@@ -20,9 +20,18 @@ Please install the following before the course begins. Estimated total setup tim
 The editor used throughout the course, with the Lean 4 extension for theorem proving.
 
 - Download: <https://code.visualstudio.com/Download>
-- Recommended extensions, installed from the marketplace once VS Code is running:
-  - `leanprover.lean4` — Lean 4 language support
-  - `ms-python.python` — Python language support
+- Recommended extensions, installed from the marketplace once VS Code is running (open the Extensions panel with `Ctrl+Shift+X` / `Cmd+Shift+X` and search):
+  - **Lean 4** by `leanprover` — Lean 4 language support and proof state display.
+  - **Python** by `ms-python` — Python language support, debugging, and linting.
+- AI-assisted coding extensions — install **at least one** of the following so we can explore AI-assisted verification in class. We will use Claude Code throughout, but the other two are encouraged for comparison.
+  - **Claude Code** by Anthropic — Anthropic's coding agent integrated into VS Code. <https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code>
+  - **OpenAI Codex** — OpenAI's coding extension. <https://marketplace.visualstudio.com/search?term=openai%20codex&target=VSCode>
+  - **Gemini Code Assist** by Google — free for individuals. <https://marketplace.visualstudio.com/items?itemName=Google.geminicodeassist>
+
+Each AI extension requires a sign-in to its provider. Accounts are free or low-cost for the level of use we need; provider-specific details:
+- Claude Code: sign in with an Anthropic Console or Claude.ai account.
+- OpenAI Codex: sign in with an OpenAI account; some features may require an API plan.
+- Gemini Code Assist: sign in with a Google account; the free individual tier is sufficient.
 
 ### 2. Python 3.10 or newer
 
