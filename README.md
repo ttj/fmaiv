@@ -112,6 +112,42 @@ cryptol --version
 
 If any of these fail, please open an issue against this repository or reach out at the email address below before the first session.
 
+## Background references
+
+Light reading to ground the course material. None of these are required reading; they are pointers to the canonical references for the tools and ideas covered.
+
+### Foundations
+
+- **G. D. Plotkin.** *A structural approach to operational semantics.* Technical Report DAIMI FN-19, Computer Science Department, Aarhus University, 1981. Republished in *Journal of Logic and Algebraic Programming*, 60–61: 17–139, 2004. <https://doi.org/10.1016/j.jlap.2004.05.001> (Plotkin's own freely available copy of the JLAP version: <https://homepages.inf.ed.ac.uk/gdp/publications/sos_jlap.pdf>)
+  - The original "structural operational semantics" notes that introduce transition systems as the operational backbone of programming-language semantics. We use this framing on Day 1 and thread it through the rest of the course.
+
+### Formal methods overview
+
+- **E. M. Clarke and J. M. Wing.** *Formal Methods: State of the Art and Future Directions.* ACM Computing Surveys, 28(4): 626–643, 1996. <https://doi.org/10.1145/242223.242257> (free PDF on Jeannette Wing's Columbia page: <https://www.cs.columbia.edu/~wing/publications/ClarkeWing96.pdf>)
+  - A still-standard pedagogical survey by two of the field's founders; gives the lay of the land for what formal methods is and where it's been deployed.
+
+### Tools
+
+- **R. Cavada, A. Cimatti, M. Dorigatti, A. Griggio, A. Mariotti, A. Micheli, S. Mover, M. Roveri, and S. Tonetta.** *The nuXmv Symbolic Model Checker.* In *Computer Aided Verification (CAV 2014)*, LNCS 8559, pp. 334–342. Springer, 2014. <https://doi.org/10.1007/978-3-319-08867-9_22>
+  - The tool paper for nuXmv, the symbolic model checker we use on Day 2.
+
+- **J. Lewis and B. Martin.** *Cryptol: High Assurance, Retargetable Crypto Development and Validation.* In *IEEE Military Communications Conference (MILCOM 2003)*, vol. 2, pp. 820–825, 2003. <https://doi.org/10.1109/MILCOM.2003.1290218>
+  - The original Cryptol paper from Galois and the NSA, introducing it as a DSL for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
+
+### AI-assisted verification and formalized mathematics
+
+- **J. Avigad.** *Mathematics and the formal turn.* Bulletin of the American Mathematical Society (New Series), 61(2): 225–240, 2024. <https://doi.org/10.1090/bull/1832> (arXiv preprint: <https://arxiv.org/abs/2311.00007>)
+  - An AMS Bulletin essay framed for working mathematicians on what proof assistants are, why they matter, and how the field has moved.
+
+- **Y. Bengio and N. Malkin.** *Machine learning and information theory concepts towards an AI mathematician.* Bulletin of the American Mathematical Society (New Series), 61(3): 457–469, 2024. <https://doi.org/10.1090/bull/1839>
+  - The complementary AMS Bulletin essay on what AI for mathematics is, what it is missing, and what an "AI mathematician" would actually require.
+
+- **J. Bayer, C. Benzmüller, K. Buzzard, M. David, L. Lamport, Y. Matiyasevich, L. Paulson, D. Schleicher, B. Stock, and E. Zelmanov.** *Mathematical Proof Between Generations.* Notices of the American Mathematical Society, 71(1): 79–92, January 2024. <https://doi.org/10.1090/noti2860>
+  - A multi-author Notices article including Kevin Buzzard's section on Lean and the formalization of contemporary mathematics; useful first read for the Day 3 framing.
+
+- **G. Gonthier.** *Formal Proof — The Four-Color Theorem.* Notices of the American Mathematical Society, 55(11): 1382–1393, December 2008. <https://www.ams.org/notices/200811/tx081101382p.pdf>
+  - The classic AMS Notices writeup of a fully machine-checked landmark theorem; reads as a historical predecessor to the Lean / AI-assisted formalizations of today.
+
 ## Course materials
 
 This repository will hold the course materials (slides, mini-project scaffolds, worked examples, and reference scripts) once the course is finalized. For now, only the setup README is included here.
