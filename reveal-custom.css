@@ -1,0 +1,82 @@
+<style>
+/* FMAIV deck — small tweaks layered on top of RevealJS `white` theme. */
+
+/* Use the full slide area; the default 5-7% margin wastes space. */
+.reveal .slides section {
+    padding: 0.5em 1em;
+    text-align: left;
+}
+
+/* Headings: a touch tighter so a long title fits on one line. */
+.reveal h1 { font-size: 2.2em; margin-bottom: 0.3em; }
+.reveal h2 { font-size: 1.6em; margin-bottom: 0.3em; line-height: 1.15; }
+.reveal h3 { font-size: 1.2em; margin-bottom: 0.2em; }
+
+/* Body text: a hair smaller than default so 5-bullet slides fit. */
+.reveal p, .reveal li { font-size: 0.78em; line-height: 1.35; }
+.reveal ul, .reveal ol { margin-left: 1em; }
+.reveal li { margin-bottom: 0.25em; }
+
+/* Tables: shrink for the multi-row reference tables. */
+.reveal table { font-size: 0.62em; margin: 0.4em auto; }
+.reveal table th, .reveal table td { padding: 0.15em 0.5em; }
+.reveal table thead { background: #f0f0f0; }
+
+/* Code blocks: smaller font, allow horizontal scroll instead of overflow. */
+.reveal pre { font-size: 0.55em; max-height: 75vh; overflow: auto; }
+.reveal pre code { padding: 0.4em 0.6em; }
+
+/* Inline code a tiny bit bigger so it remains readable in body text. */
+.reveal code { font-size: 0.95em; }
+
+/* Math: keep readable, slightly bigger than body. */
+.reveal .MathJax { font-size: 1em !important; }
+
+/* Block quotes: a faint left border instead of italic, so quotes are
+   distinguishable from regular text without screaming. */
+.reveal blockquote {
+    border-left: 4px solid #cfb87c;        /* VU gold-ish */
+    padding: 0.2em 0.8em;
+    background: #fafafa;
+    font-style: normal;
+    font-size: 0.78em;
+    width: 90%;
+}
+
+/* Speaker notes (::: notes blocks) are hidden from the slide view but
+   shown in the speaker view (press 'S'). No tweak needed; this is just
+   a reminder. */
+
+/* Figures: center, give breathing room, cap width. */
+.reveal figure { text-align: center; margin: 0.4em auto; }
+.reveal img    { max-height: 65vh; max-width: 90%; }
+
+/* Tight two-column helper. Use as:
+       :::: {.columns}
+       ::: {.column width="55%"}  ...  :::
+       ::: {.column width="45%"}  ...  :::
+       :::: */
+.reveal .columns { display: flex; gap: 1.2em; align-items: flex-start; }
+
+/* Callout boxes for "key insight" highlights. Use:
+       ::: {.callout}
+       This is the headline takeaway.
+       ::: */
+.reveal .callout {
+    background: #fffbe6;
+    border-left: 4px solid #cfb87c;
+    padding: 0.4em 0.8em;
+    margin: 0.5em 0;
+    font-size: 0.85em;
+}
+
+/* Section divider slides (H1) — bigger and centered. */
+.reveal section.has-light-background h1,
+.reveal h1.section,
+.reveal section h1 { text-align: center; margin-top: 1.5em; }
+
+/* Title slide: center everything, generous spacing. */
+.reveal section.title-slide h1 { text-align: center; font-size: 2.6em; margin-top: 0.6em; }
+.reveal section.title-slide h2 { text-align: center; color: #555; }
+.reveal section.title-slide { padding: 1em; }
+</style>
