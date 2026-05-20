@@ -74,26 +74,15 @@ The symbolic model checker used on Day 2. Free for non-commercial use; a short r
 - After download, place the `nuXmv` binary on your `PATH`.
 - Verify: `nuXmv -help` (or just `nuXmv` to enter the interactive shell, then type `quit`)
 
-### 6. CBMC
+### 6. CBMC, Cryptol, SAW — via Docker (recommended)
 
-The bounded model checker for C used on Day 4.
+The Day 4 toolchain — [CBMC](https://github.com/diffblue/cbmc) (bounded model checker for C), [Cryptol](https://github.com/GaloisInc/cryptol) (Galois's bit-precise specification DSL), and [SAW](https://github.com/GaloisInc/saw-script) (Software Analysis Workbench, equivalence-checks C against Cryptol) — is provided as a single Docker image. SAW in particular needs a specific LLVM/clang version to parse bitcode reliably, and pinning that across Windows/macOS/Linux laptops is more friction than the rest of the course put together. Docker removes all of it.
 
-- Repository: <https://github.com/diffblue/cbmc>
-- macOS: `brew install cbmc`
-- Ubuntu / Debian: `sudo apt install cbmc`
-- Windows: install from the [CBMC releases page](https://github.com/diffblue/cbmc/releases)
-- Verify: `cbmc --version`
+- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) or Docker Engine (Linux).
+- See [`day04/README.md`](day04/README.md) for the one-time `docker compose build` and the day-of `docker compose run --rm day04`. The image bundles CBMC, Cryptol, SAW, clang-15, and Z3.
+- Verify: `docker compose run --rm day04 cbmc --version` (after the one-time build).
 
-A Docker image will be provided as a fallback closer to the course date for participants who cannot install CBMC locally.
-
-### 7. Cryptol
-
-The Galois domain-specific language used on Day 4 for specifying and verifying bit-level algorithms, together with the Software Analysis Workbench (SAW) it integrates with.
-
-- Repository: <https://github.com/GaloisInc/cryptol>
-- Download a release binary from <https://github.com/GaloisInc/cryptol/releases> and place `cryptol` on your `PATH`.
-- Alternative: build from source following the instructions in the repository.
-- Verify: `cryptol --version`
+If you prefer native installs, CBMC is in `apt`/`brew` and Cryptol/SAW ship Linux/macOS prebuilt tarballs from their releases pages; expect to pin clang's version against SAW's bitcode parser. Docker is strongly preferred.
 
 ## Verify everything is installed
 
@@ -106,8 +95,10 @@ python -c "import z3; print(z3.get_version_string())"
 lean --version
 lake --version
 nuXmv -help | head -1
-cbmc --version
-cryptol --version
+docker --version
+docker compose run --rm day04 cbmc --version          # from data/cs6315/fmaiv/day04/
+docker compose run --rm day04 cryptol --version
+docker compose run --rm day04 saw --version
 ```
 
 If any of these fail, please open an issue against this repository or reach out at the email address below before the first session.
@@ -136,6 +127,9 @@ Light reading to ground the course material. None of these are required reading;
 
 ### AI-assisted verification and formalized mathematics
 
+- **J. Alper.** *Embracing AI and formalization: Experimenting with tomorrow's mathematical tools.* Bulletin of the American Mathematical Society (New Series), 63(2): 177–197, 2026. <https://doi.org/10.1090/bull/1879>
+  - A motivational Bulletin essay on how AI and proof-assistant formalization (notably Lean) are already reshaping mathematical research practice. Alper recounts standing up the eXperimental Lean Lab at the University of Washington and argues for active engagement with these tools.
+
 - **J. Avigad.** *Mathematics and the formal turn.* Bulletin of the American Mathematical Society (New Series), 61(2): 225–240, 2024. <https://doi.org/10.1090/bull/1832> (arXiv preprint: <https://arxiv.org/abs/2311.00007>)
   - An AMS Bulletin essay framed for working mathematicians on what proof assistants are, why they matter, and how the field has moved.
 
@@ -148,9 +142,49 @@ Light reading to ground the course material. None of these are required reading;
 - **G. Gonthier.** *Formal Proof — The Four-Color Theorem.* Notices of the American Mathematical Society, 55(11): 1382–1393, December 2008. <https://www.ams.org/notices/200811/tx081101382p.pdf>
   - The classic AMS Notices writeup of a fully machine-checked landmark theorem; reads as a historical predecessor to the Lean / AI-assisted formalizations of today.
 
+### Textbooks and reference works
+
+A small selection from the CS 6315 (Vanderbilt) syllabus. None are required reading for the four-day course — they are the long-form references behind the topics we touch.
+
+- **R. Alur.** *Principles of Cyber-Physical Systems.* MIT Press, 2015. <https://mitpress.mit.edu/9780262029117/principles-of-cyber-physical-systems/>
+  - Companion textbook for the CS 6315 semester course; covers synchronous reactive components, transition systems, temporal logic, and timed/hybrid systems — exactly the formalism thread we use on Days 1–2.
+
+- **E. A. Lee and S. A. Seshia.** *Introduction to Embedded Systems: A Cyber-Physical Systems Approach* (2nd ed.). MIT Press, 2017. Free online: <https://leeseshia.org>
+  - Companion-level introduction; useful if Alur is more terse than you'd like. Particularly strong on the modeling-and-design half.
+
+- **M. Huth and M. Ryan.** *Logic in Computer Science: Modelling and Reasoning about Systems* (2nd ed.). Cambridge University Press, 2004. <https://www.cambridge.org/9780521543101>
+  - Standard undergraduate-to-early-graduate introduction to propositional/predicate logic, CTL/LTL, and model checking. Mirrors the Day 1 + Day 2 material.
+
+- **E. M. Clarke, O. Grumberg, D. Kroening, D. Peled, and H. Veith.** *Model Checking* (2nd ed.). MIT Press, 2018. <https://mitpress.mit.edu/9780262038836/model-checking/>
+  - The canonical reference for model checking; written by the field's founders. Day 2 is built on this material.
+
+- **A. V. Aho and J. D. Ullman.** *Foundations of Computer Science.* W. H. Freeman, 1994. Free online: <http://infolab.stanford.edu/~ullman/focs.html>
+  - Background on sets, logic, induction, and the discrete-math substrate every formal-methods tool stands on. Useful if Day 1's logic refresher moves too fast.
+
+### Verification competitions and benchmark suites
+
+Several verification subfields run annual competitions on shared benchmarks. They are the cleanest way to see "what tools are currently state-of-the-art for class X of problem", and the benchmark repositories themselves are useful for project ideas. List adapted from the CS 6315 project proposal handout.
+
+| Topic | Competition / benchmark | Link |
+|---|---|---|
+| Neural-network verification | **VNN-COMP** | <https://vnn-comp.github.io/> |
+| Software verification (C, Java) | **SV-COMP** + sv-benchmarks | <https://sv-comp.sosy-lab.org/> · <https://github.com/sosy-lab/sv-benchmarks> |
+| SMT solvers | **SMT-COMP** | <https://smt-comp.github.io/> |
+| SAT solvers | **SAT competition** | <https://satcompetition.github.io/> |
+| Reactive synthesis | **SYNT-COMP** | <https://www.syntcomp.org/> |
+| Cyber-physical / hybrid systems | **ARCH-COMP** + benchmarks | <https://cps-vo.org/group/ARCH/benchmarks> · <https://gitlab.com/goranf/ARCH-COMP/> |
+| Petri nets | **Model Checking Contest (MCC)** | <https://mcc.lip6.fr/models.php> |
+| Deductive verification | **VerifyThis** | <https://www.pm.inf.ethz.ch/research/verifythis.html> |
+| Stochastic systems | **PRISM** + **Storm** case studies | <https://www.prismmodelchecker.org/casestudies/> · <https://www.stormchecker.org/> |
+| C with annotations | Frama-C / ACSL | <https://frama-c.com/wp.html> |
+| Lean | Lean 4 repo | <https://github.com/leanprover/lean4> |
+| Static / dynamic analysis (industrial) | Meta Infer, Polyspace, Simulink Design Verifier, VS IntelliTest | <https://fbinfer.com/> · <https://www.mathworks.com/products/polyspace.html> · <https://www.mathworks.com/products/simulink-design-verifier.html> · <https://learn.microsoft.com/en-us/visualstudio/test/intellitest-manual/> |
+
+If you are looking for a Day-4-style mini-project of your own, picking one benchmark suite above and running 2–3 of its tools on the smallest case is a standard pattern.
+
 ## Course materials
 
-This repository will hold the course materials (slides, mini-project scaffolds, worked examples, and reference scripts) once the course is finalized. For now, only the setup README is included here.
+The four days live under [`day01/`](day01/) … [`day04/`](day04/), each containing a `README.md`, slides under `slides/`, worked examples under `examples/`, and a mini-project under `assignments/`. The plan that produced the current shape is in [`PLAN.md`](PLAN.md).
 
 ## Contact
 
