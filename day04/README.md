@@ -4,23 +4,19 @@ The same counter, now in C with a CBMC harness. Then a pivot to Cryptol with the
 
 ## Schedule
 
-### Lecture and live demo
+About three hours of lecture and live, hands-on work in three blocks, plus a take-home mini-project. The slide deck (`slides/day04.md`) follows this same structure.
 
 | Block | Approx. length | Content |
 |---|---|---|
-| 4.1 | ~20 min | Programs as transition systems on memory states. Connect back to Day 1; this is the same machinery, applied to source code. |
-| 4.2 | ~45 min | Bounded model checking of C with CBMC. Loop unwinding, `assert` / `assume`, nondeterministic inputs. Live demo: `cbmc counter.c counter_check.c --unwind 26`. |
-| 4.3 | ~40 min | Cryptol and SAW. A bit-precise functional DSL for specifying algorithms. Equivalence checking against C implementations via LLVM bitcode and SMT. Live demo: `popcount.cry` with `:prove popcount_kernighan_eq`. |
-| 4.4 | ~15 min | Survey. Neural-network verification (α,β-CROWN, NNV); industrial deployments at AWS, Microsoft, Galois; what is next. |
+| Opening | ~10 min | Programs as transition systems on memory states — the same machinery from Day 1, applied to source code. |
+| L1 — CBMC | ~50 min | Bounded model checking of C with CBMC: loop unwinding, `assert` / `assume`, nondeterministic inputs. Smoke test (`cbmc --version`). Hands-on: `counter.c` / `counter_check.c`, run `cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions`; then weaken the assertion to `x < 10`, watch CBMC produce a counterexample, and read it. |
+| Break | ~10 min | |
+| L2 — Cryptol + SAW | ~50 min | A bit-precise functional DSL for specifying algorithms; equivalence checking against C implementations via LLVM bitcode and SMT. Hands-on: `counter.cry` (the fifth encoding of the counter), `popcount.cry` / `popcount.c` with `:prove popcount_kernighan_eq`, and the `popcount.saw` C ↔ Cryptol equivalence proof. |
+| Break | ~10 min | |
+| L3 — The frontier | ~50 min | Neural-network verification (α,β-CROWN, NNV); industrial deployments at AWS, Microsoft, Galois; what comes next. Time to start the take-home mini-project and for Q&A. |
+| Wrap | ~10 min | Recap of the four days and intro to the take-home mini-project. |
 
-### Hands-on
-
-| Block | Approx. length | Activity |
-|---|---|---|
-| 4.5 | ~15 min | Smoke test: `cbmc --version`, `cryptol --version`, `saw --version`. |
-| 4.6 | ~30 min | Walk through `counter.c` / `counter_check.c`. Run CBMC. Then weaken the assertion to `x < 10`, watch CBMC produce a counterexample, and read it. |
-| 4.7 | ~30 min | Walk through `popcount.cry` and `popcount.c`. Run `cryptol popcount.cry` and try `:prove popcount_kernighan_eq` interactively. |
-| 4.8 | ~45 min | Mini-project (see `assignments/day04.md`). |
+**Take-home mini-project** (see `assignments/day04.md`).
 
 ## Learning objectives for Day 4
 

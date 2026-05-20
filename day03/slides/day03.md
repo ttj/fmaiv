@@ -157,8 +157,8 @@ Tactics are programs that manipulate the proof state (hypotheses + goal). You wa
 
 ## The current Lean moment (1)
 
-- **Polynomial Freiman–Ruzsa conjecture** — formalized in Lean by Tao, Gowers, Green, Manners + ~25 collaborators, **3 weeks** from informal proof to checked formalization (2023).
-- **Mathlib** — the community math library, **1M+ lines**, thousands of contributors.
+- **Polynomial Freiman–Ruzsa conjecture** — informal proof by Gowers, Green, Manners & Tao (2023); formalized in Lean in **~3 weeks** by a ~25-person collaboration led by Tao with Yael Dillies and Bhavik Mehta.
+- **Mathlib** — the community math library, **2M+ lines**, thousands of contributors.
 
 ::: notes
 PFR is the cultural watershed: a recent research theorem formalized collaboratively in weeks, not years, because Lean's kernel let strangers compose work safely. Mathlib is the substrate — a million-line, continuously-checked library covering undergraduate-through-research mathematics. Together they show Lean is no longer a toy: it is where a growing slice of real mathematics is being made machine-checkable.
@@ -172,11 +172,11 @@ PFR is the cultural watershed: a recent research theorem formalized collaborativ
 - **DeepSeek-Prover-V2** (April 2025) — **88.9%** on miniF2F, the olympiad-Lean benchmark.
 
 ```
-miniF2F SOTA:  2022 ~29%  →  2023 ~50%  →  2024 ~70%  →  2025 ~89%
+miniF2F SOTA:  2022 ~35%  →  2023 ~50%  →  2024 ~70%  →  2025 ~89%
 ```
 
 ::: notes
-The AI side. AlphaProof reached IMO medal level generating Lean proofs; DeepSeek-Prover-V2 pushed the standard Lean benchmark from ~29% to ~89% in three years. This curve is why the course exists: AI can now draft formal proofs at a strong level, but every one is checked by the Lean kernel — the AI proposes, the kernel disposes. That combination is what makes AI-generated mathematics trustworthy.
+The AI side. AlphaProof reached IMO medal level generating Lean proofs; DeepSeek-Prover-V2 pushed the standard Lean benchmark from ~35% to ~89% in roughly three years. This curve is why the course exists: AI can now draft formal proofs at a strong level, but every one is checked by the Lean kernel — the AI proposes, the kernel disposes. That combination is what makes AI-generated mathematics trustworthy.
 :::
 
 ---
@@ -202,7 +202,7 @@ For a math-faculty audience this is the "why you" slide. Mathematicians are unus
 - A **proof assistant** checks every step against a tiny trusted **kernel**.
 - Lean 4 is **dependent type theory**: propositions are types, proofs are terms.
 - **Tactics** build the proof term interactively by transforming the goal.
-- The moment is real: PFR, Mathlib (1M+ lines), AlphaProof, DeepSeek-Prover.
+- The moment is real: PFR, Mathlib (2M+ lines), AlphaProof, DeepSeek-Prover.
 
 ::: notes
 Block recap. Take-home: you understand what Lean is (kernel-checked type theory) and why now (AI + Mathlib). Next block: actually doing it on the counter.
@@ -254,7 +254,7 @@ example (a b : Nat) : a + b = b + a := by exact?   -- suggests Nat.add_comm
 - **Naming convention**: `Nat.add_comm`, `List.length_append` — namespace + what it says.
 
 ::: notes
-The practical skill for a 1M-line library: you do not memorize lemmas, you search. exact?/apply? read the current goal and propose library lemmas that close it. The naming convention is the other half — once you internalize "namespace.subject_property," you can guess a lemma name and confirm with autocomplete. This is also where AI assistants shine: naming the right Mathlib lemma is something they do well.
+The practical skill for a 2M-line library: you do not memorize lemmas, you search. exact?/apply? read the current goal and propose library lemmas that close it. The naming convention is the other half — once you internalize "namespace.subject_property," you can guess a lemma name and confirm with autocomplete. This is also where AI assistants shine: naming the right Mathlib lemma is something they do well.
 :::
 
 ---

@@ -4,24 +4,19 @@ The same counter we model-checked in Day 2, now proved from first principles in 
 
 ## Schedule
 
-### Lecture and live demo
+About three hours of lecture and live, hands-on work in three blocks, plus a take-home mini-project. The slide deck (`slides/day03.md`) follows this same structure.
 
 | Block | Approx. length | Content |
 |---|---|---|
-| 3.1 | ~15 min | Why theorem proving on top of model checking. Parametric / unbounded systems, mathematical content, end-to-end correctness. |
-| 3.2 | ~40 min | Lean 4 essentials. Terms, types, `def`, `theorem`. The core tactics: `intro`, `exact`, `rfl`, `simp`, `omega`. Live: walk through Tutorial World on the Lean Game Server. |
-| 3.3 | ~15 min | Mathlib in ten minutes. `exact?`, `apply?`, search-by-conclusion, name conventions. |
-| 3.4 | ~25 min | Transition systems in Lean. Open `CounterDemo/TransitionSystem.lean` and `CounterDemo/Counter.lean`; see the SMV file from Day 2 reincarnated as a `TransitionSystem CounterState`. |
-| 3.5 | ~25 min | Inductive invariants. The strengthening pattern. Walk through `counterInv_init` and the first case of `counterInv_step`. |
+| Opening | ~10 min | Why theorem proving on top of model checking: parametric / unbounded systems, mathematical content, end-to-end correctness. |
+| L1 — Why proving & what Lean is | ~50 min | Lean 4 essentials: terms, types, `def`, `theorem`; core tactics (`intro`, `exact`, `rfl`, `simp`, `omega`). The current Lean moment (PFR, Mathlib, AlphaProof, DeepSeek-Prover). Mathlib search in ten minutes: `exact?`, `apply?`, search-by-conclusion, naming conventions. |
+| Break | ~10 min | |
+| L2 — Lean by example: the counter | ~50 min | The Day 2 counter reincarnated as a `TransitionSystem CounterState` (`CounterDemo/TransitionSystem.lean`, `Counter.lean`). Inductive invariants and the strengthening pattern; walk through `counterInv_init` and the first case of `counterInv_step`. Smoke test: `lake build` (five expected `sorry` warnings). |
+| Break | ~10 min | |
+| L3 — AI in the loop + Lean for real | ~50 min | Hands-on walk-through of `CounterDemo/CounterProofs.lean`: the strengthened invariant, the init lemma, the step lemma's case split, and how each `INVARSPEC` is read off via `invariant_strengthening`. Use Claude Code as a proof pair partner; discuss where it was right and where it bluffed. |
+| Wrap | ~10 min | Recap and intro to the take-home mini-project. |
 
-### Hands-on
-
-| Block | Approx. length | Activity |
-|---|---|---|
-| 3.6 | ~15 min | Smoke test: `lake build` in `examples/CounterDemo`. The five `sorry` warnings in `Counter.lean` are expected (auto-generated stubs); the real proofs are in `CounterProofs.lean`. |
-| 3.7 | ~30 min | Walk through `CounterDemo/CounterProofs.lean`. Identify (a) the strengthened invariant, (b) the init lemma, (c) the step lemma's case split, (d) how each `INVARSPEC` is read off via `invariant_strengthening`. |
-| 3.8 | ~45 min | Mini-project (see `assignments/day03.md`): finish or extend a proof. Use Claude Code as a pair partner. |
-| 3.9 | ~30 min | Share what worked, what surprised. Discuss where Claude was right and where it bluffed. |
+**Take-home mini-project** (see `assignments/day03.md`): finish or extend a proof, using Claude Code as a pair partner.
 
 ## Learning objectives for Day 3
 

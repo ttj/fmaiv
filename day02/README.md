@@ -4,24 +4,19 @@ The same counter from Day 1, but now we ask the model checker to settle the ques
 
 ## Schedule
 
-### Lecture and live demo
+About three hours of lecture and live, hands-on work in three blocks, plus a take-home mini-project. The slide deck (`slides/day02.md`) follows this same structure.
 
 | Block | Approx. length | Content |
 |---|---|---|
-| 2.1 | ~15 min | Recap. From bounded SMT (Day 1) to full reachability. |
-| 2.2 | ~25 min | The SMV input language. `MODULE`, `VAR`, `ASSIGN`, `init`, `next`. Live read-through of `counter.smv`. |
-| 2.3 | ~40 min | Temporal logic. Path quantifiers; modal operators. CTL: `AG`, `EF`, `AF`, `EG`. LTL: `G`, `F`, `X`, `U`. Live poll: match the English property to the formula. |
-| 2.4 | ~35 min | Model-checking algorithms. Explicit-state, symbolic (BDD), bounded (SAT). When each is the right tool. |
-| 2.5 | ~5 min | Wrap-up + assignment intro. |
+| Opening | ~10 min | Recap. From bounded SMT (Day 1) to full reachability. |
+| L1 — Reactive systems & SMV | ~50 min | The SMV input language: `MODULE`, `VAR`, `ASSIGN`, `init`, `next`. Live read-through of `counter.smv`. Smoke test (`nuXmv -help`) and first run. |
+| Break | ~10 min | |
+| L2 — Temporal logic: CTL & LTL | ~50 min | Path quantifiers and modal operators. CTL (`AG`, `EF`, `AF`, `EG`) and LTL (`G`, `F`, `X`, `U`). Live poll: match the English property to the formula. |
+| Break | ~10 min | |
+| L3 — Algorithms & live nuXmv | ~50 min | Explicit-state, symbolic (BDD), and bounded (SAT) model checking, and when each is the right tool. Hands-on: run `nuXmv counter.smv`, read the verdicts, introduce a bug in `next(x)` and watch nuXmv produce a counterexample. Tour `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`. |
+| Wrap | ~10 min | Recap and intro to the take-home mini-project. |
 
-### Hands-on with nuXmv
-
-| Block | Approx. length | Activity |
-|---|---|---|
-| 2.6 | ~15 min | Smoke test: `nuXmv -help`. Load `counter.smv`. |
-| 2.7 | ~30 min | Walk through `counter.smv`. Run `nuXmv counter.smv` to verify the four INVARSPECs and one LTLSPEC. Introduce a bug in `next(x)` and watch nuXmv produce a counterexample. |
-| 2.8 | ~45 min | Walk through `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`. Each has slightly different idioms (boolean encoding, explicit program-counter, structured records). |
-| 2.9 | ~30 min | Mini-project (see `assignments/day02.md`). |
+**Take-home mini-project** (see `assignments/day02.md`).
 
 ## Learning objectives for Day 2
 
@@ -56,7 +51,7 @@ After installing nuXmv (see top-level `README.md`):
 nuXmv counter.smv
 ```
 
-The default interactive prompt is fine; the file's `INVARSPEC`, `LTLSPEC`, and `CTLSPEC` clauses are checked automatically when nuXmv runs in batch mode. For an interactive session:
+`counter.smv` carries several `INVARSPEC`, `LTLSPEC`, and `CTLSPEC` clauses, all checked automatically in batch mode. They are deliberately mixed: of the five invariants, three hold (e.g. `x <= count_max`) and two fail (`x < count_max` and `x <= count_max / 2`), so a run shows both `true` verdicts and counterexample traces. For an interactive session:
 
 ```
 nuXmv -int counter.smv
@@ -69,4 +64,4 @@ nuXmv -int counter.smv
 
 ## Browser fallback
 
-If you cannot install nuXmv locally before the afternoon block, [smvis](https://github.com/verivital/smvis) runs a hosted nuXmv on Hugging Face Spaces and renders the same models with state-graph and BDD visualizations.
+If you cannot install nuXmv locally before the live nuXmv block (L3), [smvis](https://github.com/verivital/smvis) runs a hosted nuXmv on Hugging Face Spaces and renders the same models with state-graph and BDD visualizations.

@@ -65,4 +65,4 @@ A single zip with:
 
 ## Connecting to Days 1, 3, 4
 
-Yesterday you asked Z3 about the counter for bounded paths. Today you asked nuXmv for all paths. Tomorrow you will prove these same invariants directly in Lean — no bound, no BDD, just an induction that says the invariant holds at every step. On Day 4 we come back to programs and use CBMC (which is, internally, the same bounded SMT idea from Day 1, applied to C source).
+On Day 1 you asked Z3 about the counter for bounded paths. On Day 2 you asked nuXmv for all paths. On Day 3 you will prove these same invariants directly in Lean — no bound, no BDD, just an induction that says the invariant holds at every step. On Day 4 we come back to programs and use CBMC (which is, internally, the same bounded SMT idea from Day 1, applied to C source).
