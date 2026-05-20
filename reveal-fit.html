@@ -1,0 +1,34 @@
+<!-- FMAIV: shrink any slide whose content overflows the slide height, so all
+     content is always visible. Included after the body (-A) so RevealJS exists.
+     Requires top-aligned slides (render with -V center=false) so the per-slide
+     transform doesn't fight RevealJS's centering transform. -->
+<script>
+(function () {
+  function fitAll() {
+    var cfg = (window.Reveal && Reveal.getConfig) ? Reveal.getConfig() : {};
+    var H = cfg.height || 720;
+    var pad = 8;
+    document.querySelectorAll('.reveal .slides section').forEach(function (s) {
+      if (s.querySelector('section')) return;       // skip vertical-stack containers
+      s.style.transform = '';                       // reset before measuring
+      s.style.transformOrigin = 'top center';
+      var natural = s.scrollHeight;
+      if (natural > H - pad) {
+        var scale = Math.max(0.4, (H - pad) / natural);
+        s.style.transform = 'scale(' + scale + ')';
+      }
+    });
+  }
+  function hook() {
+    if (window.Reveal && Reveal.on) {
+      Reveal.on('ready', fitAll);
+      Reveal.on('slidechanged', fitAll);
+      Reveal.on('resize', fitAll);
+      try { if (Reveal.isReady && Reveal.isReady()) fitAll(); } catch (e) {}
+    } else {
+      setTimeout(hook, 80);
+    }
+  }
+  hook();
+})();
+</script>

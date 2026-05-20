@@ -14,6 +14,7 @@ on:
     paths:
       - "day0?/slides/*.md"
       - "reveal-custom.css"
+      - "reveal-fit.html"
       - ".github/workflows/pages.yml"
   workflow_dispatch: {}
 
@@ -48,9 +49,10 @@ jobs:
               -V revealjs-url=https://cdn.jsdelivr.net/npm/reveal.js@5.0.0 \
               -V theme=white -V transition=fade \
               -V width=1280 -V height=720 -V margin=0.04 \
-              -V minScale=0.4 -V maxScale=1.4 \
+              -V minScale=0.2 -V maxScale=1.5 \
+              -V center=false \
               -V controls=true -V progress=true -V hash=true \
-              -H reveal-custom.css
+              -H reveal-custom.css -A reveal-fit.html
           done
 
       - name: Build index page
