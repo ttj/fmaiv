@@ -4,7 +4,10 @@
    Slides are top-aligned (render with -V center=false). */
 
 .reveal .slides { text-align: left; }
-.reveal .slides section { padding: 10px 26px; }
+/* border-box so the 26px padding stays INSIDE RevealJS's slide width (1280)
+   instead of pushing the section wider than the slide and off the viewport
+   (which clipped wide tables at the right edge). */
+.reveal .slides section { padding: 10px 26px; box-sizing: border-box; }
 
 /* Headings: compact so titles don't eat vertical space. */
 .reveal h1 { font-size: 1.9em;  margin: 0 0 0.3em; line-height: 1.1; }
@@ -41,4 +44,15 @@
 .reveal section.title-slide { text-align: center; }
 .reveal section.title-slide h1 { font-size: 2.3em; }
 .reveal section.title-slide h2 { color: #555; }
+
+/* Wrapping: long words, URLs, inline code, and table cells wrap instead of
+   running off the right edge. (Wide *code blocks* and tables keep their layout
+   and are instead scaled down by reveal-fit.html, which honors width overflow.)
+   overflow-wrap only acts when wrapping is allowed, so block code — which is
+   `white-space: pre` — is unaffected and stays aligned. */
+.reveal p, .reveal li, .reveal td, .reveal th,
+.reveal h1, .reveal h2, .reveal h3 { overflow-wrap: break-word; }
+.reveal a, .reveal :not(pre) > code { overflow-wrap: anywhere; }
+.reveal td, .reveal th { word-break: break-word; }   /* let cells wrap so a wide table can't force the slide wider */
+.reveal table { table-layout: auto; max-width: 100%; }
 </style>

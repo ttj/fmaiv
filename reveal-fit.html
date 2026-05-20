@@ -1,7 +1,8 @@
-<!-- FMAIV: shrink any slide whose content overflows the slide height, so all
-     content is always visible. Included after the body (-A) so RevealJS exists.
-     Requires top-aligned slides (render with -V center=false) so the per-slide
-     transform doesn't fight RevealJS's centering transform. -->
+<!-- FMAIV: shrink any slide whose content overflows the slide box — in EITHER
+     dimension (height or width) — so all content is always visible. Included
+     after the body (-A) so RevealJS exists. Requires top-aligned slides (render
+     with -V center=false) so the per-slide transform doesn't fight RevealJS's
+     centering transform. -->
 <script>
 (function () {
   function fitAll() {
@@ -12,10 +13,15 @@
       if (s.querySelector('section')) return;       // skip vertical-stack containers
       s.style.transform = '';                       // reset before measuring
       s.style.transformOrigin = 'top center';
-      var natural = s.scrollHeight;
-      if (natural > H - pad) {
-        var scale = Math.max(0.4, (H - pad) / natural);
-        s.style.transform = 'scale(' + scale + ')';
+      // Width is element-relative: the section box is fixed (border-box = slide
+      // width), so content wider than its own box is the real horizontal
+      // overflow. Height is vs the slide height, since top-aligned sections grow.
+      var sh = s.scrollHeight, sw = s.scrollWidth, cw = s.clientWidth;
+      var scaleH = sh > (H - pad) ? (H - pad) / sh : 1;  // taller than the slide
+      var scaleW = sw > cw        ? cw / sw         : 1;  // wider than its box
+      var scale = Math.min(scaleH, scaleW);             // honor the tighter limit
+      if (scale < 1) {
+        s.style.transform = 'scale(' + Math.max(0.3, scale) + ')';
       }
     });
   }
@@ -25,6 +31,12 @@
       Reveal.on('slidechanged', fitAll);
       Reveal.on('resize', fitAll);
       try { if (Reveal.isReady && Reveal.isReady()) fitAll(); } catch (e) {}
+      // Re-fit after late reflow (web fonts, MathJax) that can grow a slide
+      // AFTER the initial fit and would otherwise spill off-slide.
+      try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll); } catch (e) {}
+      try { if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(fitAll); } catch (e) {}
+      setTimeout(fitAll, 400);
+      setTimeout(fitAll, 1400);
     } else {
       setTimeout(hook, 80);
     }
