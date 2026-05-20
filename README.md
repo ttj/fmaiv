@@ -184,7 +184,7 @@ If you are looking for a Day-4-style mini-project of your own, picking one bench
 
 ## Course materials
 
-The four days live under [`day01/`](day01/) … [`day04/`](day04/), each containing a `README.md`, slides under `slides/`, worked examples under `examples/`, and a mini-project under `assignments/`. The plan that produced the current shape is in [`PLAN.md`](PLAN.md).
+The four days live under [`day01/`](day01/) … [`day04/`](day04/), each containing a `README.md`, slides under `slides/`, worked examples under `examples/`, and a mini-project under `assignments/`.
 
 ## Contact
 

@@ -1,0 +1,68 @@
+/* Day 4 — the counter from Days 1, 2, 3, now in Cryptol.
+ *
+ * The state is (mode, x) where mode is a Bit (False = OFF, True = ON) and
+ * x is a 4-bit count in [0, 15]; the step relation mirrors counter.c byte
+ * for byte. Two properties, both discharged by SBV / Z3 in well under a
+ * second:
+ *
+ *   (a) `bounded_invariant` — for every 25-press sequence starting from
+ *       the initial state, x stays in [0, COUNT_MAX]. Same shape as the
+ *       CBMC harness on counter.c.
+ *
+ *   (b) `inductive_invariant` — for every state satisfying the invariant
+ *       and every press input, the successor state also satisfies the
+ *       invariant. With the (trivial) initial-state check, this is the
+ *       inductive proof we did by hand in Lean (Day 3), here dispatched
+ *       to SMT.
+ *
+ * Run interactively:
+ *     cryptol counter.cry
+ *     counter> :prove bounded_invariant
+ *     counter> :prove inductive_invariant
+ *
+ * Both should report "Q.E.D.".
+ */
+
+module counter where
+
+COUNT_MAX : [4]
+COUNT_MAX = 10
+
+type State = (Bit, [4])  // (mode, x); False = OFF, True = ON
+
+initial : State
+initial = (False, 0)
+
+/* One step of the counter. The four guards match the cases in counter.c,
+ * counter.lean, and counter.smv. Cryptol's `if-then-else` chain plays the
+ * role of the SMV `next(...)` block. */
+step : State -> Bit -> State
+step s press =
+    if (~mode) && (~press)                            then (False, x)
+    else if (~mode) && press                          then (True,  x)
+    else if mode && (~press) && (x < COUNT_MAX)       then (True,  x + 1)
+    else if mode && (press || (x >= COUNT_MAX))       then (False, 0)
+    else                                                   (mode,  x)
+    where
+        mode = s.0
+        x    = s.1
+
+/* The invariant we want to hold of every reachable state. */
+inv : State -> Bit
+inv s = s.1 <= COUNT_MAX
+
+/* Property (a): bounded reachability. Every 25-press trajectory keeps
+ * the invariant. Same statement CBMC discharges on counter_check.c. */
+property bounded_invariant (presses : [25]Bit) =
+    foldl (&&) True [ inv s | s <- states ]
+    where
+        states : [26]State
+        states = [initial] # [ step s p | s <- states | p <- presses ]
+
+/* Property (b): inductive invariant. If a state satisfies inv, one step
+ * preserves inv. With `inv initial` (which holds trivially since x = 0),
+ * this implies the invariant on every reachable state, for every length
+ * of trajectory — the inductive proof from Day 3, but discharged by Z3
+ * instead of written by hand. */
+property inductive_invariant (s : State) (press : Bit) =
+    if inv s then inv (step s press) else True

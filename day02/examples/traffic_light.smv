@@ -1,0 +1,67 @@
+MODULE main
+-- Traffic light controller for a main road / side road intersection.
+-- Main road gets a longer green phase; side road gets a shorter one.
+-- Cycle: main_green -> main_yellow -> side_green -> side_yellow -> repeat
+
+VAR
+    main_light : {green, yellow, red};
+    side_light : {green, yellow, red};
+    timer : 0..5;
+
+ASSIGN
+    init(main_light) := green;
+    init(side_light) := red;
+    init(timer) := 0;
+
+    next(timer) := case
+        -- main green phase: 4 ticks (0..3), yellow: 1 tick (4)
+        main_light = green & timer < 4 : timer + 1;
+        main_light = green & timer = 4 : 0;
+        main_light = yellow : 0;
+        -- side green phase: 2 ticks (0..1), yellow: 1 tick (2)
+        side_light = green & timer < 2 : timer + 1;
+        side_light = green & timer = 2 : 0;
+        side_light = yellow : 0;
+        TRUE : timer;
+    esac;
+
+    next(main_light) := case
+        main_light = green & timer = 4 : yellow;
+        main_light = yellow : red;
+        main_light = red & side_light = yellow : green;
+        TRUE : main_light;
+    esac;
+
+    next(side_light) := case
+        side_light = red & main_light = yellow : green;
+        side_light = green & timer = 2 : yellow;
+        side_light = yellow : red;
+        TRUE : side_light;
+    esac;
+
+-- SAFETY: both lights are never green at the same time
+INVARSPEC !(main_light = green & side_light = green)
+
+-- SAFETY: both lights are never yellow at the same time
+INVARSPEC !(main_light = yellow & side_light = yellow)
+
+-- LIVENESS: main road always eventually gets green
+CTLSPEC AG AF (main_light = green)
+
+-- LIVENESS: side road always eventually gets green
+CTLSPEC AG AF (side_light = green)
+
+-- timer stays in range
+INVARSPEC timer <= 5
+
+-- main road starts green
+INVARSPEC main_light = green | side_light = green | main_light = yellow | side_light = yellow
+
+-- exactly one direction has a non-red light at any time
+INVARSPEC (main_light != red) -> (side_light = red)
+INVARSPEC (side_light != red) -> (main_light = red)
+
+-- LTL properties for Buchi analysis
+LTLSPEC G F(main_light = green)    -- passes: always eventually green
+LTLSPEC F G(main_light = green)    -- fails: light keeps cycling
+LTLSPEC G(!(main_light = green & side_light = green))  -- passes: mutual exclusion

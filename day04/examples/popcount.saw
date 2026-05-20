@@ -1,0 +1,43 @@
+// SAW script: prove the C popcount_loop implementation in popcount.c agrees
+// with the Cryptol popcount_simple specification on every 8-bit input.
+//
+// Run:
+//      clang -c -emit-llvm -O0 -o popcount.bc popcount.c
+//      saw popcount.saw
+//
+// Expected output (last line): "Proof succeeded! popcount_loop".
+//
+// Why only popcount_loop, and not also popcount_kernighan?
+// -------------------------------------------------------
+// `popcount_loop` has a fixed `for (i = 0; i < 8; ++i)` loop — SAW unrolls
+// it once and discharges the equivalence in milliseconds.
+//
+// `popcount_kernighan` has a data-dependent `while (x != 0)` loop. SAW's
+// symbolic executor needs an explicit unroll bound for those, otherwise
+// it tries to explore arbitrarily many iterations and never terminates.
+// On the Cryptol side we *already* show the two definitions agree
+// (`:prove popcount_kernighan_eq` → Q.E.D.), so the chain
+//
+//      popcount_loop (C)  ==  popcount_simple (Cryptol)   <-- this SAW script
+//      popcount_simple (Cryptol)  ==  popcount_kernighan (Cryptol)  <-- :prove
+//
+// proves all three are equivalent without the SAW heroics.
+
+import "popcount.cry";
+
+m <- llvm_load_module "popcount.bc";
+
+let popcount_spec name impl = do {
+  llvm_verify m name [] false (do {
+    x <- llvm_fresh_var "x" (llvm_int 8);
+    llvm_execute_func [llvm_term x];
+    llvm_return (llvm_term {{ impl x }});
+  }) z3;
+};
+
+// C `popcount_loop` returns uint8_t (= [8]). Cryptol `popcount_simple`
+// returns [4]. Pad with four zero MSBs to match the C return type.
+popcount_loop_ov <- popcount_spec "popcount_loop"
+  {{ \(x : [8]) -> (zero : [4]) # popcount_simple x }};
+
+print "popcount_loop verified against popcount_simple.";

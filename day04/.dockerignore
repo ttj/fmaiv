@@ -1,0 +1,5 @@
+# Keep the build context tiny — the Dockerfile installs everything from
+# upstream, it doesn't COPY anything in. Anything that *is* in this folder
+# is only ever mounted at runtime via docker compose.
+**/*
+!Dockerfile

@@ -1,0 +1,39 @@
+// Day 4 — population count, the canonical first Cryptol example.
+//
+// Two specifications. The simple one mirrors the textbook definition;
+// the clever one is Brian Kernighan's "n = n & (n - 1)" trick. We
+// prove they agree on every 8-bit input.
+//
+// Run interactively:
+//     cryptol popcount.cry
+//     popcount> :prove popcount_kernighan_eq
+//     popcount> :sat \x -> popcount_simple x != popcount_kernighan x
+//
+// The first should report "Q.E.D."; the second should report "no
+// satisfying assignment" (which is the same statement).
+
+module popcount where
+
+/** Textbook popcount: sum of the bits. */
+popcount_simple : [8] -> [4]
+popcount_simple x = sum [0 # [b] | b <- x]
+
+/** Kernighan's trick: repeatedly clear the lowest set bit. The number
+ *  of iterations until x = 0 is popcount(x). At 8 bits this loop
+ *  terminates after at most 8 steps; we unfold a fixed eight-step
+ *  schedule so the function is total at this width. */
+popcount_kernighan : [8] -> [4]
+popcount_kernighan x = sum [step k | k <- [0..7]]
+  where
+    // 1 if the k-th iteration still has a bit to clear, 0 otherwise.
+    step k = if iterate k != 0 then 1 else 0
+    // value of x after `k` Kernighan iterations
+    iterate k = (steps @ k) : [8]
+    steps : [9][8]
+    steps = [x] # [ y && (y - 1) | y <- steps | _ <- [0..7] ]
+
+/** Equivalence: the two definitions agree on every 8-bit input.
+ *  `:prove popcount_kernighan_eq` discharges this via Cryptol's built-in
+ *  SBV / What4 backend (Z3 under the hood). */
+popcount_kernighan_eq : [8] -> Bit
+property popcount_kernighan_eq x = popcount_simple x == popcount_kernighan x

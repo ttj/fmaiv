@@ -1,0 +1,80 @@
+# Day 4 mini-project — Program and high-assurance verification
+
+**Goal.** Write a small C program (or Cryptol spec), set up a verification harness, and discharge a property end-to-end.
+
+**Time budget.** 60–90 minutes. Pick **one track**.
+
+## Track A — CBMC
+
+### A.1 Warm-up (15 min)
+
+1. Run `cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions`. Confirm `VERIFICATION SUCCESSFUL`.
+2. Weaken the assertion in `counter_check.c` from `assert(s.x <= 10)` to `assert(s.x < 10)`. Re-run. Read the counterexample. Identify the exact `press` sequence that drove `x` to 10.
+3. Restore the original assertion.
+
+### A.2 Your own program (45–60 min)
+
+Write a small C function and a CBMC harness for one of:
+
+- **Saturating counter.** A counter that increments on input `1` and decrements on input `-1`, clamped to `[0, 10]`. Property: the counter is always in `[0, 10]`.
+- **Fixed-size queue.** A circular buffer of capacity 8. Property: after a `push` and then a `pop`, the value returned is the value pushed (FIFO discipline), and the buffer is never reported full or empty incorrectly.
+- **Integer absolute value.** Write `int my_abs(int x)`. Property: for every input that does not trigger undefined behavior (so, exclude `INT_MIN`), `my_abs(x) >= 0` and `my_abs(x) == x || my_abs(x) == -x`. Use `__CPROVER_assume` to exclude `INT_MIN`.
+
+Each harness should:
+
+- Pull inputs from `nondet_*()` functions.
+- Loop or call the function a few times.
+- Assert the property you want.
+
+### A.3 Counterexample (15 min)
+
+Introduce a single off-by-one or sign bug. Re-run CBMC. Capture the counterexample. One paragraph: what state did the bug allow, and what specific line in your code caused it.
+
+### Submit
+
+A zip with: your `.c` files, the CBMC command line you used, the verdict from a clean run, and the counterexample from the buggy run.
+
+## Track B — Cryptol + SAW
+
+### B.1 Warm-up (15 min)
+
+1. Run `cryptol counter.cry`. Then `:prove bounded_invariant` (mirrors the CBMC harness) and `:prove inductive_invariant` (mirrors the Lean proof). Both should report `Q.E.D.`. Same counter as Days 1–3; SMT discharges both bounded and inductive claims.
+2. Run `cryptol popcount.cry`. Then `:prove popcount_kernighan_eq`. Should report `Q.E.D.`.
+3. Run `:sat \(x : [8]) -> popcount_simple x != popcount_kernighan x`. Should report "Unsatisfiable" — the negation has no satisfying input.
+4. Optional: if SAW is installed, run `clang -c -emit-llvm -O0 -o popcount.bc popcount.c && saw popcount.saw`. Should report `Proof succeeded! popcount_loop`.
+
+### B.2 Your own spec (45–60 min)
+
+Write a Cryptol spec for one of:
+
+- **4-bit Caesar cipher.** Encryption: rotate a `[4]` left by a key `k : [2]`. Decryption: rotate right by `k`. Property: `decrypt(k, encrypt(k, x)) == x` for every input.
+- **Parity bit.** A function `parity : [8] -> Bit` that returns the XOR of all eight bits. Equivalent definitions: `xor_fold` and a lookup table for nibbles XORed together. Property: the two definitions agree.
+- **CRC-4 (small CRC).** Pick a CRC-4 polynomial; write the bit-shift definition. (Best for participants comfortable with the bit-level idiom.)
+
+For each, in Cryptol:
+
+- Write at least two definitions of the same function.
+- Write a `property` stating they agree.
+- Discharge it with `:prove`.
+
+If SAW is installed and you have a C implementation handy, write an equivalent `.saw` script following `popcount.saw` as a template.
+
+### Submit
+
+A zip with: your `.cry` file, the REPL transcript of `:prove your_property`, and (optionally) a SAW script and verdict.
+
+## Survey discussion (optional, 10 min plenary)
+
+If time allows, pick one of the following and write a single paragraph:
+
+- Look up the most recent VNN-COMP results. Which neural-network architectures are now in routine reach of α,β-CROWN, and which still aren't?
+- Read the AWS Provable Security s2n page. Which property is continuously verified, and what tool stack underpins it?
+- For your own research area: name one thing in your daily work that would be a candidate for formal verification, and one thing that would be the wrong fit.
+
+## Connecting to Days 1–3
+
+- Day 1's bounded SMT was running implicitly inside CBMC the whole time today.
+- Day 2's transition systems are programs once you let the program counter be part of the state.
+- Day 3's inductive invariants are exactly what Cryptol's `:prove` discharges, but for finite-width bit vectors and via SMT instead of by hand.
+
+The week you have just had is approximately the toolchain of any formal-methods engineer working in 2026: SMT for foundations, model checking for finite reactive systems, theorem proving for the mathematical and parametric content, source-level checkers for the actual code.

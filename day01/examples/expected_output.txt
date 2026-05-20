@@ -1,0 +1,34 @@
+Expected output of Day 1 examples (with z3-solver 4.15.x).
+Use this to verify your setup before class.
+
+=== z3_smoke.py ===
+Z3 version: 4.15.3
+solver result: sat
+model: [y = 1, x = 6]
+(note: any (x, y) with x + y = 7 and x, y > 0 is a valid model; exact values can differ.)
+
+=== z3_pigeonhole.py ===
+  2 pigeons into 1 holes: unsat
+  3 pigeons into 2 holes: unsat
+  4 pigeons into 3 holes: unsat
+  5 pigeons into 4 holes: unsat
+  6 pigeons into 5 holes: unsat
+
+Classic result: unsat for every n >= 1.
+
+=== z3_counter_bounded.py ===
+Counter with x_cap=10; checking unreachability of x=11.
+
+  bound =  5 steps:  UNSAT (no path)
+  bound = 10 steps:  UNSAT (no path)
+  bound = 15 steps:  UNSAT (no path)
+  bound = 20 steps:  UNSAT (no path)
+  bound = 30 steps:  UNSAT (no path)
+
+Bounded model checking only rules out short counterexamples.
+Day 2 will rule them out for all lengths with nuXmv.
+
+=== z3_smt_basics.smt2 ===
+sat
+((x 3) (y 4))
+(or (x 4) (y 3) — either ordering is correct since the constraints are symmetric)

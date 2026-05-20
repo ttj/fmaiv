@@ -1,0 +1,9 @@
+name = "CounterDemo"
+version = "0.1.0"
+defaultTargets = ["CounterDemo"]
+
+[leanOptions]
+autoImplicit = false
+
+[[lean_lib]]
+name = "CounterDemo"

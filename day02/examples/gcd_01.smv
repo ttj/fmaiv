@@ -1,0 +1,106 @@
+-- Euclid's GCD algorithm for naturals a, b
+-- 
+-- l1: while (a != b) {
+-- l2:   if (a > b)
+-- l3:     a = a - b;
+--       else
+-- l4:     b = b - a;
+-- l5: }
+--
+-- general process
+-- 1) introduce a program counter (pc) variable
+--    that ranges over the lines of code (l1, l2, etc.)
+-- 2) for any loops, have to in essence convert them 
+--    into gotos (see from l3/l4 back to l1)
+-- 3) sequentially go over the lines of code, add updates 
+--    for the pc going to subsequent lines based on conditions, etc
+-- 4) add termination condition at end (so infinite execs)
+
+MODULE main
+VAR
+  a : 0..10;
+  b : 0..10;
+  pc : {l1, l2, l3, l4, l5};
+ASSIGN
+  init(pc) := l1;
+--  init(a) := 10;
+--  init(b) := 1;
+  next(pc) :=
+    case
+-- just copy of code for explanation
+-- l1: while (a != b) {
+-- l2:   if (a > b)
+-- l3:     a = a - b;
+--       else
+-- l4:     b = b - a;
+-- l5: }    
+      pc = l1 & a != b : l2; -- while (a != b) is true
+      pc = l1 & a = b : l5; -- while (a != b) is false, done
+      pc = l2 & a > b : l3; -- if (a > b): first if
+      pc = l2 & a <= b : l4; -- else case, negation of (a > b)
+      pc = l3 | pc = l4 : l1; -- repeat loop, goto
+      pc = l5 : l5; -- terminate, just stay here (so inf executions)
+    esac;
+  next(a) :=
+    case
+      -- remark: we must repeat the condition (a > b) here, because this has
+      -- to hold for all the program locations inside the "if" block...
+      pc = l3 & a > b : a - b;
+      TRUE : a;
+    esac;
+  next(b) :=
+    case
+      pc = l4 & b > a : b - a;
+      TRUE : b;
+    esac;
+
+-- general pattern: if we don't specify initial
+-- values for variables, then we can specify them 
+-- as the 1st element along a trace in ltl, e.g., 
+-- set the values a and b here outside the temporal operators
+--LTLSPEC (a = 16 & b = 12) -> F (a = 4 & b = 4);
+
+-- CTL specs: eventually reach termination state (a = b)
+CTLSPEC AG ((a != b) -> AF (a = b))
+CTLSPEC AG ((a = 6 & b = 9 & pc = l1) -> AF (a = 3 & b = 3))
+
+CTLSPEC AG ((a = 5 & b = 9 & pc = l1) -> AF (a = 1 & b = 1))
+
+CTLSPEC AG ((a = 9 & b = 4 & pc = l1) -> AF (a = 4 & b = 5))
+
+
+LTLSPEC (a = 4 & b = 3) -> F (a = 1 & b = 1);
+
+LTLSPEC (a = 4 & b = 3) -> F (a = 2 & b = 2);
+
+LTLSPEC (a = b) -> F (a = b);
+
+--LTLSPEC (a / b = 0) -> F (a = b);
+
+LTLSPEC (a = 4 & b = 2) -> F (a = 2 & b = 2);
+
+LTLSPEC (a = 4 & b = 8) -> F (a = 2 & b = 2);
+
+LTLSPEC (a = 5 & b = 5) -> F (a = 5 & b = 5);
+
+
+LTLSPEC (a = 3 & b = 9) -> F (a = 3 & b = 3);
+
+
+--LTLSPEC (a = 99 & b = 33) -> F (a = 33 & b = 33);
+
+--LTLSPEC (a = 99 & b = 27) -> F (a = 9 & b = 9);
+
+-- false
+--LTLSPEC (a = 16 & b = 11) -> F (a = 4 & b = 4);
+
+-- false
+--LTLSPEC (a = 21 & b = 7) -> F (a = 3 & b = 3);
+
+
+INVARSPEC a > 0 & b > 0;
+
+INVARSPEC a >= 0 & b >= 0;
+
+INVARSPEC a = 0 & b = 0;
+

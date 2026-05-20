@@ -1,0 +1,70 @@
+-- Mutual exclusion protocol for 2 processes
+MODULE main
+VAR
+  process1 : {idle, waiting, critical};
+  process2 : {idle, waiting, critical};
+  turn : 1..2;
+  flag1 : boolean;
+  flag2 : boolean;
+
+ASSIGN
+  init(process1) := idle;
+  init(process2) := idle;
+  init(turn) := 1;
+  init(flag1) := FALSE;
+  init(flag2) := FALSE;
+
+  next(process1) :=
+    case
+      process1 = idle : {idle, waiting};
+      process1 = waiting & (!flag2 | turn = 1) : critical;
+      process1 = critical : idle;
+      TRUE : process1;
+    esac;
+
+  next(process2) :=
+    case
+      process2 = idle : {idle, waiting};
+      process2 = waiting & (!flag1 | turn = 2) : critical;
+      process2 = critical : idle;
+      TRUE : process2;
+    esac;
+
+  next(flag1) :=
+    case
+      process1 = idle & next(process1) = waiting : TRUE;
+      process1 = critical & next(process1) = idle : FALSE;
+      TRUE : flag1;
+    esac;
+
+  next(flag2) :=
+    case
+      process2 = idle & next(process2) = waiting : TRUE;
+      process2 = critical & next(process2) = idle : FALSE;
+      TRUE : flag2;
+    esac;
+
+  next(turn) :=
+    case
+      process1 = critical : 2;
+      process2 = critical : 1;
+      TRUE : turn;
+    esac;
+
+-- Safety properties (mutual exclusion)
+INVARSPEC !(process1 = critical & process2 = critical);  -- Mutual exclusion (should pass)
+INVARSPEC process1 = critical -> !flag2 | turn = 1;  -- Entry condition (should pass)
+INVARSPEC process2 = critical -> !flag1 | turn = 2;  -- Entry condition (should pass)
+INVARSPEC process1 = idle | process1 = waiting | process1 = critical;  -- Valid states (should pass)
+
+-- Liveness properties
+CTLSPEC AG(process1 = waiting -> AF(process1 = critical));  -- No starvation P1 (should pass)
+CTLSPEC AG(process2 = waiting -> AF(process2 = critical));  -- No starvation P2 (should pass)
+CTLSPEC AG(EF(process1 = critical));  -- P1 can enter critical (should pass)
+CTLSPEC AG(EF(process2 = critical));  -- P2 can enter critical (should pass)
+CTLSPEC AG(process1 = critical);  -- P1 always in critical (should fail)
+
+-- LTL properties
+LTLSPEC G(process1 = waiting -> F(process1 = critical));  -- P1 no starvation
+LTLSPEC G(process2 = waiting -> F(process2 = critical));  -- P2 no starvation
+LTLSPEC F(process1 = critical);  -- P1 eventually enters critical
