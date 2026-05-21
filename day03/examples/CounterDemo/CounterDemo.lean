@@ -3,3 +3,6 @@
 import CounterDemo.TransitionSystem
 import CounterDemo.Counter
 import CounterDemo.CounterProofs
+import CounterDemo.ArraySum
+import CounterDemo.Gcd
+import CounterDemo.TrafficLight

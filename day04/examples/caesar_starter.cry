@@ -1,0 +1,19 @@
+/* Shift cipher — STARTER. Implement `decrypt` so the round-trip proves.
+ *
+ *     cryptol caesar_starter.cry
+ *     caesar_starter> :prove roundtrip
+ * It returns a COUNTEREXAMPLE until you fix `decrypt`; aim for "Q.E.D."
+ * Worked solution: caesar.cry.
+ */
+module caesar_starter where
+
+type N = 16
+
+encrypt : [8] -> [N][8] -> [N][8]
+encrypt k msg = [ c + k | c <- msg ]
+
+/* TODO: undo the shift (hint: subtract the key byte). */
+decrypt : [8] -> [N][8] -> [N][8]
+decrypt k ct = ct          // stub: returns the ciphertext unchanged
+
+property roundtrip k msg = decrypt k (encrypt k msg) == msg

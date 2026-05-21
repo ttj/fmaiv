@@ -1,0 +1,36 @@
+-- A small 3-floor elevator — STARTER (fill in the TODOs).
+--
+-- The state and the `moving` logic are given. You must:
+--   (1) make the door closed in any step where the car will be moving;
+--   (2) make the car move one floor only when `moving` is true;
+--   (3) write the safety spec "moving implies the door is closed".
+MODULE main
+VAR
+  floor  : 0..2;
+  door   : {open, closed};
+  moving : boolean;
+
+ASSIGN
+  init(floor)  := 0;
+  init(door)   := open;
+  init(moving) := FALSE;
+
+  next(moving) := case
+    door = open : FALSE;
+    TRUE        : {FALSE, TRUE};
+  esac;
+
+  -- TODO 1: if next(moving) is TRUE, force the door closed; otherwise allow
+  -- {open, closed}.
+  next(door) := {open, closed};
+
+  -- TODO 2: when next(moving) is TRUE, move one floor (0->1, 2->1, 1->{0,2});
+  -- otherwise stay put.
+  next(floor) := floor;
+
+-- TODO 3: write the safety property — moving implies the door is closed.
+-- INVARSPEC moving -> door = closed;
+
+-- These help you sanity-check once TODO 1/2 are done:
+CTLSPEC AG EF (floor = 2);
+CTLSPEC AG EF (door = open);

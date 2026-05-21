@@ -1,0 +1,23 @@
+/* Repeating-key XOR — STARTER. Implement `encrypt` so the round-trip proves.
+ *
+ *     cryptol xor_cipher_starter.cry
+ *     xor_cipher_starter> :prove roundtrip
+ * Returns a COUNTEREXAMPLE until you fix `encrypt`; aim for "Q.E.D."
+ * Worked solution: xor_cipher.cry.
+ */
+module xor_cipher_starter where
+
+type N = 16
+type K = 4
+
+keystream : [K][8] -> [N][8]
+keystream key = join (repeat`{N / K} key)
+
+/* TODO: XOR the message with the keystream. */
+encrypt : [K][8] -> [N][8] -> [N][8]
+encrypt key msg = msg          // stub: no encryption yet
+
+decrypt : [K][8] -> [N][8] -> [N][8]
+decrypt key ct = ct ^ keystream key
+
+property roundtrip key msg = decrypt key (encrypt key msg) == msg

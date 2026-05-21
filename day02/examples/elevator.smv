@@ -1,0 +1,49 @@
+-- A small 3-floor elevator (simple, single-component example).
+--
+-- The safety property of interest: the doors are CLOSED whenever the car is
+-- moving. We enforce it by construction (the door is forced closed in any step
+-- where `moving` becomes true) and then ask the model checker to confirm it.
+MODULE main
+VAR
+  floor  : 0..2;
+  door   : {open, closed};
+  moving : boolean;
+
+ASSIGN
+  init(floor)  := 0;
+  init(door)   := open;
+  init(moving) := FALSE;
+
+  -- The car may decide to move only when the door is currently closed.
+  next(moving) := case
+    door = open : FALSE;          -- door open: cannot start moving
+    TRUE        : {FALSE, TRUE};  -- door closed: free to move or stay
+  esac;
+
+  -- If the car will be moving this step, the door must be closed; otherwise
+  -- it may open or close freely (passengers boarding).
+  next(door) := case
+    next(moving) : closed;
+    TRUE         : {open, closed};
+  esac;
+
+  -- Move one floor when moving; stay otherwise. Ends (0,2) bounce off.
+  next(floor) := case
+    next(moving) & floor = 0 : 1;
+    next(moving) & floor = 2 : 1;
+    next(moving) & floor = 1 : {0, 2};
+    TRUE                     : floor;
+  esac;
+
+-- SAFETY: the door is closed whenever the car is moving (HOLDS).
+INVARSPEC moving -> door = closed;
+
+-- REACHABILITY: the car can always eventually reach the top floor (HOLDS).
+CTLSPEC AG EF (floor = 2);
+
+-- REACHABILITY: the door can always eventually open (HOLDS).
+CTLSPEC AG EF (door = open);
+
+-- DELIBERATELY FALSE: claims the door is always closed — NuSMV returns a
+-- trace where the door is open (e.g. the initial state).
+INVARSPEC door = closed;

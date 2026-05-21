@@ -63,6 +63,39 @@ If SAW is installed and you have a C implementation handy, write an equivalent `
 
 A zip with: your `.cry` file, the REPL transcript of `:prove your_property`, and (optionally) a SAW script and verdict.
 
+## More worked examples (`examples/`)
+
+Cryptol specs with proved properties and C programs with CBMC harnesses, each
+with a starter you complete.
+
+**Cryptol** (`:prove` reports `Q.E.D.`):
+
+| Spec | Property | Solution | Starter |
+|---|---|---|---|
+| Shift ("Caesar") cipher | decrypt inverts encrypt, for all keys/messages | `caesar.cry` | `caesar_starter.cry` |
+| Repeating-key XOR cipher | round-trip + involutive | `xor_cipher.cry` | `xor_cipher_starter.cry` |
+
+```bash
+cryptol caesar.cry
+caesar> :prove roundtrip          # Q.E.D.
+```
+
+**CBMC** (the `*_check.c` harness is the spec; verify a `.c` against it):
+
+| Program | Property checked | Solution | Starter |
+|---|---|---|---|
+| Array maximum | result ≥ every element, and equals some element | `array_max.c` + `array_max_check.c` | `array_max_starter.c` |
+| Binary search (sorted input) | found ⇒ `a[r] == key`; not found ⇒ key absent | `binsearch.c` + `binsearch_check.c` | `binsearch_starter.c` |
+
+```bash
+cbmc array_max.c  array_max_check.c  --unwind 6  --unwinding-assertions   # SUCCESSFUL
+cbmc binsearch.c  binsearch_check.c  --unwind 10 --unwinding-assertions   # SUCCESSFUL
+```
+
+The `*_starter.{cry,c}` files are stubs: Cryptol returns a **Counterexample**
+and CBMC reports **VERIFICATION FAILED** until you implement them (verify your
+version against the same property/harness).
+
 ## Survey discussion (optional, 10 min plenary)
 
 If time allows, pick one of the following and write a single paragraph:

@@ -48,6 +48,27 @@ Pick one of the systems in Part B. Introduce a single, small bug in the transiti
 - The first few states of the counterexample.
 - One or two sentences saying what the counterexample shows.
 
+## More worked models (`examples/`)
+
+Additional models, each with a mix of true and deliberately-false specs, plus
+starters with holes. Concurrency is modeled by interleaving with a free
+scheduler variable — no deprecated `process` blocks.
+
+| Model | What it shows | Solution | Starter |
+|---|---|---|---|
+| Elevator | a simple safety property (doors closed while moving) | `elevator.smv` | `elevator_starter.smv` |
+| Peterson's mutex | concurrent mutual exclusion + no-starvation under fairness | `peterson.smv` | `peterson_starter.smv` |
+| Producer/consumer | bounded-buffer safety + liveness | `prodcons.smv` | — |
+
+```bash
+nuXmv peterson.smv      # or:  NuSMV peterson.smv
+```
+
+Each solution's specs are annotated `(HOLDS)` or `DELIBERATELY FALSE`, so a
+single run shows you both a proof and a counterexample. In
+`peterson_starter.smv` the L3 wait conditions are missing, so mutual exclusion
+*fails* — add them (and the no-starvation LTL specs) to make it pass.
+
 ## What to submit
 
 A single zip with:

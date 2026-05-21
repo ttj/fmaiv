@@ -1,0 +1,90 @@
+-- Peterson's mutual-exclusion algorithm for two processes.
+--
+-- Concurrency WITHOUT the deprecated `process` keyword: a free scheduler
+-- variable `run` is chosen nondeterministically each step, and a process only
+-- moves when it is scheduled. This is the standard interleaving model.
+--
+-- Each process runs the entry protocol:
+--   L0 idle      L1 flag[i] := TRUE     L2 turn := other
+--   L3 wait until (flag[other] = FALSE | turn = me)
+--   L4 critical  L5 flag[i] := FALSE -> back to L0
+MODULE main
+VAR
+  pc1   : 0..5;
+  pc2   : 0..5;
+  flag1 : boolean;
+  flag2 : boolean;
+  turn  : 1..2;
+  run   : 1..2;          -- free scheduler: who takes the next step (interleaving)
+
+ASSIGN
+  init(pc1) := 0;  init(pc2) := 0;
+  init(flag1) := FALSE;  init(flag2) := FALSE;
+  init(turn) := 1;
+
+  next(pc1) := case
+    run != 1                          : pc1;        -- not scheduled
+    pc1 = 0                           : {0, 1};     -- may begin entry
+    pc1 = 1                           : 2;          -- set flag1
+    pc1 = 2                           : 3;          -- set turn
+    pc1 = 3 & (!flag2 | turn = 1)     : 4;          -- wait clears -> enter
+    pc1 = 3                           : 3;          -- still waiting
+    pc1 = 4                           : 5;          -- leave critical
+    pc1 = 5                           : 0;          -- clear flag, idle
+    TRUE                              : pc1;
+  esac;
+
+  next(pc2) := case
+    run != 2                          : pc2;
+    pc2 = 0                           : {0, 1};
+    pc2 = 1                           : 2;
+    pc2 = 2                           : 3;
+    pc2 = 3 & (!flag1 | turn = 2)     : 4;
+    pc2 = 3                           : 3;
+    pc2 = 4                           : 5;
+    pc2 = 5                           : 0;
+    TRUE                              : pc2;
+  esac;
+
+  next(flag1) := case
+    run = 1 & pc1 = 1 : TRUE;     -- L1 action
+    run = 1 & pc1 = 5 : FALSE;    -- L5 action
+    TRUE             : flag1;
+  esac;
+
+  next(flag2) := case
+    run = 2 & pc2 = 1 : TRUE;
+    run = 2 & pc2 = 5 : FALSE;
+    TRUE             : flag2;
+  esac;
+
+  next(turn) := case
+    run = 1 & pc1 = 2 : 2;        -- P1 yields turn to P2
+    run = 2 & pc2 = 2 : 1;        -- P2 yields turn to P1
+    TRUE             : turn;
+  esac;
+
+-- Each process is scheduled infinitely often (otherwise "no starvation"
+-- is trivially violable by a scheduler that ignores a process forever).
+FAIRNESS run = 1;
+FAIRNESS run = 2;
+
+-- SAFETY: mutual exclusion — never both in the critical section (HOLDS).
+INVARSPEC !(pc1 = 4 & pc2 = 4);
+
+-- SANITY: being in the critical section implies your flag is raised (HOLDS).
+INVARSPEC pc1 = 4 -> flag1;
+INVARSPEC pc2 = 4 -> flag2;
+
+-- LIVENESS / no starvation under fair scheduling: a waiting process
+-- eventually enters its critical section (HOLDS — Peterson guarantees this).
+LTLSPEC G (pc1 = 3 -> F pc1 = 4);
+LTLSPEC G (pc2 = 3 -> F pc2 = 4);
+
+-- Each process can reach its critical section (HOLDS).
+CTLSPEC AG EF (pc1 = 4);
+CTLSPEC AG EF (pc2 = 4);
+
+-- DELIBERATELY FALSE: claims P1 is never critical — NuSMV returns a
+-- counterexample trace that walks P1 into the critical section.
+INVARSPEC pc1 != 4;

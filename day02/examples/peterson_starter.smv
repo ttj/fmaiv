@@ -1,0 +1,72 @@
+-- Peterson's mutual exclusion — STARTER (fill in the TODOs).
+--
+-- The interleaving scaffold is given. Two things are missing:
+--   (1) the WAIT conditions at L3 (currently every process enters immediately,
+--       so mutual exclusion is VIOLATED — run it and watch INVARSPEC fail);
+--   (2) the no-starvation LTL specs at the bottom.
+--
+-- Fix the two `next(pcN)` L3 lines to encode Peterson's wait:
+--   process i may leave L3 only when (flag[other] = FALSE | turn = i).
+MODULE main
+VAR
+  pc1   : 0..5;
+  pc2   : 0..5;
+  flag1 : boolean;
+  flag2 : boolean;
+  turn  : 1..2;
+  run   : 1..2;          -- free scheduler (interleaving)
+
+ASSIGN
+  init(pc1) := 0;  init(pc2) := 0;
+  init(flag1) := FALSE;  init(flag2) := FALSE;
+  init(turn) := 1;
+
+  next(pc1) := case
+    run != 1   : pc1;
+    pc1 = 0    : {0, 1};
+    pc1 = 1    : 2;
+    pc1 = 2    : 3;
+    pc1 = 3    : 4;   -- TODO: only enter when (!flag2 | turn = 1), else stay at 3
+    pc1 = 4    : 5;
+    pc1 = 5    : 0;
+    TRUE       : pc1;
+  esac;
+
+  next(pc2) := case
+    run != 2   : pc2;
+    pc2 = 0    : {0, 1};
+    pc2 = 1    : 2;
+    pc2 = 2    : 3;
+    pc2 = 3    : 4;   -- TODO: only enter when (!flag1 | turn = 2), else stay at 3
+    pc2 = 4    : 5;
+    pc2 = 5    : 0;
+    TRUE       : pc2;
+  esac;
+
+  next(flag1) := case
+    run = 1 & pc1 = 1 : TRUE;
+    run = 1 & pc1 = 5 : FALSE;
+    TRUE             : flag1;
+  esac;
+
+  next(flag2) := case
+    run = 2 & pc2 = 1 : TRUE;
+    run = 2 & pc2 = 5 : FALSE;
+    TRUE             : flag2;
+  esac;
+
+  next(turn) := case
+    run = 1 & pc1 = 2 : 2;
+    run = 2 & pc2 = 2 : 1;
+    TRUE             : turn;
+  esac;
+
+FAIRNESS run = 1;
+FAIRNESS run = 2;
+
+-- This SHOULD pass once your wait conditions are correct (it FAILS now):
+INVARSPEC !(pc1 = 4 & pc2 = 4);
+
+-- TODO: add the two no-starvation LTL specs, e.g.
+--   LTLSPEC G (pc1 = 3 -> F pc1 = 4);
+--   LTLSPEC G (pc2 = 3 -> F pc2 = 4);

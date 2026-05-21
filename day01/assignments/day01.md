@@ -33,6 +33,31 @@ Encode a traffic light with states `{red, yellow, green}` and a simple cyclic tr
 
 Choose any small system you can describe in a paragraph (a vending machine, a turnstile, a coffee maker with brewing/ready/empty modes). Write its transition relation in Z3, formulate one safety property, and verify it up to a chosen bound.
 
+## More SMT puzzles (`examples/puzzles/`)
+
+Worked solutions and matching starters that encode classic puzzles as
+*constraints* — you state what a solution is and let Z3 search, never writing a
+search algorithm. Each `*.py` solution prints a solution and self-checks; each
+`*_starter.py` has the encoding blanked out with TODOs (run it to see an
+incomplete result, then fill in the constraints).
+
+| Puzzle | Solution | Starter |
+|---|---|---|
+| Sudoku (9×9 Latin square + boxes) | `sudoku.py` | `sudoku_starter.py` |
+| KenKen / Calcudoku (Latin square + arithmetic cages) | `kenken.py` | `kenken_starter.py` |
+| N-Queens (no two queens attack) | `nqueens.py` | `nqueens_starter.py` |
+| Magic square (rows/cols/diagonals sum equal) | `magic_square.py` | — |
+
+```bash
+cd examples/puzzles
+python sudoku.py            # prints the unique solution and verifies it
+python nqueens.py 12        # any board size
+python kenken_starter.py    # incomplete until you fill the TODOs
+```
+
+Good exercise: complete `kenken_starter.py` so its output matches `kenken.py`
+and it reports a unique solution.
+
 ## What to submit
 
 A single `.py` file with:

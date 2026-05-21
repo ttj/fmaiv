@@ -1,0 +1,39 @@
+-- Bounded-buffer producer/consumer (concurrency without `process`).
+--
+-- A shared buffer holds 0..CAP items. Each step a free action variable `act`
+-- picks producer, consumer, or idle: the producer adds an item only if there
+-- is room; the consumer removes one only if the buffer is non-empty. This is
+-- the classic concurrency example for "no overflow / no underflow".
+MODULE main
+DEFINE CAP := 3;
+VAR
+  buf : 0..3;                 -- must match CAP
+  act : {prod, cons, idle};   -- free: chosen nondeterministically each step
+
+ASSIGN
+  init(buf) := 0;
+  next(buf) := case
+    act = prod & buf < CAP : buf + 1;   -- produce only with room
+    act = cons & buf > 0   : buf - 1;   -- consume only when non-empty
+    TRUE                   : buf;
+  esac;
+
+-- Producer and consumer each act infinitely often.
+FAIRNESS act = prod;
+FAIRNESS act = cons;
+
+-- SAFETY: the buffer never overflows or underflows (HOLDS).
+INVARSPEC buf <= CAP;
+INVARSPEC buf >= 0;
+
+-- REACHABILITY: the buffer can be full, and can be empty (both HOLD).
+CTLSPEC AG EF (buf = CAP);
+CTLSPEC AG EF (buf = 0);
+
+-- LIVENESS under fairness: there is always room again, and an item again
+-- (HOLD: a fair consumer keeps making room; a fair producer keeps adding).
+LTLSPEC G F (buf < CAP);
+LTLSPEC G F (buf > 0);
+
+-- DELIBERATELY FALSE: claims the buffer never fills — counterexample produced.
+INVARSPEC buf != CAP;

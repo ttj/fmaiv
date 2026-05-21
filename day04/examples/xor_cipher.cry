@@ -1,0 +1,34 @@
+/* Day 4 — a repeating-key XOR stream cipher in Cryptol, with proved round-trip.
+ *
+ * The classic "Vigenere over bytes": XOR each message byte with a repeating
+ * key. XOR is its own inverse, so encryption == decryption. We prove, for ALL
+ * keys and messages, that applying it twice is the identity (and that
+ * decrypt inverts encrypt).
+ *
+ * Run interactively:
+ *     cryptol xor_cipher.cry
+ *     xor_cipher> :prove roundtrip
+ *     xor_cipher> :prove involutive
+ * Both should report "Q.E.D."
+ */
+module xor_cipher where
+
+type N = 16                       // message length in bytes
+type K = 4                        // key length in bytes
+
+/* The keystream is the key repeated to the message length. (N is a multiple
+ * of K here, so we repeat exactly N/K times and flatten.) */
+keystream : [K][8] -> [N][8]
+keystream key = join (repeat`{N / K} key)
+
+encrypt : [K][8] -> [N][8] -> [N][8]
+encrypt key msg = msg ^ keystream key
+
+decrypt : [K][8] -> [N][8] -> [N][8]
+decrypt key ct = ct ^ keystream key
+
+/* Decryption recovers the message, for every key and message. */
+property roundtrip key msg = decrypt key (encrypt key msg) == msg
+
+/* Encrypting twice returns the original (XOR is involutive). */
+property involutive key msg = encrypt key (encrypt key msg) == msg

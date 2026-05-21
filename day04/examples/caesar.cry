@@ -1,0 +1,29 @@
+/* Day 4 — a shift ("Caesar") cipher in Cryptol, with proved round-trip.
+ *
+ * Each byte of the message is shifted by a key byte (addition mod 256);
+ * decryption subtracts the same key. The interesting part is not the cipher
+ * (it is trivially weak) but that we can *prove*, for ALL keys and ALL
+ * messages, that decryption inverts encryption — an exhaustive statement that
+ * SMT discharges in well under a second.
+ *
+ * Run interactively:
+ *     cryptol caesar.cry
+ *     caesar> :prove roundtrip
+ *     caesar> :prove decrypt_inverts
+ * Both should report "Q.E.D."
+ */
+module caesar where
+
+type N = 16                       // message length in bytes
+
+encrypt : [8] -> [N][8] -> [N][8]
+encrypt k msg = [ c + k | c <- msg ]
+
+decrypt : [8] -> [N][8] -> [N][8]
+decrypt k ct = [ c - k | c <- ct ]
+
+/* For every key and message, decrypting an encryption recovers the message. */
+property roundtrip k msg = decrypt k (encrypt k msg) == msg
+
+/* The other direction also holds (encryption inverts decryption). */
+property decrypt_inverts k msg = encrypt k (decrypt k msg) == msg
