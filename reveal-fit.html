@@ -1,42 +1,75 @@
-<!-- FMAIV: shrink any slide whose content overflows the slide box — in EITHER
-     dimension (height or width) — so all content is always visible. Included
-     after the body (-A) so RevealJS exists. Requires top-aligned slides (render
-     with -V center=false) so the per-slide transform doesn't fight RevealJS's
-     centering transform. -->
+<!-- FMAIV after-body include (added with pandoc -A, so RevealJS already exists).
+     Three jobs:
+       1. MATH: force MathJax 3 to (re)typeset each slide. Pandoc registers
+          reveal's MathJax*2* plugin but loads the MathJax*3* library, so math is
+          often left untypeset or mis-measured in hidden slides. We re-typeset
+          the current slide whenever it is shown, which is reliable.
+       2. FIT: scale down any slide whose content overflows its box (height or
+          width) so nothing runs off-slide. Requires top-aligned slides
+          (render with -V center=false).
+       3. NUMBER: show a "section.slide / total-in-section" badge per slide. -->
 <script>
 (function () {
-  function fitAll() {
+  // ---- FIT --------------------------------------------------------------
+  function fitOne(s) {
+    if (s.querySelector('section')) return;            // skip vertical-stack containers
     var cfg = (window.Reveal && Reveal.getConfig) ? Reveal.getConfig() : {};
-    var H = cfg.height || 720;
-    var pad = 8;
-    document.querySelectorAll('.reveal .slides section').forEach(function (s) {
-      if (s.querySelector('section')) return;       // skip vertical-stack containers
-      s.style.transform = '';                       // reset before measuring
-      s.style.transformOrigin = 'top center';
-      // Width is element-relative: the section box is fixed (border-box = slide
-      // width), so content wider than its own box is the real horizontal
-      // overflow. Height is vs the slide height, since top-aligned sections grow.
-      var sh = s.scrollHeight, sw = s.scrollWidth, cw = s.clientWidth;
-      var scaleH = sh > (H - pad) ? (H - pad) / sh : 1;  // taller than the slide
-      var scaleW = sw > cw        ? cw / sw         : 1;  // wider than its box
-      var scale = Math.min(scaleH, scaleW);             // honor the tighter limit
-      if (scale < 1) {
-        s.style.transform = 'scale(' + Math.max(0.3, scale) + ')';
-      }
-    });
+    var H = cfg.height || 720, pad = 8;
+    s.style.transform = '';                             // reset before measuring
+    s.style.transformOrigin = 'top center';
+    var sh = s.scrollHeight, sw = s.scrollWidth, cw = s.clientWidth;
+    var scaleH = sh > (H - pad) ? (H - pad) / sh : 1;   // taller than the slide
+    var scaleW = sw > cw        ? cw / sw         : 1;   // wider than its box
+    var scale = Math.min(scaleH, scaleW);
+    if (scale < 1) s.style.transform = 'scale(' + Math.max(0.3, scale) + ')';
   }
+  function fitAll() {
+    document.querySelectorAll('.reveal .slides section').forEach(fitOne);
+  }
+
+  // ---- MATH -------------------------------------------------------------
+  function typeset(el) {
+    if (!(window.MathJax && MathJax.typesetPromise)) { fitAll(); return; }
+    try { if (el && MathJax.typesetClear) MathJax.typesetClear([el]); } catch (e) {}
+    MathJax.typesetPromise(el ? [el] : undefined).then(fitAll).catch(fitAll);
+  }
+  function typesetCurrent() {
+    typeset(document.querySelector('.reveal .slides section.present') || null);
+  }
+
+  // ---- NUMBER -----------------------------------------------------------
+  function updateNo() {
+    if (!(window.Reveal && Reveal.getIndices)) return;
+    var idx = Reveal.getIndices();
+    var tops = document.querySelectorAll('.reveal .slides > section');
+    var stack = tops[idx.h];
+    var verts = stack ? stack.querySelectorAll(':scope > section') : [];
+    var total = verts.length || 1;
+    var badge = document.getElementById('fmaiv-slideno');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'fmaiv-slideno';
+      var rv = document.querySelector('.reveal');
+      if (rv) rv.appendChild(badge);
+    }
+    if (badge) badge.textContent = (idx.h + 1) + '.' + (idx.v + 1) + ' / ' + total;
+  }
+
+  function onReady()  { typeset(null); updateNo(); fitAll(); }
+  function onChange() { typesetCurrent(); updateNo(); }
+
   function hook() {
     if (window.Reveal && Reveal.on) {
-      Reveal.on('ready', fitAll);
-      Reveal.on('slidechanged', fitAll);
+      Reveal.on('ready', onReady);
+      Reveal.on('slidechanged', onChange);
       Reveal.on('resize', fitAll);
-      try { if (Reveal.isReady && Reveal.isReady()) fitAll(); } catch (e) {}
-      // Re-fit after late reflow (web fonts, MathJax) that can grow a slide
-      // AFTER the initial fit and would otherwise spill off-slide.
+      try { if (Reveal.isReady && Reveal.isReady()) onReady(); } catch (e) {}
+      // Re-typeset / re-fit after late reflow (web fonts, MathJax startup).
       try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll); } catch (e) {}
-      try { if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(fitAll); } catch (e) {}
-      setTimeout(fitAll, 400);
-      setTimeout(fitAll, 1400);
+      try { if (window.MathJax && MathJax.startup && MathJax.startup.promise)
+              MathJax.startup.promise.then(function () { typeset(null); }); } catch (e) {}
+      setTimeout(typesetCurrent, 1200);
+      setTimeout(fitAll, 1600);
     } else {
       setTimeout(hook, 80);
     }

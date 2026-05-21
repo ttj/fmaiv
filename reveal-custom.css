@@ -55,4 +55,14 @@
 .reveal a, .reveal :not(pre) > code { overflow-wrap: anywhere; }
 .reveal td, .reveal th { word-break: break-word; }   /* let cells wrap so a wide table can't force the slide wider */
 .reveal table { table-layout: auto; max-width: 100%; }
+
+/* Per-slide position badge: "section.slide / total-in-section", bottom-left.
+   Lives on .reveal (not the section) so the per-slide fit transform never
+   scales or hides it. */
+#fmaiv-slideno {
+  position: absolute; bottom: 10px; left: 14px; z-index: 31;
+  font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  font-size: 15px; font-weight: 600; color: #9a9a9a;
+  letter-spacing: 0.02em; pointer-events: none;
+}
 </style>
