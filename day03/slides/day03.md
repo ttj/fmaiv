@@ -157,26 +157,27 @@ Tactics are programs that manipulate the proof state (hypotheses + goal). You wa
 
 ## The current Lean moment (1)
 
-- **Polynomial Freiman–Ruzsa conjecture** — informal proof by Gowers, Green, Manners & Tao (2023); formalized in Lean in **~3 weeks** by a ~25-person collaboration led by Tao with Yael Dillies and Bhavik Mehta.
-- **Mathlib** — the community math library, **2M+ lines**, thousands of contributors.
+- **Polynomial Freiman–Ruzsa conjecture** — informal proof by Gowers, Green, Manners & Tao (Nov 2023); formalized in Lean in **~3 weeks** (completed Dec 2023) by a 20+-person collaboration led by Tao with Yael Dillies and Bhavik Mehta.
+- **Mathlib** — the community math library, **~2M lines**, ~800 contributors.
 
 ::: notes
-PFR is the cultural watershed: a recent research theorem formalized collaboratively in weeks, not years, because Lean's kernel let strangers compose work safely. Mathlib is the substrate — a million-line, continuously-checked library covering undergraduate-through-research mathematics. Together they show Lean is no longer a toy: it is where a growing slice of real mathematics is being made machine-checkable.
+PFR is the cultural watershed: a recent research theorem formalized collaboratively in weeks, not years, because Lean's kernel let strangers compose work safely. Mathlib is the substrate — a ~2-million-line, continuously-checked library covering undergraduate-through-research mathematics. Together they show Lean is no longer a toy: it is where a growing slice of real mathematics is being made machine-checkable.
 :::
 
 ---
 
 ## The current Lean moment (2)
 
-- **AlphaProof** (DeepMind, 2024) — IMO **silver-medal** performance, proofs in Lean.
-- **DeepSeek-Prover-V2** (April 2025) — **88.9%** on miniF2F, the olympiad-Lean benchmark.
+- **AlphaProof + AlphaGeometry 2** (DeepMind, 2024) — **IMO 2024 silver-medal-equivalent** score (28/42); AlphaProof solved 3 problems with proofs generated and checked in Lean.
+- **DeepSeek-Prover-V2** (671B, April 2025) — **88.9%** on miniF2F at a large pass@8192 budget (~82% at pass@32), the competition-Lean benchmark.
 
 ```
-miniF2F SOTA:  2022 ~35%  →  2023 ~50%  →  2024 ~70%  →  2025 ~89%
+miniF2F-test SOTA (illustrative; sample budgets differ by year):
+  2022 ~35%  →  2023 ~50%  →  2024 ~65-70%  →  2025 ~89%
 ```
 
 ::: notes
-The AI side. AlphaProof reached IMO medal level generating Lean proofs; DeepSeek-Prover-V2 pushed the standard Lean benchmark from ~35% to ~89% in roughly three years. This curve is why the course exists: AI can now draft formal proofs at a strong level, but every one is checked by the Lean kernel — the AI proposes, the kernel disposes. That combination is what makes AI-generated mathematics trustworthy.
+The AI side. AlphaProof (with AlphaGeometry 2) reached IMO silver-medal level, AlphaProof generating Lean proofs; DeepSeek-Prover-V2 pushed the standard Lean benchmark from ~35% to ~89% in roughly three years (the later figures use very large sample budgets, so read the curve as illustrative). This curve is why the course exists: AI can now draft formal proofs at a strong level, but every one is checked by the Lean kernel — the AI proposes, the kernel disposes. That combination is what makes AI-generated mathematics trustworthy.
 :::
 
 ---

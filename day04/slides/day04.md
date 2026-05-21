@@ -386,7 +386,7 @@ $$\forall x \in R,\ f(x)\ \text{still classifies correctly (robustness)}.$$
 Hard because `f` is **non-convex**, **non-linear**, and has millions–billions of activations.
 
 ::: notes
-Neural-network verification flips the script: now the *AI itself* is the artifact to verify. The canonical property is local robustness — for every input within an ℓ_∞ ball around a sample, the network gives the same class. This is genuinely hard: a ReLU network is a piecewise-linear function with exponentially many pieces, so exact verification is NP-hard. This is Taylor's research area (NNV), so there's deep local expertise.
+Neural-network verification flips the script: now the *AI itself* is the artifact to verify. The canonical property is local robustness — for every input within an ℓ_∞ ball around a sample, the network gives the same class. This is genuinely hard: a ReLU network is a piecewise-linear function with exponentially many pieces, so exact verification is NP-complete (Katz et al., Reluplex, CAV 2017). This is Taylor's research area (NNV), so there's deep local expertise.
 :::
 
 ---
@@ -422,9 +422,9 @@ VNN-COMP (like SAT-COMP/SMT-COMP) is the honest scoreboard. Feed-forward ReLU ne
 
 AWS **Provable Security** runs formal methods at production scale:
 
-- **s2n-TLS** — TLS handshake + crypto verified with **SAW** (the L2 workflow), every commit.
-- **s2n-bignum** — P-256/384, X25519, Ed25519, RSA, AES-XTS — verified per commit.
-- **Cedar** — IAM policy language **specified in Lean** (Day 3).
+- **s2n-TLS** — crypto kernels (HMAC, DRBG) verified with **SAW** against Cryptol specs (the L2 workflow), every commit.
+- **s2n-bignum** — verified **assembly** (P-256/384/521, X25519, Ed25519, RSA, AES-XTS), each with a **HOL Light** proof, per commit.
+- **Cedar** — authorization policy language **specified in Lean** (Day 3; originally Dafny).
 
 ::: notes
 The flagship industrial deployment, and it ties together the whole week: SAW (today) verifies s2n's crypto, Lean (Day 3) specifies Cedar's policy semantics, and SMT (Day 1) underlies all of it. AWS treats verification as a CI signal — every commit re-runs the proofs. This is the existence proof that formal methods scales to the largest, most cost-sensitive systems: at AWS scale, one crypto bug costs more than a decade of verification engineering.
@@ -436,7 +436,7 @@ The flagship industrial deployment, and it ties together the whole week: SAW (to
 
 - **Semiconductors** — Cadence JasperGold, Synopsys VC Formal (Apple, Intel, AMD, ARM).
 - **Verified systems** — seL4 (microkernel, Isabelle), CompCert (C compiler, Coq).
-- **Avionics / space** — SCADE, Astrée, SPARK/Ada (Airbus, Ariane 6).
+- **Avionics / space** — SCADE & Astrée (Airbus fly-by-wire), SPARK/Ada (Ariane 6).
 - **Microsoft** — Dafny, Boogie, Z3 across Azure and Windows components.
 
 ::: notes
@@ -547,7 +547,7 @@ The survey paragraph makes students connect the frontier to their own work — t
 
 ## References for Day 4
 
-- **Kroening, Tautschnig.** *CBMC – C Bounded Model Checker*, TACAS 2014.
+- **Clarke, Kroening, Lerda.** *A Tool for Checking ANSI-C Programs*, TACAS 2004 (the original CBMC paper; lead/maintainer Daniel Kroening).
 - **Lewis, Martin.** *Cryptol: High Assurance, Retargetable Crypto Development*, MILCOM 2003.
 - **Galois** — Cryptol & SAW docs/tutorials; **AWS Provable Security** blog.
 - **VNN-COMP** — <https://vnn-comp.github.io/>; **α,β-CROWN**; **NNV** (verivital).
