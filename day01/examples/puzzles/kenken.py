@@ -82,17 +82,65 @@ def is_unique(solution):
     return s.check() == z3.unsat
 
 
-def show(grid):
-    for row in grid:
-        print(" ".join(str(v) for v in row))
+_OP_SYM = {"+": "+", "-": "-", "*": "x", "/": "/", "=": ""}
+
+
+def render(grid=None):
+    """Draw the KenKen with cage borders and clues. With `grid`, also fills in
+    the digits (so the same function shows the input puzzle and the solution).
+    Clue notation: target then operation, e.g. `3+`, `12x` (times), `2/` (divide)
+    shown in the top-left cell of each cage. `x` = multiply, `/` = divide."""
+    cage_of, clue, anchor = {}, {}, {}
+    for idx, (t, op, cells) in enumerate(CAGES):
+        clue[idx] = f"{t}{_OP_SYM[op]}"
+        anchor[idx] = min(cells)               # top-left cell of the cage
+        for cell in cells:
+            cage_of[cell] = idx
+
+    W = 6                                       # cell inner width
+    hbound = lambda r, c: r == 0 or r == N or cage_of[(r - 1, c)] != cage_of[(r, c)]
+    vbound = lambda r, c: c == 0 or c == N or cage_of[(r, c - 1)] != cage_of[(r, c)]
+
+    def corner(r, c):
+        seg = ((0 <= c - 1 <= N - 1 and hbound(r, c - 1)) or
+               (c <= N - 1 and hbound(r, c)) or
+               (0 <= r - 1 <= N - 1 and vbound(r - 1, c)) or
+               (r <= N - 1 and vbound(r, c)))
+        return "+" if seg else " "
+
+    def hline(r):
+        return "".join(corner(r, c) + ("-" * W if hbound(r, c) else " " * W)
+                       for c in range(N)) + corner(r, N)
+
+    lines = []
+    for r in range(N):
+        lines.append(hline(r))
+        top, bot = "", ""
+        for c in range(N):
+            edge = "|" if vbound(r, c) else " "
+            idx = cage_of[(r, c)]
+            cl = clue[idx] if anchor[idx] == (r, c) else ""
+            dg = str(grid[r][c]) if grid is not None else ""
+            top += edge + f" {cl:<{W - 1}}"
+            bot += edge + f"{dg:^{W}}"
+        lines.append(top + "|")
+        lines.append(bot + "|")
+    lines.append(hline(N))
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
+    print("Puzzle (clues = target then op; x = times, / = divide):\n")
+    print(render())
+
     sol = solve()
     if sol is None:
-        print("unsat: no solution")
+        print("\nunsat: no solution")
         raise SystemExit(1)
-    show(sol)
+
+    print("\nSolution:\n")
+    print(render(sol))
+
     # Self-checks: Latin square + every cage satisfied.
     rng = set(range(1, N + 1))
     assert all(set(sol[r]) == rng for r in range(N)), "row not a permutation"
