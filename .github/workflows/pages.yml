@@ -45,7 +45,7 @@ jobs:
             [ -f "$src" ] || { echo "skip $d (no $src)"; continue; }
             echo "rendering $src"
             pandoc "$src" -t revealjs -s -o "_site/$d.html" \
-              --slide-level=2 --katex \
+              --slide-level=2 --katex=https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/ \
               -V revealjs-url=https://cdn.jsdelivr.net/npm/reveal.js@5.0.0 \
               -V theme=white -V transition=fade \
               -V width=1280 -V height=720 -V margin=0.04 \
