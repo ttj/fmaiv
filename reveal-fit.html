@@ -1,13 +1,11 @@
 <!-- FMAIV after-body include (added with pandoc -A, so RevealJS already exists).
-     Three jobs:
-       1. MATH: force MathJax 3 to (re)typeset each slide. Pandoc registers
-          reveal's MathJax*2* plugin but loads the MathJax*3* library, so math is
-          often left untypeset or mis-measured in hidden slides. We re-typeset
-          the current slide whenever it is shown, which is reliable.
-       2. FIT: scale down any slide whose content overflows its box (height or
+     Two jobs:
+       1. FIT: scale down any slide whose content overflows its box (height or
           width) so nothing runs off-slide. Requires top-aligned slides
           (render with -V center=false).
-       3. NUMBER: show a "section.slide / total-in-section" badge per slide. -->
+       2. NUMBER: show a "section.slide / slides-in-section" badge per slide.
+     Math is rendered by KaTeX (pandoc --katex), synchronously at load, so no
+     math handling is needed here. -->
 <script>
 (function () {
   // ---- FIT --------------------------------------------------------------
@@ -25,16 +23,6 @@
   }
   function fitAll() {
     document.querySelectorAll('.reveal .slides section').forEach(fitOne);
-  }
-
-  // ---- MATH -------------------------------------------------------------
-  function typeset(el) {
-    if (!(window.MathJax && MathJax.typesetPromise)) { fitAll(); return; }
-    try { if (el && MathJax.typesetClear) MathJax.typesetClear([el]); } catch (e) {}
-    MathJax.typesetPromise(el ? [el] : undefined).then(fitAll).catch(fitAll);
-  }
-  function typesetCurrent() {
-    typeset(document.querySelector('.reveal .slides section.present') || null);
   }
 
   // ---- NUMBER -----------------------------------------------------------
@@ -55,21 +43,18 @@
     if (badge) badge.textContent = (idx.h + 1) + '.' + (idx.v + 1) + ' / ' + total;
   }
 
-  function onReady()  { typeset(null); updateNo(); fitAll(); }
-  function onChange() { typesetCurrent(); updateNo(); }
+  function refresh() { fitAll(); updateNo(); }
 
   function hook() {
     if (window.Reveal && Reveal.on) {
-      Reveal.on('ready', onReady);
-      Reveal.on('slidechanged', onChange);
+      Reveal.on('ready', refresh);
+      Reveal.on('slidechanged', refresh);
       Reveal.on('resize', fitAll);
-      try { if (Reveal.isReady && Reveal.isReady()) onReady(); } catch (e) {}
-      // Re-typeset / re-fit after late reflow (web fonts, MathJax startup).
+      try { if (Reveal.isReady && Reveal.isReady()) refresh(); } catch (e) {}
+      // Re-fit after web fonts (incl. KaTeX fonts) load and reflow content.
       try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll); } catch (e) {}
-      try { if (window.MathJax && MathJax.startup && MathJax.startup.promise)
-              MathJax.startup.promise.then(function () { typeset(null); }); } catch (e) {}
-      setTimeout(typesetCurrent, 1200);
-      setTimeout(fitAll, 1600);
+      setTimeout(fitAll, 600);
+      setTimeout(fitAll, 1400);
     } else {
       setTimeout(hook, 80);
     }
