@@ -11,7 +11,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Opening | ~10 min | Course overview. Why now: generative AI has industrialized production but not validation. The four-day arc. |
 | L1 — Why now | ~50 min | The AI × formal-methods asymmetry. Famous bugs that motivated the field (Therac-25, Ariane 5, Pentium FDIV, Toyota, 737 MAX). AWS provable security. What formal methods does — and does not — give you. |
 | Break | ~10 min | |
-| L2 — Logic & transition systems | ~50 min | Propositional and first-order logic: syntax, semantics, satisfiability, validity. Live poll: SAT or UNSAT? Transition systems `T = (S, S₀, →, AP, L)`; traces and reachability. The running example (the counter) written as a transition system. |
+| L2 — Logic & transition systems | ~50 min | Propositional and first-order logic: syntax, semantics, satisfiability, validity. Quick check: SAT or UNSAT? Transition systems `T = (S, S₀, →, AP, L)`; traces and reachability. The running example (the counter) written as a transition system. |
 | Break | ~10 min | |
 | L3 — SAT, SMT, and Z3 | ~50 min | DPLL/CDCL intuition. Theories (LIA, BV, EUF). Driving Z3 from Python and SMT-LIB. Live + hands-on: `examples/z3_smoke.py`, `examples/z3_pigeonhole.py`, `examples/z3_smt_basics.smt2`, and `examples/z3_counter_bounded.py` (bounded reachability of the counter — "can `x` reach 11 in `N` steps?"). |
 | Wrap | ~10 min | Recap and intro to the take-home mini-project. |

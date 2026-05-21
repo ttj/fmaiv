@@ -338,7 +338,7 @@ Three minutes of live coding. The Claude Code prompt is "give me an SMT-LIB enco
 
 ---
 
-## Poll: SAT or UNSAT?
+## Quick check: SAT or UNSAT?
 
 For each formula, predict `sat` or `unsat`:
 
@@ -348,10 +348,10 @@ For each formula, predict `sat` or `unsat`:
 4. $\forall x.\; x + 0 = x$, in linear integer arithmetic
 5. $\exists x, y \in \mathbb{Z}.\; x^2 + y^2 = 25 \wedge x > 0 \wedge y > 0$
 
-Open the Top Hat poll on screen. We'll run each one through Z3 after the vote.
+Call out your prediction for each — then we'll run each one through Z3.
 
 ::: notes
-Top Hat poll. Expected: (1) unsat — contradiction; (2) sat — tautology, every assignment satisfies; we call it "valid", which is the same as "negation is unsat"; (3) unsat — by modus ponens chain; (4) sat (and valid) — true in LIA; (5) sat with model x=3, y=4 (or 4,3). The point is to make participants realize satisfiability is the *primitive* operation; validity is "negation is unsat" and entailment is "premises ∧ ¬conclusion is unsat". Everything is satisfiability.
+Ask the class for each. Expected: (1) unsat — contradiction; (2) sat — tautology, every assignment satisfies; we call it "valid", which is the same as "negation is unsat"; (3) unsat — by modus ponens chain; (4) sat (and valid) — true in LIA; (5) sat with model x=3, y=4 (or 4,3). The point is to make participants realize satisfiability is the *primitive* operation; validity is "negation is unsat" and entailment is "premises ∧ ¬conclusion is unsat". Everything is satisfiability.
 :::
 
 ---
@@ -661,7 +661,7 @@ We could verify by hand because the state space is finite and small. Day 2's nuX
 
 ---
 
-## Poll: which is which?
+## Quick check: which is which?
 
 Match each English sentence to one of (a), (b), or (c).
 
@@ -676,7 +676,7 @@ Choices (formulas in informal English):
 - (c) Conditional invariant
 
 ::: notes
-Top Hat poll. Expected: 1 → safety invariant; 2 → reachability witness (`EF` in CTL on Day 2); 3 → conditional invariant. The point is to teach the vocabulary of three property categories we'll meet over the week: safety (always-good), reachability (some-good-eventually), and conditional safety (implication). All three are decidable by SMT in bounded form, by model checking in unbounded form.
+Ask the class. Expected: 1 → safety invariant; 2 → reachability witness (`EF` in CTL on Day 2); 3 → conditional invariant. The point is to teach the vocabulary of three property categories we'll meet over the week: safety (always-good), reachability (some-good-eventually), and conditional safety (implication). All three are decidable by SMT in bounded form, by model checking in unbounded form.
 :::
 
 ---
@@ -973,7 +973,7 @@ This is the conceptual ladder for the week. Day 1's bounded SMT is the simplest,
 
 ---
 
-## Poll: predict the verdict
+## Quick check: predict the verdict
 
 For each, predict SAT / UNSAT *before* I run it.
 
@@ -983,7 +983,7 @@ For each, predict SAT / UNSAT *before* I run it.
 4. The pigeonhole with 100 pigeons into 99 holes.
 5. The counter, asking "can $\text{mode} = \text{on} \wedge x = 0$ in $\le 1$ step?"
 
-Open Top Hat on screen. We'll run each.
+Take a guess for each — then we run each.
 
 ::: notes
 Expected: (1) SAT with model x=1, y=6 (or 2,5, etc); (2) UNSAT — counter can only increment x by 1 per step and needs to flip to on first, so x=11 unreachable; (3) SAT — 11 steps is enough (1 to flip on, 10 to count up); (4) UNSAT — pigeonhole at scale; (5) SAT — single press goes off→on with x unchanged. The point is to make participants *think* about the encoding before trusting the verdict.

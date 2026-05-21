@@ -11,7 +11,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Opening | ~10 min | Recap. From bounded SMT (Day 1) to full reachability. |
 | L1 — Reactive systems & SMV | ~50 min | The SMV input language: `MODULE`, `VAR`, `ASSIGN`, `init`, `next`. Live read-through of `counter.smv`. Smoke test (`nuXmv -help`) and first run. |
 | Break | ~10 min | |
-| L2 — Temporal logic: CTL & LTL | ~50 min | Path quantifiers and modal operators. CTL (`AG`, `EF`, `AF`, `EG`) and LTL (`G`, `F`, `X`, `U`). Live poll: match the English property to the formula. |
+| L2 — Temporal logic: CTL & LTL | ~50 min | Path quantifiers and modal operators. CTL (`AG`, `EF`, `AF`, `EG`) and LTL (`G`, `F`, `X`, `U`). Quick check: match the English property to the formula. |
 | Break | ~10 min | |
 | L3 — Algorithms & live nuXmv | ~50 min | Explicit-state, symbolic (BDD), and bounded (SAT) model checking, and when each is the right tool. Hands-on: run `nuXmv counter.smv`, read the verdicts, introduce a bug in `next(x)` and watch nuXmv produce a counterexample. Tour `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`. |
 | Wrap | ~10 min | Recap and intro to the take-home mini-project. |

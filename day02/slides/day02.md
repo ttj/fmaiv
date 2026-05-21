@@ -410,7 +410,7 @@ Concrete specs on the running system. The first is the safety invariant we have 
 
 ---
 
-## Live poll: match the English to the formula
+## Quick check: match the English to the formula
 
 1. Every reachable state has `x ≤ 10`.
 2. Every reachable state can return to `mode = off`.
@@ -420,7 +420,7 @@ Concrete specs on the running system. The first is the safety invariant we have 
 **Choices:** A. `AG (x ≤ 10)` · B. `AG EF (mode = off)` · C. `F G (mode = on)` · D. `AG EF (x = 10)`
 
 ::: notes
-Top Hat poll. 1→A, 2→B, 3→C, 4→D. The discriminating skill is recognizing AG EF (recoverability, CTL) vs F G (stabilization, LTL). After the vote, run each through nuXmv and show the verdicts: A, B, D are true; C is false (counter always leaves on).
+Ask the class. 1→A, 2→B, 3→C, 4→D. The discriminating skill is recognizing AG EF (recoverability, CTL) vs F G (stabilization, LTL). After the vote, run each through nuXmv and show the verdicts: A, B, D are true; C is false (counter always leaves on).
 :::
 
 ---
