@@ -13,7 +13,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Break | ~10 min | |
 | L2 — Lean by example: the counter | ~50 min | The Day 2 counter reincarnated as a `TransitionSystem CounterState` (`CounterDemo/TransitionSystem.lean`, `Counter.lean`). Inductive invariants and the strengthening pattern; walk through `counterInv_init` and the first case of `counterInv_step`. Smoke test: `lake build` (five expected `sorry` warnings). |
 | Break | ~10 min | |
-| L3 — AI in the loop + Lean for real | ~50 min | Hands-on walk-through of `CounterDemo/CounterProofs.lean`: the strengthened invariant, the init lemma, the step lemma's case split, and how each `INVARSPEC` is read off via `invariant_strengthening`. Use Claude Code as a proof pair partner; discuss where it was right and where it bluffed. |
+| L3 — AI in the loop + Lean for real | ~50 min | Hands-on walk-through of `CounterDemo/Counter.lean`: the strengthened invariant, the init lemma, the step lemma's case split, and how each `INVARSPEC` is read off via `invariant_strengthening`. Use Claude Code as a proof pair partner; discuss where it was right and where it bluffed. |
 | Wrap | ~10 min | Recap and intro to the take-home mini-project. |
 
 **Take-home mini-project** (see `assignments/day03.md`): finish or extend a proof, using Claude Code as a pair partner.
@@ -39,20 +39,24 @@ day03/
 │       ├── lean-toolchain
 │       ├── CounterDemo.lean              ← root module
 │       └── CounterDemo/
-│           ├── TransitionSystem.lean     ← T = (S, S0, →) + Invariant + InductiveInvariant
-│           ├── Counter.lean              ← the counter, mechanically translated from counter.smv
-│           └── CounterProofs.lean        ← the three INVARSPEC theorems, proved
+│           ├── TransitionSystem.lean     ← framework: TransitionSystem, Invariant, InductiveInvariant, ranking functions
+│           ├── Counter.lean              ← the counter: transition system + proved invariants (solution)
+│           ├── ArraySum.lean             ← list sum + a loop invariant
+│           ├── Sorting.lean              ← insertion sort proved to produce a sorted list
+│           ├── Gcd.lean                  ← Euclid's GCD; termination via a ranking function
+│           ├── TrafficLight.lean         ← traffic-light transition system + safety invariant
+│           └── *Starter.lean             ← starter version of each (proofs stubbed with `sorry`)
 └── assignments/day03.md
 ```
 
-The Lean files in `examples/CounterDemo/` are clones from <https://github.com/ttj/leansmv>, edited only to retarget the `import` statements at the local `CounterDemo` namespace. The repo is Mathlib-free for the counter material (Mathlib is needed only for the continuous models used elsewhere in that project).
+The counter material derives from <https://github.com/ttj/leansmv> (retargeted at the local `CounterDemo` namespace); the other modules are course additions. The project is Mathlib-free throughout. Each concept has a solution module (`Foo.lean`, builds with no `sorry`) and a starter (`FooStarter.lean`, with `sorry` to fill in).
 
 ## Running
 
 ```bash
 cd examples/CounterDemo
-lake build                # full project, builds clean with five expected sorry warnings
-lake build CounterDemo.CounterProofs   # just the proofs file, much faster
+lake build                # whole project, builds clean (every solution module is proved)
+lake build CounterDemo.CounterStarter   # a starter: builds with `sorry` until you finish it
 ```
 
 Open in VS Code with the Lean 4 extension installed for the interactive proof state.

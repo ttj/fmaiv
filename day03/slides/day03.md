@@ -239,7 +239,7 @@ Second block, the hands-on core. The workhorse tactics, how to find Mathlib lemm
 | `constructor` | prove an `∧`/structure by parts |
 
 ::: notes
-These eight close the vast majority of goals you will meet today. omega is the star for the counter (all the arithmetic is linear over Nat). simp normalizes the if-then-else encoded transition relation. cases/by_cases drive the case analysis on mode/press/x. constructor splits the conjunctive invariant. Every one of these appears in CounterProofs.lean.
+These eight close the vast majority of goals you will meet today. omega is the star for the counter (all the arithmetic is linear over Nat). simp normalizes the if-then-else encoded transition relation. cases/by_cases drive the case analysis on mode/press/x. constructor splits the conjunctive invariant. Every one of these appears in Counter.lean.
 :::
 
 ---
@@ -462,7 +462,7 @@ The genuinely new capability is goal-conditioned proof drafting. The safety prop
 
 ## Live demo: AI-assisted repair
 
-1. Open `CounterProofs.lean`; weaken `counterInv` to drop the second conjunct.
+1. Open `Counter.lean`; weaken `counterInv` to drop the second conjunct.
 2. `lake build` → `counterInv_step` now **fails** (the off-case can't close).
 3. Ask Claude Code to repair it.
 4. Read what it proposes — does it re-add the right conjunct, or hallucinate a tactic?
@@ -579,7 +579,7 @@ The bridge: Days 1-3 worked on models of the counter; Day 4 connects specs and p
 In `examples/CounterDemo`:
 
 1. `lake build`; confirm the five `sorry` warnings are only on the auto-generated stubs.
-2. In `CounterProofs.lean`, find the three pieces of the inductive-invariant pattern.
+2. In `Counter.lean`, find the three pieces of the inductive-invariant pattern.
 3. Add and prove **one** new invariant — e.g. `x > 0 → mode = on` — via strengthening; confirm with `#print axioms`.
 
 ::: notes

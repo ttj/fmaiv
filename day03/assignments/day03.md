@@ -6,15 +6,15 @@
 
 ## Part A — Warm-up (15 min)
 
-1. From `examples/CounterDemo`, run `lake build`. Confirm it succeeds with the five expected `sorry` warnings (these are in the auto-generated `Counter.lean` stubs; the real proofs live in `CounterProofs.lean`).
-2. Open `CounterDemo/CounterProofs.lean` in VS Code with the Lean 4 extension installed. Place your cursor at the end of `counterInv_init` and inspect the proof state. Do the same inside one of the cases of `counterInv_step`.
-3. Read the comments at the top of `CounterProofs.lean` until you can explain the strengthening pattern to a neighbor.
+1. From `examples/CounterDemo`, run `lake build`. It builds cleanly — every solution module is fully proved. (The exercise files, `*Starter.lean`, build with `sorry` warnings until you complete them.)
+2. Open `CounterDemo/Counter.lean` in VS Code with the Lean 4 extension installed. Place your cursor at the end of `counterInv_init` and inspect the proof state. Do the same inside one of the cases of `counterInv_step`.
+3. Read the comments at the top of `Counter.lean` until you can explain the strengthening pattern to a neighbor.
 
 ## Part B — One of these (45–60 min)
 
 ### B.1 — Add a new invariant
 
-Open `CounterDemo/CounterProofs.lean` and prove a new invariant of the counter. Reasonable candidates:
+Open `CounterDemo/Counter.lean` and prove a new invariant of the counter. Reasonable candidates:
 
 - `s.x ≤ 5` is *not* an invariant — try to prove it, watch where the proof breaks, and produce the counterexample state.
 - `s.x ≤ 10 ∧ (s.mode = .off → s.x = 0) ∧ (s.x > 0 → s.mode = .on)` is the combined invariant of all three INVARSPECs. Prove that this is inductive.
@@ -22,7 +22,7 @@ Open `CounterDemo/CounterProofs.lean` and prove a new invariant of the counter. 
 
 ### B.2 — Modify the counter
 
-In `CounterDemo/Counter.lean`, change `count_max` from 10 to 25 (it is a single integer literal repeated; see comments). Re-state and re-prove `CounterTS_inv1` with the new bound. Most of `CounterProofs.lean` will need small adjustments; use Claude Code to suggest them.
+In `CounterDemo/Counter.lean`, change `count_max` from 10 to 25 (it is a single integer literal repeated; see comments). Re-state and re-prove `CounterTS_inv1_proved` with the new bound. Most of `Counter.lean` will need small adjustments; use Claude Code to suggest them.
 
 ### B.3 — A new system from scratch
 
