@@ -12,7 +12,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "day0?/slides/*.md"
+      # NB: in GitHub path globs `?` means "zero or one of the preceding char",
+      # so "day0?/slides" never matched day01..day04. Use "day*" instead.
+      - "day*/slides/*.md"
       - "reveal-custom.css"
       - "reveal-fit.html"
       - ".github/workflows/pages.yml"
