@@ -456,7 +456,7 @@ For a propositional formula $\varphi$:
 |---|---|---|
 | **Satisfiability** | exists $v$ with $v \models \varphi$ | NP-complete (Cook 1971) |
 | **Validity** | every $v$ satisfies $\varphi$ | co-NP-complete |
-| **Entailment** | $\Gamma \models \varphi$ — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | reducible to (un)satisfiability |
+| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | reducible to (un)satisfiability |
 
 Everything reduces to satisfiability:
 
@@ -625,7 +625,7 @@ Transition relation $\rightarrow$ (parameterized by a non-deterministic `press` 
 $$\begin{aligned}
 (\text{off}, x) &\xrightarrow{\neg p} (\text{off}, x) \\
 (\text{off}, x) &\xrightarrow{p} (\text{on}, x) \\
-(\text{on}, x) &\xrightarrow{\neg p, \; x < 10} (\text{on}, x + 1) \\
+(\text{on}, x) &\xrightarrow{\neg p \;\wedge\; x < 10} (\text{on}, x + 1) \\
 (\text{on}, x) &\xrightarrow{p \;\vee\; x = 10} (\text{off}, 0)
 \end{aligned}$$
 
