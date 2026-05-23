@@ -1085,7 +1085,8 @@ def bounded_reach_to(forbidden_x: int, num_steps: int):
     s.add(mode[0] == MODE_OFF, x[0] == 0)
     for k in range(num_steps):
         s.add(step(mode[k], x[k], press[k], mode[k+1], x[k+1]))
-    s.add(x[num_steps] == forbidden_x)
+    # bad state reachable at ANY step k ≤ N  (the "≤ N" of BMC)
+    s.add(z3.Or([x[k] == forbidden_x for k in range(num_steps+1)]))
     return s.check()
 ```
 

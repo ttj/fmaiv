@@ -66,19 +66,28 @@ def step(s_mode, s_x, press, sp_mode, sp_x):
 
 
 def bounded_reach_to(forbidden_x: int, num_steps: int) -> z3.CheckSatResult:
-    """Ask: can x reach `forbidden_x` in exactly `num_steps` transitions?"""
+    """Ask: can x reach `forbidden_x` within `num_steps` transitions?
+
+    "Within" = at *some* step k <= num_steps, not only at exactly num_steps.
+    That is the "<= N" of bounded model checking: a counterexample of any
+    length up to the bound counts.
+    """
     s = z3.Solver()
+    # One copy of each state variable per step 0..num_steps (the "unrolling").
     mode = [z3.Int(f"mode_{k}") for k in range(num_steps + 1)]
     x = [z3.Int(f"x_{k}") for k in range(num_steps + 1)]
+    # One press input per transition (there are num_steps transitions).
     press = [z3.Bool(f"press_{k}") for k in range(num_steps)]
 
     # initial state: (off, 0)
     s.add(mode[0] == MODE_OFF, x[0] == 0)
-    # transition relation for each step
+    # transition relation for each step: state k --press_k--> state k+1
     for k in range(num_steps):
         s.add(step(mode[k], x[k], press[k], mode[k + 1], x[k + 1]))
-    # the bad property: x = forbidden_x at the final step
-    s.add(x[num_steps] == forbidden_x)
+    # the bad property: x = forbidden_x at SOME step k <= num_steps.
+    # (Asserting it only at the final step would ask "exactly num_steps";
+    #  the disjunction over all steps is the honest "<= N" question.)
+    s.add(z3.Or([x[k] == forbidden_x for k in range(num_steps + 1)]))
 
     return s.check()
 
