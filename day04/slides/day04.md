@@ -1019,7 +1019,7 @@ The deliverables promised on Day 1, now realized. This is the checklist students
 
 A 4-day intensive *samples*; here's the rest of the map, with courses that go deep (annotated list in the repo README):
 
-- **Deductive verification & separation logic** — contracts + loop invariants: **Dafny, Verus** (verifies *Rust* — squarely on the AI-code thesis), **Frama-C, Why3, Viper**. (CMU 15-414, ETH Program Verification.)
+- **Deductive verification, deeper** — we introduced contracts + loop invariants today; go further into **separation logic** (the heap, aliasing, concurrency) and full functional correctness with **Dafny, Verus** (verifies *Rust*), **Frama-C, Why3, Viper**. (CMU 15-414, ETH Program Verification.)
 - **Program synthesis** — the dual of verification: **SyGuS, Rosette**. If generation is cheap, *synthesize-then-verify* is the natural pairing. (Berkeley 219C, OPLSS.)
 - **Verified-stack tradition (Coq/Rocq, Isabelle)** — **CompCert** (C compiler), **seL4** (microkernel): the largest machine-checked artifacts. (DeepSpec, MIT FRAP.)
 - **Probabilistic & hybrid model checking** — **PRISM**; nuXmv's infinite-state/IC3 and hybrid modes. (Oxford CAV.)
