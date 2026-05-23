@@ -114,11 +114,11 @@ cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions
 ```
 
 - `--unwind N` — unfold each loop `N` times.
-- `--unwinding-assertions` — if `N` was too small, CBMC **tells you** (rather than silently missing deep bugs).
+- `--unwinding-assertions` — CBMC checks `N` was large enough and **fails loudly** if not. (CBMC 6 enables this by default; we write it explicitly to be clear.)
 - Off-by-one: a loop running `BOUND = 25` times needs `--unwind 26` — one extra for the termination check.
 
 ::: notes
-Unwinding is the bounded part of bounded model checking. The crucial flag is --unwinding-assertions: without it, CBMC silently truncates loops at N and can miss bugs beyond depth N (the Day-1 BMC incompleteness). With it, CBMC adds an assertion "the loop really finished within N" and fails loudly if not — converting a silent-incompleteness into a visible one. The +1 off-by-one is a real gotcha we hit building the example: BOUND=25 needs --unwind 26 because the termination check is one more iteration.
+Unwinding is the bounded part of bounded model checking. The --unwinding-assertions flag makes CBMC add an assertion "the loop really finished within N" and fail loudly if not — converting silent incompleteness (the Day-1 BMC limitation) into a visible one. Version note that matters: from CBMC 6 onward this is part of the default "standard checks," so a plain `cbmc` run already does it; we pass the flag explicitly (and the example files do too) for clarity, and you can turn it off with `--no-unwinding-assertions`. The +1 off-by-one is a real gotcha we hit building the example: BOUND=25 needs --unwind 26 because the termination check is one more iteration.
 :::
 
 ---
@@ -216,7 +216,7 @@ A major selling point: CBMC's default checks catch the classic memory-safety and
 
 - A C program is a **transition system on memory**; CBMC builds it from source.
 - CBMC = C → goto-program → unwound → SMT → Z3 (Day 1's engine, automated).
-- Harness with `nondet_*()` + `assert` + `__CPROVER_assume`; mind `--unwinding-assertions`.
+- Harness with `nondet_*()` + `assert` + `__CPROVER_assume`; `--unwind N` bounds loops (CBMC 6 checks `N` is big enough by default).
 - Default checks catch overflow, bounds, null deref, division-by-zero for free.
 
 ::: notes
@@ -246,7 +246,7 @@ CBMC checks code against inline assertions. But often you want:
 - a **reference spec** independent of any implementation, and
 - a proof that a fast/tricky implementation **equals** the spec on all inputs.
 
-"Spec once, verify many implementations." This is **Cryptol** (Galois + NSA, 2003) + **SAW**.
+"Spec once, verify many implementations." This is **Cryptol** (Galois, first published 2003) + **SAW**.
 
 ::: notes
 The motivation for the spec-vs-implementation split. In crypto especially, you have a clean mathematical spec (the standard) and a heavily optimized implementation (assembly, bit-twiddling). You want to prove they compute the same function on every input. Cryptol expresses the spec at the bit level; SAW (the Software Analysis Workbench) extracts a model of the C/LLVM implementation and proves equivalence via SMT. The Pentium FDIV bug (Day 1) is exactly an implementation-vs-spec mismatch.
@@ -254,22 +254,41 @@ The motivation for the spec-vs-implementation split. In crypto especially, you h
 
 ---
 
-## Reading Cryptol: everything is sized
+## What is Cryptol?
 
-A functional language where **every type carries a size** — that bit-exactness is why it's the language of choice for crypto and hardware specs.
+A small functional language for writing **executable specifications** of algorithms that work on bits and bytes — built by Galois, first published 2003, originally for cryptography.
 
-| Type | Meaning |
-|---|---|
-| `Bit` | a single bit (a Boolean) |
-| `[8]` | an 8-bit word — a sequence of 8 bits (bit-vectors are just `[n]`) |
-| `[n]T` | a sequence of `n` values of type `T` — so `[8]` *is* `[8]Bit` |
-| `[4][8]` | 4 bytes (a sequence of four 8-bit words) |
-| `(A, B)` · `A -> B` | a tuple · a function |
+- You write *what* the algorithm computes, at the bit level — not *how* to make it fast.
+- The same file is both **runnable** (test it) and **provable** (`:prove` checks it for *all* inputs).
+- Think "executable math for bit-vectors": if you can write AES on a whiteboard, you can write it in Cryptol almost line-for-line.
 
-Sizes are part of the type and checked at compile time: `[8] + [8]` is fine, `[8] + [4]` is a type error.
+Why it matters today: it's the cleanest place to see "spec = proof target," and it's how AWS verifies real crypto (later this block).
 
 ::: notes
-The one thing to internalize before reading any Cryptol: types are sized. `[8]` is an 8-bit word; the general form is `[n]T` ("n things of type T"), and a bit-vector `[8]` is literally `[8]Bit`. That's what makes Cryptol bit-exact and a great fit for crypto/hardware where widths matter. Everything else is ordinary functional programming — functions, tuples, sequences.
+Motivation before notation — the instructor's explicit fix, since students hit the type table cold and got lost. The single framing that lands: "executable math for bit-vectors." It's a spec language, so the whole file is the thing you prove things about; there's no separate "implementation" to wrestle with until SAW. Keep this slide light and reassuring — the scary-looking types come next, but now they have a purpose.
+:::
+
+---
+
+## Cryptol types are sizes — read `[n]T` as "n of T"
+
+Every type carries a size, checked at compile time. That bit-exactness is why Cryptol is the language for crypto and hardware specs.
+
+| You write | You say | It means |
+|---|---|---|
+| `Bit` | "bit" | one bit (a Boolean) |
+| `[8]` | "8 bits" | an 8-bit word (= `[8]Bit`) |
+| `[16][8]` | "16 of 8-bit" | 16 bytes (a 16-byte buffer) |
+| `[4][8]` | "4 of 8-bit" | 4 bytes |
+| `(A, B)` | "a pair" | a tuple of an `A` and a `B` |
+| `A -> B -> C` | "a function" | takes an `A` **and** a `B`, returns a `C` |
+
+- The **number is the length**, and it's **part of the type** — so the compiler always knows every size.
+- That's why `[8] + [8]` type-checks but `[8] + [4]` is a compile error.
+- Multiple arrows = multiple arguments: `[8] -> [N][8] -> [N][8]` takes a key byte **and** a message.
+
+::: notes
+The one thing to internalize before reading any Cryptol — the instructor flagged that `[n]T` was never really explained. Read it left-to-right as "n of T": `[16][8]` = "16 of (8-bit word)" = 16 bytes. The number is the length and it lives in the type, so widths are always known and checked — that's the bit-exactness crypto needs. The `A -> B -> C` "two arrows = two arguments" row heads off the most common beginner confusion when they meet `[8] -> [N][8] -> [N][8]` (it's currying, but you don't need that word).
 :::
 
 ---
@@ -287,7 +306,8 @@ decrypt k ct  = [ c - k | c <- ct ]
 property roundtrip k msg = decrypt k (encrypt k msg) == msg
 ```
 
-- `[ f c | c <- msg ]` is a **comprehension**: apply `f` to each element `c` of `msg`.
+- `type N = 16` names a compile-time size — usable anywhere a length is needed.
+- `[ c + k | c <- msg ]` is a **comprehension**: "for each byte `c` *drawn from* `msg` (`<-`), produce `c + k`" — like building a new array by transforming each element.
 - `+` / `-` on `[8]` are arithmetic **mod 256** — the width lives in the type.
 - a `property` is a claim to check for **all** inputs.   *(this is `examples/caesar.cry`)*
 
@@ -297,22 +317,26 @@ A complete, readable Cryptol program. `[N][8]` is "N bytes" — there is the `[n
 
 ---
 
-## `:prove` and `:sat`
+## `:check`, `:prove`, `:sat`
 
 ```text
-caesar> :prove roundtrip
+caesar> :check roundtrip          -- fast: random testing, no solver
+Using random testing.
+passed 100 tests.
+caesar> :prove roundtrip          -- exhaustive: ALL keys × ALL 16-byte messages
 Q.E.D.
 caesar> :sat \k msg -> decrypt k (encrypt k msg) != msg
-no satisfying assignment
+Unsatisfiable
 ```
 
-- `:prove p` — "`p` holds for **all** inputs" (here: every key × every 16-byte message).
-- `:sat (¬p)` — "find a counterexample"; *no satisfying assignment* = none exists.
+- `:check p` — quick random sanity test (no solver), great before the real proof.
+- `:prove p` — "`p` holds for **all** inputs"; `Q.E.D.` = proved exhaustively.
+- `:sat e` — find inputs making `e` true; `Unsatisfiable` = none exist. (`\k msg -> e` is an anonymous function of `k` and `msg`.)
 
-Same SMT engine as Day 1 (Z3 / What4): `:prove p` is exactly "`¬p` is unsatisfiable" — the validity ↔ unsat-of-negation equivalence, now over fixed-width bit vectors.
+`:prove p` is exactly "`¬p` is unsatisfiable" — Day 1's validity ↔ unsat-of-negation, now over fixed-width bit vectors. Cryptol talks to **Z3** by default (through its SBV backend). *(Run the `caesar_starter.cry` stub and `:prove roundtrip` returns a `Counterexample` instead.)*
 
 ::: notes
-:prove hands the property to an SMT solver and checks it over the entire input space — every key and every 16-byte message, astronomically large but still decidable because everything is finite-width. Q.E.D. = proved exhaustively. :sat of the negation is the dual "find a counterexample"; no satisfying assignment means none exists. Same validity = unsat-of-negation idea from Day 1, now in Cryptol — no inductive argument needed for fixed-width bit vectors.
+Three commands, easiest to strongest. `:check` randomly samples inputs (no solver) — instant confidence while drafting. `:prove` hands the property to an SMT solver and checks it over the *entire* input space — every key and every 16-byte message, astronomically large but decidable because everything is finite-width; `Q.E.D.` = proved exhaustively. `:sat` of the negation is the dual "find a counterexample"; `Unsatisfiable` (the real Cryptol word) means none exists. Same validity = unsat-of-negation idea from Day 1, now in Cryptol — no inductive argument needed for fixed-width bit vectors. Default solver is Z3 via the SBV backend; What4 is a selectable alternative.
 :::
 
 ---
@@ -326,7 +350,7 @@ step : State -> Bit -> State
 step s press = ...                 // four guards, mirrors counter.c
 
 property bounded_invariant (presses : [25]Bit) =
-    foldl (&&) True [ inv s | s <- run presses ]      // mirrors CBMC harness
+    foldl (&&) True [ inv s | s <- states ]           // states = the 25-step trajectory
 
 property inductive_invariant (s : State) (press : Bit) =
     if inv s then inv (step s press) else True          // mirrors Lean step
@@ -336,6 +360,8 @@ property inductive_invariant (s : State) (press : Bit) =
 :prove bounded_invariant    → Q.E.D.   (~0.2s)
 :prove inductive_invariant  → Q.E.D.   (~0.02s)
 ```
+
+(`foldl (&&) True xs` folds "and" across a list — "are all of `xs` true?"; `states` is the trajectory the file builds from `presses`.)
 
 ::: notes
 The counter, one last time. Cryptol lets us express *both* prior styles: bounded_invariant is the Day-1/CBMC bounded check (every 25-press trajectory), and inductive_invariant is the Day-3 Lean step (one step preserves the invariant) — both discharged by SMT in milliseconds. Same system, both kinds of guarantee, in one tiny file. This is the satisfying closure of the running example: five encodings, and Cryptol re-expresses two of them.
@@ -410,7 +436,7 @@ The problem: given a trained network `f` and an input region `R`,
 
 $$\forall x \in R,\ f(x)\ \text{still classifies correctly (robustness)}.$$
 
-Hard because `f` is **non-convex**, **non-linear**, and has millions–billions of activations.
+Here `R` is usually an **ℓ∞ ball** — every input within ε of a sample (each coordinate nudged by ≤ ε). *Robustness* = small input changes never flip the output class. Hard because `f` is **non-convex** (the safe region isn't a simple shape), **non-linear**, and has millions–billions of activations.
 
 ::: notes
 Neural-network verification flips the script: now the *AI itself* is the artifact to verify. The canonical property is local robustness — for every input within an ℓ_∞ ball around a sample, the network gives the same class. This is genuinely hard: a ReLU network is a piecewise-linear function with exponentially many pieces, so exact verification is NP-complete (Katz et al., Reluplex, CAV 2017). This is Taylor's research area (NNV), so there's deep local expertise.
@@ -420,8 +446,8 @@ Neural-network verification flips the script: now the *AI itself* is the artifac
 
 ## α,β-CROWN and NNV
 
-- **α,β-CROWN** — branch-and-bound with linear bounds on activations; multi-year **VNN-COMP** winner.
-- **NNV** (Vanderbilt/verivital) — set-based reachability with star sets, including cyber-physical systems.
+- **α,β-CROWN** — *branch-and-bound* (split the input region into cases, bound each) with linear bounds on activations; multi-year **VNN-COMP** winner.
+- **NNV** (Vanderbilt/verivital) — set-based reachability with *star sets* (a compact representation of a whole set of inputs/states), including cyber-physical systems.
 - **UNSAT certifies robustness**: no input in `R` flips the class.
 
 ::: notes
@@ -554,6 +580,8 @@ Pick a track (see [`assignments/day04.md`](../assignments/day04.md)):
 
 - **CBMC**: write a small C function + harness (saturating counter, queue, `my_abs`); verify a property; introduce a bug and capture the counterexample.
 - **Cryptol/SAW**: write a small spec (4-bit cipher, parity, CRC-4) with two definitions; `:prove` they agree.
+
+Each topic ships a `_starter` stub (which produces a counterexample) plus a worked solution — start from the starter and fix it until the verdict is clean.
 
 ::: notes
 Self-contained tracks. CBMC track: the abs-value one is a great overflow lesson (INT_MIN needs __CPROVER_assume). Cryptol track: two definitions + :prove is the core skill. Either is a complete exercise; the bug-and-counterexample step (CBMC) is the most instructive part.
