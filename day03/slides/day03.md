@@ -210,10 +210,14 @@ The full dictionary, the heart of the L1 deepening. Walk a few rows aloud. Impli
 
 ## A tiny term-mode proof of each connective
 
-No tactics — just *build the term* the dictionary prescribes:
+No tactics — just *build the term* the dictionary prescribes. The slogan "proofs **are** programs" is *literal*:
 
 ```lean
--- implication: a function
+-- the simplest proof there is: P → P is the identity function
+example (p : Prop) : p → p :=
+  fun hp => hp                          -- given a proof of p, hand it straight back
+
+-- implication in general: still a function (this one ignores its 2nd input)
 example (p q : Prop) : p → (q → p) :=
   fun hp => fun _ => hp                 -- given p (and anything), return the p
 

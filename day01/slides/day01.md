@@ -1028,6 +1028,25 @@ The "theoretically hard, practically easy" pattern is the central surprise of mo
 
 ---
 
+## Proving by refutation: the one move behind every solver
+
+A SAT/SMT solver does essentially one thing: **find a model** (a satisfying assignment) — or report there is none (**UNSAT**). So how can it *prove* a property, which is a claim about *all* inputs?
+
+**Assert the negation and check satisfiability.**
+
+- `φ` is **valid** (always true) **iff** `¬φ` is **UNSAT**.
+- `P` **entails** `Q` **iff** `P ∧ ¬Q` is **UNSAT** — nothing makes the premises true and the conclusion false.
+
+> *Socrates:* assert `∀x. Man(x) → Mortal(x)`, `Man(socrates)`, **and** `¬Mortal(socrates)`. The solver returns **unsat** ⇒ the syllogism is valid.
+
+This is the spine of the whole day: the live demos and bounded model checking all *assert that something bad is possible and let the solver fail to find it.*
+
+::: notes
+The conceptual key to the entire SAT/SMT day, pulled to the front — it is the opening move of every SMT tutorial (cvc5/Z3 beginners; CMU 15-414 states it as "P → Q is valid iff P ∧ ¬Q is unsatisfiable"). Students are puzzled that a tool which "looks for a satisfying assignment" can *prove* anything, since proof quantifies over all inputs. Resolve it here: to prove a universal claim you ask the solver for a single counterexample, and "unsat" — no counterexample exists — *is* the proof. Validity of φ = unsatisfiability of ¬φ; entailment of Q from P = unsatisfiability of P ∧ ¬Q. The Socrates syllogism is the canonical one-liner. Then flag the through-line: the pigeonhole and Sudoku demos are satisfiability questions, and bounded model checking asserts "a bad state is reachable in k steps" and reads UNSAT as "safe to depth k." Same move every time — and it rhymes with Day 2's `L(K) ∩ L(¬φ) = ∅` and Day 3's proof by contradiction. This is also why the verification picture from L1 had two outputs: a model = a counterexample, UNSAT = a proof.
+:::
+
+---
+
 ## CNF: the canonical input form
 
 A **literal** is an atom or its negation: $p$ or $\neg p$.
@@ -1175,6 +1194,21 @@ Empty clause derived $\Rightarrow$ **UNSAT**. This is a checkable certificate: a
 
 ::: notes
 Resolution is the instructor's "another way to implement a SAT solver" and, crucially, the source of UNSAT *certificates*. The teaching point: SAT answers are asymmetric. A `sat` answer comes with a model anyone can plug in and check; an `unsat` answer needs a *proof*, and resolution is that proof — a sequence of clauses ending in the empty clause. Modern CDCL solvers emit exactly this (in the DRAT proof format) so the result can be independently verified; this matters enormously in verification, where you must trust the "no counterexample" verdict. Tie it back: resolution is the same inference rule from the Week 3 propositional-logic section (from $a\vee b$ and $\neg b\vee c$ derive $a\vee c$) — here aimed at deriving falsehood to prove unsatisfiability. The empty clause is "the disjunction of nothing," which is false, so deriving it from the premises means the premises entail false, i.e. are contradictory.
+:::
+
+---
+
+## Cores and certificates: trust a tiny checker
+
+The resolution proof above is a **certificate** — a small, independent checker re-validates "UNSAT" without trusting the solver. Solvers expose two practical handles (SMT-LIB commands):
+
+- **`(get-proof)`** — the full derivation of `⊥`. A ~hundred-line checker can validate a solver that is hundreds of thousands of lines. *This is "AI proposes, the kernel disposes" at the solver level.*
+- **`(get-unsat-core)`** — a *minimal* subset of your assertions that is already contradictory. It pinpoints **which** assumptions clashed — invaluable when a spec comes back `unsat` and you don't know why.
+
+> A `sat` answer ships a **model** you can plug in and check. An `unsat` answer ships a **proof** you can re-check. Either way, you never have to trust the solver itself.
+
+::: notes
+The complement to the resolution slide, and a Day-1 landing of the course's central thesis. Both artifacts are SMT-LIB 2 standard commands. `get-proof` returns a machine-checkable proof object; the point a faculty audience appreciates is the *trust asymmetry* — the solver may be 300k lines of C++, but the proof checker is tiny and auditable, so the trusted computing base shrinks to that checker (a DRAT checker for SAT, cvc5's Ethos checker for SMT, the Lean kernel on Day 3). That is exactly the "trusted kernel" architecture the course keeps returning to: a giant solver (or an AI) proposes, a small checker disposes. `get-unsat-core` returns a minimal contradictory subset of your assertions — if you encode a spec and it unexpectedly comes back unsat, the core tells you which handful of constraints are fighting, the standard way to debug an over-constrained model (CMU 15-414 defines the minimal unsat core; cvc5 and Z3 implement both commands). The closing line restates the sat/unsat asymmetry from the resolution slide: both verdicts are independently checkable, which is the whole reason formal methods can be trusted even when the tools themselves are enormous.
 :::
 
 ---

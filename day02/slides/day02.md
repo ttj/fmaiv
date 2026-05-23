@@ -609,6 +609,23 @@ This is the conceptual keystone for the whole liveness story (Week 10) and answe
 
 ---
 
+## How the check works: LTL → Büchi → emptiness
+
+The lasso is the *what*; here is the *how* — the classic explicit-state algorithm:
+
+1. **Negate & translate.** Build a **Büchi automaton** for **¬φ** — it accepts exactly the *bad* runs (those violating φ).
+2. **System as automaton.** View the model `K` as an automaton whose language is all its executions.
+3. **Product.** Form `K × B₍¬φ₎`; its language is the runs of `K` that are *also* bad = `L(K) ∩ L(¬φ)`.
+4. **Emptiness.** Is that language empty? **Empty ⇒ no bad run ⇒ K ⊨ φ.** Non-empty ⇒ an accepting **lasso** — your counterexample.
+
+It is valid because `L(K) ⊆ L(φ)` **iff** `L(K) ∩ L(¬φ) = ∅` — the same "assert the negation, hunt for a witness" move as SAT/SMT. Emptiness = a linear-time search for a reachable accepting cycle (nested depth-first search).
+
+::: notes
+The machinery behind the lasso, made explicit (the automata-theoretic approach of Vardi & Wolper, as taught in CMU 15-414 lectures 17/20 and Oxford's CAV course). Keep it to the four steps. The deep idea worth landing: model checking is *language containment* — the system's behaviors should all be "good" behaviors, i.e. L(K) ⊆ L(φ). That containment holds exactly when there's no behavior that is both a real run AND a violation, i.e. L(K) ∩ L(¬φ) = ∅ — which is why we translate the *negation* into a Büchi automaton (it recognizes violations) and intersect. The product's language is empty iff no reachable accepting cycle exists, decided in linear time by nested DFS (SPIN's algorithm) or SCC detection. Two callbacks: (1) it's the exact "assert ¬φ, look for a model" move from SAT/SMT entailment, now over infinite words; (2) the witness is precisely the lasso from the previous slide. This is the explicit-state counterpart to the symbolic methods coming up.
+:::
+
+---
+
 ## LTL patterns you'll actually write
 
 | Formula | English |
@@ -1292,6 +1309,40 @@ To make BMC **complete**: add *k-induction* (if a property holds for the first `
 
 ::: notes
 Tie back to Day 1. BMC is unbeatable at finding shallow bugs fast and gives a concrete counterexample. Its weakness is completeness — UNSAT at depth k says nothing about depth k+1. The fixes (k-induction, interpolation, IC3/PDR) turn BMC into a complete method; nuXmv implements several. For this course the message is: BMC refutes cheaply, symbolic/BDD proves exhaustively, and modern tools blend them.
+:::
+
+---
+
+## Inductive invariants: a safety proof in two checks
+
+To prove a safety property `P` ("nothing bad ever happens") you rarely compute the exact reachable set. Instead find an **inductive invariant** `J`:
+
+- **Initiation:** every initial state satisfies it — `Init ⇒ J`.
+- **Consecution:** every step from a `J`-state stays in `J` — `J ∧ R ⇒ J′`.
+- **Strength:** it implies what you wanted — `J ⇒ P`.
+
+All three ⇒ `P` holds for **every** reachable state — no unrolling, no bound.
+
+- **Checking** a candidate is two SMT queries: consecution fails *iff* `J ∧ R ∧ ¬J′` is **SAT** — the solver hands back the offending step.
+- **The catch:** `P` itself is usually *not* inductive (e.g. `y ≥ 1` under `y′ = y + x` needs the helper `x ≥ 1`). Model checking's job is to **find** an inductive `J`; on **Day 3** you'll **supply** one by hand and prove it in Lean.
+
+::: notes
+The single most unifying concept in the field, and a deliberate Day-2→Day-3 bridge (grounded in Berkeley EECS 219C's scribed notes). Safety = the reachable states never leave the "good" set P. You almost never compute the reachable set exactly; instead you exhibit *any* set J that (i) contains the initial states, (ii) is closed under the transition relation, and (iii) sits inside P. That J certifies safety — "a safety proof = find an inductive invariant." Stress the asymmetry that trips everyone up: a property P you care about is frequently NOT inductive on its own — the classic example is y ≥ 1 under y′ = y + x, where the step breaks unless you also know x ≥ 1, so you *strengthen* P to P ∧ (x ≥ 1). Checking a candidate is mechanical (two SMT queries; consecution is exactly J ∧ R ∧ ¬J′ unsat — the entailment-by-negation move again). The hard, creative part is *finding* J: that's what k-induction and IC3 automate (next), and what you'll do by hand in Lean on Day 3 (the inductive-invariant method). Same idea, three vantage points: SMT checks it, model checking finds it, Lean lets you supply and prove it.
+:::
+
+---
+
+## From bounded to complete: k-induction and IC3
+
+Two ways to turn BMC's *bug-finding* into an unbounded *proof*:
+
+- **k-induction = BMC made complete.** *Base:* no counterexample in the first `k` steps (a BMC query). *Step:* whenever `P` holds along `k` consecutive states, it holds at the next — with a "no repeated state" (simple-path) constraint so it terminates. Pass both ⇒ `P` holds forever. Looking back `k` steps succeeds where 1-step induction fails.
+- **IC3 / PDR** (Property-Directed Reachability). Builds an inductive invariant *incrementally* as a chain of **frames** (over-approximations of "reachable in ≤ i steps"), learning a small clause from each *counterexample-to-induction* — **without ever unrolling** the transition relation. Often the fastest engine.
+
+**nuXmv runs both** (its `check_invar_ic3` uses IC3) — so when nuXmv proves your `G`-property, this is what's happening under the hood.
+
+::: notes
+The "BMC is not the end of the line" slide — the gap a comparison against Berkeley 219C and the modern symbolic-MC literature flagged. Plain BMC only refutes up to depth k ("some early on called it just a good testing strategy, not verification"). k-induction reuses the *same* unrolled SAT/SMT encoding but adds an inductive step: if any k consecutive good states force the (k+1)-th to be good, and there's no short counterexample, the property holds at every depth; the simple-path constraint (the k states are distinct) guarantees a large-enough k terminates. IC3/PDR is the other workhorse and the conceptual payoff of the previous slide: it constructs an inductive invariant frame by frame, generalizing each counterexample-to-induction into a clause, never unrolling — Bradley's 2011 method, "one of the fastest SAT-based model-checking algorithms." The takeaway for this audience is not the internals but the landscape: nuXmv's invariant checking is k-induction + IC3 (per its CAV 2014 tool paper), so the "proof" half of model checking — not just the BMC "bug-finding" half — is exactly these algorithms searching for the inductive invariant from the previous slide.
 :::
 
 ---

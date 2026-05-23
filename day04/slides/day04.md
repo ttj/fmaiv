@@ -741,8 +741,10 @@ $$\forall x.\ \; \|x - x_0\|_\infty \le \varepsilon \;\Rightarrow\; \arg\max f(x
 
 This is a $\forall$-over-a-region property — Day 1's "no bad input exists," now over a continuous box of images.
 
+**ℓ∞ robustness is the canonical property, not the only one:** the same machinery handles other input regions (rotations, NLP word-substitutions), output **safety/reachability** for control networks (ACAS Xu), and monotonicity/fairness — any "input-set ⇒ output-set" claim.
+
 ::: notes
-This is the property the whole subfield is built on; get it crisp. ℓ∞ ("ell-infinity") ball just means "each coordinate independently can wiggle by up to epsilon" — for images, every pixel can get a little brighter or darker, independently. Local robustness says: across that entire box of nearby images (infinitely many of them), the network's top class never changes. The dual object is the adversarial example — a specific in-the-box image that the network misclassifies, famously a stop sign with a few stickers read as a speed-limit sign, or a panda+noise read as a gibbon. That adversarial example is exactly the counterexample, the analog of CBMC's failing trace. And structurally this is the same shape as every property this week: "for all inputs in a set, the output stays good," i.e., no bad input exists. The new wrinkle is that the set is a continuous region, not a finite enumeration.
+This is the property the whole subfield is built on; get it crisp. Note explicitly (a common oversimplification to head off) that ℓ∞ robustness is the *canonical* property because it is clean and standardized for VNN-COMP, but the verification machinery is not limited to it: the precondition can be any input set (ℓ2/ℓ1 balls, geometric perturbations like rotations/brightness, or discrete word-substitution neighborhoods for NLP), and the postcondition can be any output set — for a control network the property is safety/reachability (ACAS Xu's "stay in the safe-advisory region"), and one can also state monotonicity or fairness constraints. All of them are the same "input-set maps into output-set" shape. ℓ∞ ("ell-infinity") ball just means "each coordinate independently can wiggle by up to epsilon" — for images, every pixel can get a little brighter or darker, independently. Local robustness says: across that entire box of nearby images (infinitely many of them), the network's top class never changes. The dual object is the adversarial example — a specific in-the-box image that the network misclassifies, famously a stop sign with a few stickers read as a speed-limit sign, or a panda+noise read as a gibbon. That adversarial example is exactly the counterexample, the analog of CBMC's failing trace. And structurally this is the same shape as every property this week: "for all inputs in a set, the output stays good," i.e., no bad input exists. The new wrinkle is that the set is a continuous region, not a finite enumeration.
 :::
 
 ---
@@ -791,8 +793,10 @@ This is the "why we can't just solve it directly" slide, and it comes straight f
 
 Both certify robustness the same way: **UNSAT** ⇒ no in-region input reaches a bad output.
 
+**A second axis — completeness vs. cost:** *incomplete* methods (pure bound propagation, e.g. IBP → CROWN) are fast but may answer "**unknown**"; *complete* methods add **branch-and-bound** (β-CROWN) or exact set-splitting (NNV) to always decide — at higher cost. The strongest tools start cheap and refine only where needed — which is the configuration VNN-COMP winners converge on.
+
 ::: notes
-The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and the instructor's own approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The punchline unifying them with the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
+The map of the field, in two columns, plus the orthogonal completeness/scalability axis the AAAI NN-verification tutorial organizes around. Incomplete verifiers (interval-bound propagation, CROWN's linear relaxation) are cheap and sound but one-sided — they prove robustness when bounds are tight enough, else return "unknown." Complete verifiers guarantee a yes/no by branching (β-CROWN splits ReLUs into on/off cases) or by exact reachability (NNV splits the set at each kink); they always decide but cost more. The practical art, and what α,β-CROWN does to win VNN-COMP, is to run the cheap incomplete pass first and invoke branch-and-bound only on the neurons that remain ambiguous. Same completeness/scalability trade-off as everywhere else in the week (BMC vs k-induction; testing vs proof). The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and the instructor's own approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The punchline unifying them with the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
 :::
 
 ---
@@ -938,6 +942,24 @@ The breadth slide. Formal methods is mandatory-by-economics in chips (post-FDIV)
 
 ---
 
+## One shape behind CBMC, SAW, and NN verification
+
+Three very different Day-4 tools, one mental model — **compile the artifact to a formula, hand it to a solver:**
+
+| Tool | Artifact | Formula it builds | Solver |
+|---|---|---|---|
+| **CBMC** | C program + assertion | loops unrolled → SAT/SMT | SAT / Z3 |
+| **SAW** | C/LLVM vs Cryptol spec | symbolic execution → "impl = spec?" | SAT / SMT |
+| **α,β-CROWN / NNV** | network + ℓ∞ ball | bounds / reachable set → "bad output reachable?" | LP / MILP / SMT |
+
+Each asks the solver the *same* question — **is a bad behavior satisfiable?** — and reads **UNSAT** as a proof. It is the Day-1 move (assert the negation) wearing three costumes.
+
+::: notes
+The within-day synthesis, and the payoff of Day 1's "verification in one picture." CBMC, SAW, and neural-network verifiers look unrelated — a C model checker, a crypto equivalence prover, a robustness verifier — but share one architecture: translate the artifact plus its negated property into a logical formula, then call a decision procedure; UNSAT means no bad behavior exists (a proof), a feasible point means here is a counterexample. CBMC unrolls loops into a SAT/SMT formula; SAW symbolically executes the implementation and asserts it equals the Cryptol spec; α,β-CROWN/NNV encode "some input in the ball produces a misclassification" as bound/reachability constraints for LP/MILP/SMT. This is the exact entailment-by-negation move from Day 1 (and the model→spec→verifier→verdict picture) instantiated three more ways. For a general audience this is the single biggest takeaway of Day 4: the tools differ, the shape does not.
+:::
+
+---
+
 ## Where formal methods meets AI
 
 The convergence, both directions:
@@ -949,6 +971,27 @@ The convergence, both directions:
 
 ::: notes
 The synthesis of the entire course, sharpened into the field's organizing frame: a *bidirectional* relationship. **FM for AI** — formal methods verifies AI systems (NN verification; and, in production, AWS Bedrock's Automated Reasoning checks gate LLM outputs against formal policies). **AI for FM** — AI accelerates formal methods, and this half is richer than "drafts a proof": retrieval-augmented provers select premises and draft Lean proofs (LeanDojo/ReProver, Lean Copilot), AlphaProof reaches IMO-medal level, and *autoformalization* turns informal statements into checkable Lean — the CACM survey's thesis is literally "don't trust, verify," using the Lean kernel to ground LLM reasoning. The third bullet fills the gap a course on this topic must not skip: *how do we measure progress?* Benchmarks/competitions are the answer — miniF2F/ProofNet/PutnamBench for proving, VERINA for verifiable code generation, SV-COMP for software, VNN-COMP for neural nets — the same competition culture as SAT-/SMT-COMP. The invariant across both arrows and all four days: a small trusted checker has the final say, which is the architecture that makes AI-generated artifacts trustworthy — the thesis the workshop opened with on Day 1. (This bidirectional taxonomy + benchmark culture is the strongest pattern from comparing FMAIV to the AAAI NN-verification tutorial and the CACM "Formal Reasoning Meets LLMs" survey.)
+:::
+
+---
+
+## How do we know it works? Evaluating AI + FM
+
+If AI proposes and a kernel disposes, *measuring* progress means counting what the kernel **accepts** — never what merely looks plausible.
+
+- **pass@k** — give the model `k` tries; a problem counts as solved only if *some* attempt is **accepted by the checker** (Lean kernel, SMT proof, SV-COMP validator). No credit for plausible-looking text.
+- **Benchmarks are the scoreboard:**
+
+| Benchmark | Domain | Measures |
+|---|---|---|
+| **miniF2F / PutnamBench** | competition & undergrad math | kernel-accepted proofs (pass@k) |
+| **SV-COMP** | C software | correct verdict **+ machine-checked witness** |
+| **VNN-COMP** | neural networks | proved/disproved robustness; standardized ONNX + VNN-LIB |
+
+> "**Don't trust — verify.**" An LLM's Lean proof of a hard problem isn't read for plausibility; it is fed to the kernel. Accepted ⇒ it counts. That is *how we know.*
+
+::: notes
+The measurement story the course's own thesis demands, and a 2026 summer-school staple (Marktoberdorf's Mitchell lecture on evaluating agentic AI; the CACM "Formal Reasoning Meets LLMs" survey). The framing: because a formal kernel checks the output, AI math/verification is trustworthy in a way plain LLM text is not — a formal environment guarantees soundness and decides whether the goal was met. So evaluation counts kernel-accepted results, not human judgments of plausibility. pass@k is the standard metric (k attempts; success if any one is accepted). The scoreboards: miniF2F (488 olympiad problems) and PutnamBench (~640) for proving; SV-COMP (~33k tasks, scored only when an independent validator confirms the witness, with heavy penalties for a wrong "safe" verdict) for software; VNN-COMP for neural nets. Flag one honest soft spot — autoformalization: a kernel-checked proof of the *wrong* formalized statement is worthless, and faithfulness of the informal→formal translation still has no clean metric. The closing line is the survey's literal thesis ("don't trust, verify") and the cleanest one-sentence answer to "how is any of this validated?" for a faculty audience.
 :::
 
 ---
