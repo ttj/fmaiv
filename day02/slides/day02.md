@@ -255,7 +255,7 @@ Week 5's composition slides. The distinction is the single biggest modeling deci
 
 ## counter.smv has true *and* false specs on purpose
 
-`counter.smv` includes specs that **hold** and specs that **fail**:
+[`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv) includes specs that **hold** and specs that **fail**:
 
 - ✓ `x <= count_max` — holds.
 - ✓ `(mode = off) -> (x = 0)` — holds.
@@ -274,12 +274,12 @@ This is a real pedagogical point and a gotcha I want students to internalize. Th
 
 | File | System | Idiom it shows |
 |---|---|---|
-| `counter.smv` | the running counter | nondeterministic input |
-| `traffic_light.smv` | four-phase intersection | timed phases, mutual exclusion of greens |
-| `mutex.smv` | two-process mutual exclusion | flags + turn (idle/waiting/critical) |
-| `peterson.smv` | Peterson's algorithm | interleaving scheduler + fairness |
-| `elevator.smv` | single-car elevator | request handling, safety |
-| `gcd_01.smv` | Euclid's GCD | explicit program counter (a *program* as a TS) |
+| [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv) | the running counter | nondeterministic input |
+| [`traffic_light.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv) | four-phase intersection | timed phases, mutual exclusion of greens |
+| [`mutex.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/mutex.smv) | two-process mutual exclusion | flags + turn (idle/waiting/critical) |
+| [`peterson.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/peterson.smv) | Peterson's algorithm | interleaving scheduler + fairness |
+| [`elevator.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/elevator.smv) | single-car elevator | request handling, safety |
+| [`gcd_01.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/gcd_01.smv) | Euclid's GCD | explicit program counter (a *program* as a TS) |
 
 ::: notes
 These show the range of SMV modeling. The four original files (counter, traffic_light, mutex, gcd_01) come from verivital/smvis; peterson and elevator are course-specific examples that avoid the deprecated `process` keyword. mutex and peterson are the classic concurrency examples (peterson is the genuinely-Peterson one). gcd_01 shows the key trick for turning an ordinary sequential program into a transition system: add a program-counter variable ranging over line labels — a preview of Day 4, where CBMC does this for C automatically.
@@ -287,7 +287,7 @@ These show the range of SMV modeling. The four original files (counter, traffic_
 
 ---
 
-## traffic_light.smv as a state machine
+## [traffic_light.smv](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv) as a state machine
 
 <svg viewBox="0 0 960 210" style="display:block;margin:0.3em auto;max-width:96%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs>
@@ -326,7 +326,7 @@ The same SMV file (`traffic_light.smv`), drawn as the state machine it describes
 
 ---
 
-## A program as a transition system: gcd_01.smv
+## A program as a transition system: [gcd_01.smv](https://github.com/ttj/fmaiv/blob/main/day02/examples/gcd_01.smv)
 
 ```smv
 -- while (a != b) { if (a > b) a = a-b; else b = b-a; }
@@ -1486,7 +1486,7 @@ The bridge: model checking enumerates a finite reachable set; theorem proving pr
 
 ## In-session exercise
 
-With `nuXmv` (or **smvis** in your browser — [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis)) on `counter.smv`:
+With `nuXmv` (or **smvis** in your browser — [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis)) on [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv):
 
 1. Confirm the passing `INVARSPEC`s are `true` and the deliberately-false ones are `false`.
 2. Introduce the off-by-one bug in `next(x)`; read the counterexample; identify the exact press sequence.
@@ -1500,7 +1500,7 @@ Self-contained, runs in the room. The deliverable is a counterexample you can re
 
 ## Homework (ungraded, for depth)
 
-Pick **one** of `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`:
+Pick **one** of [`traffic_light.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv), [`mutex.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/mutex.smv), [`gcd_01.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/gcd_01.smv):
 
 - Verify the two given properties; explain each verdict.
 - Add and verify **one safety** and **one liveness** property of your own.

@@ -16,6 +16,8 @@ Annotations use a *they do / we do* convention: what the other resource emphasiz
 
 - **Formal Verification of Deep Neural Networks: Theory and Practice** — Huan Zhang, Kaidi Xu, Shiqi Wang, Cho-Jui Hsieh. AAAI 2022 tutorial (updated as UIUC ECE598HZ, 2024). <https://neural-network-verification.com/>
   - 3-part slide deck + Colab demos using `auto_LiRPA` and the VNN-COMP-winning α,β-CROWN; bound propagation (CROWN), branch-and-bound complete verification, certified defense. *They do:* deep, hands-on NN verification with current SOTA tooling. *We do:* connect NN verification to the broader SAT/SMT/MC/TP stack and the AI-coding thesis; they treat it standalone. **This is the strongest true "conference tutorial with public slides + code" in the field and the closest analogue to our Day 4 NN segment.**
+- **VNN-COMP / AAAI'26 lab on neural-network verification** (ours — Johnson et al.). <https://vnn-comp.github.io/#aaai2026>
+  - The instructor's own AAAI-2026 hands-on tutorial/lab: slides + Google Colab notebooks for benchmark proposers, verification-tool participants, and the broader AI community; ties directly to Day 4's NN-verification segment and the VNN-COMP material. The primary "extra materials" pointer for participants who want hands-on NN verification.
 - **Satisfiability Modulo Theories: A Beginner's Tutorial** — Barrett, Tinelli, Barbosa, Niemetz, Preiner, Reynolds, Zohar. *Distinguished Tutorial*, FM 2024 (Milan). <https://link.springer.com/chapter/10.1007/978-3-031-71177-0_31> (open mirror: <https://par.nsf.gov/servlets/purl/10584608>)
   - SMT foundations, theory catalog, models and proofs, exercises in **both cvc5 and Z3**. *They do:* rigorous theory catalog + careful proofs/models. *We do:* situate Z3 in a 4-day arc (Day 1) and thread it forward to model checking and SAW.
 - **An Overview of SMT and Its Applications** — Cesare Tinelli. ETAPS 2019 invited talk. <https://homepage.cs.uiowa.edu/~tinelli/talks/ETAPS-19.pdf>
@@ -106,7 +108,7 @@ Fact-checked spine of the field; this is the source list behind Day 4's "Neural-
 - **Neuro-symbolic verification** — Serbinowska & Johnson, *BehaVerify* (SEFM 2022); *Formalizing Stateful Behavior Trees* (FMAS 2024, best paper); *Neuro-Symbolic Behavior Trees and Their Verification* (NeuS 2025); Sasaki, Lopez, Johnson, *Neurosymbolic Finite and Pushdown Automata* (NeuS 2025). Tool: <https://github.com/verivital/behaverify>. Composes NN verification with classical model checking.
 
 **Competition & standards**
-- VNN-COMP reports: 2025 (6th, at SAIV/CAV) <https://arxiv.org/abs/2512.19007>; 2024 (5th) <https://arxiv.org/abs/2412.19985>. Hub: <https://vnn-comp.github.io/>.
+- VNN-COMP reports: 2025 (6th, at SAIV/CAV) <https://arxiv.org/abs/2512.19007>; 2024 (5th) <https://arxiv.org/abs/2412.19985>. Hub: <https://vnn-comp.github.io/>. Hands-on **AAAI'26 VNN-COMP tutorial/lab** (slides + Colab): <https://vnn-comp.github.io/#aaai2026>.
 - α,β-CROWN won VNN-COMP **2021, 2022, 2023, 2024, 2025** (five consecutive years). The reports note the best tools have converged on GPU-accelerated linear bound propagation with branch-and-bound.
 - Standards: **ONNX** (network interchange) <https://onnx.ai>; **VNN-LIB** (property spec) <https://www.vnnlib.org/>.
 - Benchmark: **ACAS Xu** collision-avoidance networks (the field's standard small-but-safety-critical benchmark, introduced with Reluplex).

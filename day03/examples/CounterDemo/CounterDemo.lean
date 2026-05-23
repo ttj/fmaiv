@@ -9,3 +9,4 @@ import CounterDemo.ArraySum
 import CounterDemo.Gcd
 import CounterDemo.Sorting
 import CounterDemo.TrafficLight
+import CounterDemo.SlideExamples

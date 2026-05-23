@@ -1368,6 +1368,8 @@ The companion figure slide for the DPLL(T) loop, requested in the brief. Keep na
 - `assert` adds a constraint.
 - `check-sat` returns `sat`, `unsat`, or `unknown`.
 
+Run it: [`z3_smtlib_demo.smt2`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_smtlib_demo.smt2).
+
 ::: notes
 SMT-LIB is the lingua franca; every SMT solver in the last 15 years reads it. The `(set-logic …)` line is important — it tells the solver "use only LIA reasoning, don't try to be clever". Without it, Z3 picks a logic; sometimes the wrong one. Common logics: QF_LIA, QF_LRA, QF_BV, QF_UF, QF_AUFLIA. The "QF_" prefix means "quantifier-free" — much faster than the quantified variants.
 :::
@@ -1456,7 +1458,7 @@ The Python binding gives you:
 - Iterative use (incremental solving with `push`/`pop`).
 - Programmatic model extraction.
 
-We'll run [`day01/examples/z3_smoke.py`](../examples/z3_smoke.py) live.
+We'll run [`day01/examples/z3_smoke.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_smoke.py) live.
 
 ::: notes
 The Python interface is what we'll use for the rest of the day. Open `examples/z3_smoke.py`, run it on screen, watch it print Z3 version + sat + model. Then `z3_pigeonhole.py`, watch all five cases come back unsat. Then the main event: `z3_counter_bounded.py`. The point is to physically demonstrate that Z3 is a couple of `pip install` commands away.
@@ -1466,7 +1468,7 @@ The Python interface is what we'll use for the rest of the day. Open `examples/z
 
 ## Live: pigeonhole in SAT
 
-[`day01/examples/z3_pigeonhole.py`](../examples/z3_pigeonhole.py) — encode "$n+1$ pigeons into $n$ holes" as SAT.
+[`day01/examples/z3_pigeonhole.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_pigeonhole.py) — encode "$n+1$ pigeons into $n$ holes" as SAT.
 
 ```python
 def pigeonhole(num_pigeons: int, num_holes: int):
@@ -1492,7 +1494,7 @@ Pigeonhole is the classical SAT teaching example. Notice the structure: we encod
 
 ## Live: Sudoku as constraints, not search
 
-[`day01/examples/puzzles/sudoku.py`](../examples/puzzles/sudoku.py) — one integer per cell, three "all-different" rules, plus the clues.
+[`day01/examples/puzzles/sudoku.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/puzzles/sudoku.py) — one integer per cell, three "all-different" rules, plus the clues.
 
 ```python
 cells = [[z3.Int(f"c_{r}_{c}") for c in range(9)] for r in range(9)]
@@ -1512,7 +1514,7 @@ for br in range(3):
 
 We never write a backtracking search — we *state what a solution is* and let Z3 find one. (`z3.Distinct(xs)` = "these values are pairwise unequal".)
 
-Same shape, more puzzles in `examples/puzzles/`: **N-Queens**, **KenKen**, **magic squares**.
+Same shape, more puzzles in `examples/puzzles/`: [**N-Queens**](https://github.com/ttj/fmaiv/blob/main/day01/examples/puzzles/nqueens.py), [**KenKen**](https://github.com/ttj/fmaiv/blob/main/day01/examples/puzzles/kenken.py), [**magic squares**](https://github.com/ttj/fmaiv/blob/main/day01/examples/puzzles/magic_square.py).
 
 ::: notes
 This is the single most important idea in the SMT half of the day: declarative, not imperative. The Sudoku rules are three families of Distinct constraints plus the clues; Z3 does all the search. Run it live — it solves the classic puzzle instantly and even verifies uniqueness with a blocking clause (assert the found grid is forbidden; if still sat, a second solution exists). Then point at the other puzzles as the take-home menu: KenKen adds arithmetic "cage" constraints, N-Queens adds diagonal constraints, magic squares add row/column/diagonal sum constraints — all the same "constraints, not search" shape.
@@ -1644,7 +1646,7 @@ This is the instructor's own two-bit-counter BMC example ("for k = 2, W(k) is un
 
 ## Live: bounded counter in Z3
 
-[`day01/examples/z3_counter_bounded.py`](../examples/z3_counter_bounded.py)
+[`day01/examples/z3_counter_bounded.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_counter_bounded.py)
 
 ```python
 def bounded_reach_to(forbidden_x: int, num_steps: int):
@@ -1757,7 +1759,7 @@ The bridge from Day 1 to Day 2 is "what if N could be infinity?" That's literall
 
 ## In-session exercise (15 min, your laptop)
 
-Adapt [`day01/examples/z3_counter_bounded.py`](../examples/z3_counter_bounded.py):
+Adapt [`day01/examples/z3_counter_bounded.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_counter_bounded.py):
 
 1. **Find the smallest $N$ for which $x = 10$ is reachable.** Iterate from $N = 1$.
 2. When you hit `sat`, ask Z3 for the model. Print the `press` sequence that gets $x = 10$.

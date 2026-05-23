@@ -382,6 +382,8 @@ theorem zero_add (n : Nat) : 0 + n = n := by
 
 `induction n` splits into the two ways a `Nat` is built: `zero`, and `succ k` (= `k+1`) **plus** the hypothesis `ih` for `k`. `Nat.add_succ` and `rw` are **core** Lean — no Mathlib.
 
+These snippets (and the term-mode proofs earlier) are collected, compiled, and checked in [`SlideExamples.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/SlideExamples.lean).
+
 ::: notes
 The from-scratch induction walkthrough the brief asks for, with the goal state annotated at every line so students watch the IH appear and get consumed. The crucial moment is `| succ k ih =>`: Lean hands you `k`, the goal at `k+1`, AND `ih : 0 + k = k` for free — that `ih` is the induction hypothesis, materialized as a named hypothesis you can `rw` with. The two rewrites are the whole proof: unfold `add_succ` to expose `0 + k`, then rewrite by the IH. End by noting `rw` auto-closes a goal that becomes `x = x`. Everything is core Lean — repeat for the Mathlib-free audience. This is the template the counter's reachability induction follows.
 :::
@@ -706,7 +708,7 @@ Name the recursor so the word isn't mysterious if it surfaces, but keep it light
 
 ## A transition system, in Lean
 
-From `CounterDemo/TransitionSystem.lean`:
+From [`CounterDemo/TransitionSystem.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/TransitionSystem.lean):
 
 ```lean
 structure TransitionSystem (State : Type) where
@@ -775,7 +777,7 @@ This is the conceptual capstone of the bridge built over the last several slides
 
 ## The counter as a Lean system
 
-From `CounterDemo/Counter.lean` (auto-translated from `counter.smv`):
+From [`CounterDemo/Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean) (auto-translated from [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv)):
 
 ```lean
 inductive ModeVal | off | on
@@ -1145,7 +1147,7 @@ The AI-proving landscape the brief requests, assembled from the transcript's own
 
 ## Live demo: AI-assisted repair
 
-1. Open `Counter.lean`; weaken `counterInv` to drop the second conjunct.
+1. Open [`Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean); weaken `counterInv` to drop the second conjunct.
 2. `lake build` → `counterInv_step` now **fails** (the off-case can't close).
 3. Ask Claude Code to repair it.
 4. Read what it proposes — does it re-add the right conjunct, or hallucinate a tactic?
@@ -1262,7 +1264,7 @@ The bridge: Days 1-3 worked on models of the counter; Day 4 connects specs and p
 In `examples/CounterDemo`:
 
 1. `lake build` — the solution files compile clean (no `sorry`); open a `*Starter.lean` to see the fill-in-the-blank `sorry` holes you'd complete.
-2. In `Counter.lean`, find the three pieces of the inductive-invariant pattern (`counterInv_init`, `counterInv_step`, `counterInv_inductive`).
+2. In [`Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean), find the three pieces of the inductive-invariant pattern (`counterInv_init`, `counterInv_step`, `counterInv_inductive`).
 3. Prove **one** new corollary from the strengthened `Φ` — e.g. `mode = off → x < 10` — via `invariant_strengthening`, and confirm with `#print axioms` (no `sorryAx`).
 
 ::: notes
@@ -1277,7 +1279,7 @@ Pick **one** (see [`assignments/day03.md`](../assignments/day03.md)):
 
 - Prove the **combined** invariant `(x ≤ 10) ∧ (mode = off → x = 0) ∧ (x > 0 → mode = on)` is inductive.
 - Change the bound `10` to `25` (it appears in the `next` guards and in `counterInv`) and re-prove `CounterTS_inv1` (use Claude Code for the edits).
-- Translate `traffic_light.smv` into Lean by hand and prove one invariant.
+- Translate [`traffic_light.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv) into Lean by hand and prove one invariant.
 
 Use Claude Code as a partner; note one thing it got right and one it got wrong.
 

@@ -244,7 +244,7 @@ void counter_step(struct state *s, bool press) {
 }
 ```
 
-Same four guards as SMV `next(...)`, Lean `next`, Z3 `step()`.
+Same four guards as SMV `next(...)`, Lean `next`, Z3 `step()`. *(this is [`counter.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/counter.c) + [`counter_check.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/counter_check.c))*
 
 ```text
 cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions
@@ -331,7 +331,7 @@ Now inject a bug — change the loop to `i < n - 1` (skips the last element):
 Violated property: m >= a[i]
 ```
 
-CBMC hands you the *smallest* array that exposes the off-by-one. *(this is `examples/array_max*.c`)*
+CBMC hands you the *smallest* array that exposes the off-by-one. *(this is [`array_max.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/array_max.c) + [`array_max_check.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/array_max_check.c))*
 
 ::: notes
 A second, self-contained worked example so students see the loop-and-array case, not just the state-machine counter. Two teaching points. (1) A good harness asserts the FULL specification, not a weak shadow of it: "maximum" means both an upper bound AND realized by some element — the upper-bound half alone is satisfied by INT_MAX, which is why we assert both. This mirrors the spec-completeness theme from Days 1-3. (2) The injected `i < n - 1` bug is the classic off-by-one, and CBMC's counterexample is beautifully minimal: all zeros except the last element, which the broken loop never inspects. That minimality is the debugging gift — there is no noise to wade through. Run the clean version first (SUCCESSFUL), then break it live; the contrast is the lesson.
@@ -355,7 +355,7 @@ int mid = lo + (hi - lo) / 2;   // SAFE: never overflows
 [binsearch.overflow.1] arithmetic overflow on signed + in lo + hi: FAILURE
 ```
 
-The overflow-safe form verifies clean. Same class of bug as **Ariane 5** (Day 1) — a conversion/arithmetic overflow that testing missed for years.
+The overflow-safe form verifies clean. Same class of bug as **Ariane 5** (Day 1) — a conversion/arithmetic overflow that testing missed for years. *(this is [`binsearch.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/binsearch.c) + [`binsearch_check.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/binsearch_check.c))*
 
 ::: notes
 This is the marquee example for "why bit-precise matters." The binary-search midpoint bug lived in the Java standard library — and Programming Pearls — for years because it only triggers on arrays larger than about a billion elements, which no unit test exercised. CBMC catches it as a built-in signed-overflow check, no user assertion needed, because it models the 32-bit int exactly and knows lo+hi can wrap. The overflow-safe rewrite lo + (hi-lo)/2 computes the same midpoint but never exceeds the range. Tie it to Ariane 5 from Day 1 (a 64-bit float converted to a 16-bit int overflowed) — same family of defect, same reason testing missed it, same reason a bit-precise tool finds it instantly. The example files are binsearch.c / binsearch_check.c if you want to run it live.
@@ -494,7 +494,7 @@ property roundtrip k msg = decrypt k (encrypt k msg) == msg
 - `type N = 16` names a compile-time size — usable anywhere a length is needed.
 - `[ c + k | c <- msg ]` is a **comprehension**: "for each byte `c` *drawn from* `msg` (`<-`), produce `c + k`" — like building a new array by transforming each element.
 - `+` / `-` on `[8]` are arithmetic **mod 256** — the width lives in the type.
-- a `property` is a claim to check for **all** inputs.   *(this is `examples/caesar.cry`)*
+- a `property` is a claim to check for **all** inputs.   *(this is [`caesar.cry`](https://github.com/ttj/fmaiv/blob/main/day04/examples/caesar.cry))*
 
 ::: notes
 A complete, readable Cryptol program. `[N][8]` is "N bytes" — there is the `[n]T` shape with T = `[8]`. The comprehension `[ c + k | c <- msg ]` maps over the message, adding the key byte to each (mod 256, because the element type is 8 bits). `decrypt` subtracts. The property says decrypt undoes encrypt for every key and message — which we prove next. No implementation tricks: this IS the spec.
@@ -546,7 +546,7 @@ property inductive_invariant (s : State) (press : Bit) =
 :prove inductive_invariant  → Q.E.D.   (~0.02s)
 ```
 
-(`foldl (&&) True xs` folds "and" across a list — "are all of `xs` true?"; `states` is the trajectory the file builds from `presses`.)
+(`foldl (&&) True xs` folds "and" across a list — "are all of `xs` true?"; `states` is the trajectory the file builds from `presses`.) *(this is [`counter.cry`](https://github.com/ttj/fmaiv/blob/main/day04/examples/counter.cry))*
 
 ::: notes
 The counter, one last time. Cryptol lets us express *both* prior styles: bounded_invariant is the Day-1/CBMC bounded check (every 25-press trajectory), and inductive_invariant is the Day-3 Lean step (one step preserves the invariant) — both discharged by SMT in milliseconds. Same system, both kinds of guarantee, in one tiny file. This is the satisfying closure of the running example: five encodings, and Cryptol re-expresses two of them.
@@ -621,7 +621,7 @@ llvm_verify m "popcount_loop" [] false (do {
 
 - `llvm_fresh_var` = "an input standing for **every** value" (CBMC's `nondet_*`, in SAW).
 - `{{ … }}` switches into **Cryptol** — `popcount_simple x` is the reference answer.
-- The script reads as a contract: *given* this symbolic input, *after* calling the function, the **return equals the spec**. *(this is `examples/popcount.saw`)*
+- The script reads as a contract: *given* this symbolic input, *after* calling the function, the **return equals the spec**. *(this is [`popcount.saw`](https://github.com/ttj/fmaiv/blob/main/day04/examples/popcount.saw))*
 
 ::: notes
 Walk the skeleton line by line — it is short and every line maps to a concept they already have. `llvm_load_module` reads the bitcode you built. The body of `llvm_verify` is a little three-part contract: declare the symbolic inputs (`llvm_fresh_var`, which is literally SAW's version of CBMC's nondet input), say "now call the function" (`llvm_execute_func`), and state the postcondition (`llvm_return …` — the result must equal the Cryptol spec evaluated on the same input). The `{{ }}` brackets are just "drop into Cryptol here." The trailing `z3` picks the solver. The shape — preconditions, execute, postcondition — is the same Hoare-style contract pattern that shows up everywhere in verification, including the Frama-C ACSL specs from the static-analysis lecture. Students don't memorize the API; they recognize the contract structure.
@@ -648,7 +648,7 @@ uint8_t popcount_loop(uint8_t x) {        // C IMPLEMENTATION
 ```
 
 - One width mismatch to bridge: C returns `[8]`, the spec returns `[4]`. The script pads with four zero bits — `(zero : [4]) # popcount_simple x` — so the types line up.
-- SAW proves these are the **same function on all 256 inputs**: *Proof succeeded! popcount_loop*.
+- SAW proves these are the **same function on all 256 inputs**: *Proof succeeded! popcount_loop*. *(this is [`popcount.cry`](https://github.com/ttj/fmaiv/blob/main/day04/examples/popcount.cry) + [`popcount.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/popcount.c))*
 
 ::: notes
 Show the two sides side by side so "spec vs implementation" stops being abstract. The Cryptol is the textbook definition (sum the bits); the C is the standard bit-shifting loop. They are obviously "meant to" compute the same thing, and SAW proves they actually do, for every one of the 256 byte inputs. The one wrinkle worth naming is the width bridge: the C function's return type is a full byte ([8]) while the spec produces a 4-bit count ([4], enough since the answer is at most 8), so the script concatenates four zero bits in front of the spec result to match — otherwise SAW reports a type mismatch, not a math error. This is the realistic flavor of SAW work: the logic is easy, and the effort is in lining up types/widths/memory between the C ABI and the clean spec.
@@ -907,6 +907,7 @@ Fact-checked entry points — the spine of the field:
 - **Family (a): bound propagation + B&B** — *CROWN* (Zhang et al., NeurIPS 2018) → *α-CROWN* (Xu et al., ICLR 2021) → *β-CROWN* (Wang et al., NeurIPS 2021) → *GCP-CROWN* (Zhang et al., NeurIPS 2022).
 - **Family (b): reachability / abstract domains** — *AI2* (Gehr et al., IEEE S&P 2018); *DeepZ* (NeurIPS 2018) & *DeepPoly* (Singh et al., POPL 2019); **NNV star sets** (Tran et al., FM 2019), *ImageStar* (CAV 2020), *NNV 2.0* (Lopez et al., CAV 2023); *Verisig* for NN-controlled hybrid systems (Ivanov et al., HSCC 2019).
 - **Books / surveys** — Albarghouthi, *Introduction to Neural Network Verification* (free at verifieddeeplearning.com); Liu et al., *Algorithms for Verifying Deep Neural Networks*, Found. & Trends in Optimization, 2021.
+- **Hands-on tutorials** — our **AAAI'26 VNN-COMP tutorial** (slides + Google Colab notebooks): <https://vnn-comp.github.io/#aaai2026>; and the AAAI-2022 NN-verification tutorial (auto_LiRPA, α,β-CROWN Colabs) at neural-network-verification.com.
 - **Frontier** — Shi et al., *Robustness Verification for Transformers*, ICLR 2020 — the formal anchor; full LLMs remain out of sound-verification reach.
 
 ::: notes
@@ -1106,7 +1107,7 @@ The survey paragraph makes students connect the frontier to their own work — t
 - **Clarke, Kroening, Lerda.** *A Tool for Checking ANSI-C Programs*, TACAS 2004 (the original CBMC paper; lead/maintainer Daniel Kroening).
 - **Lewis, Martin.** *Cryptol: High Assurance, Retargetable Crypto Development*, MILCOM 2003.
 - **Galois** — Cryptol & SAW docs/tutorials; **AWS Provable Security** blog.
-- **VNN-COMP** — <https://vnn-comp.github.io/>; **α,β-CROWN**; **NNV** (verivital).
+- **VNN-COMP** — <https://vnn-comp.github.io/>; **α,β-CROWN**; **NNV** (verivital). Hands-on **AAAI'26 VNN-COMP tutorial** (ours — slides + Google Colab notebooks): <https://vnn-comp.github.io/#aaai2026>.
 - **NN-verification reading** — Katz et al. *Reluplex* (CAV 2017); Tran et al. *NNV / star sets* (FM 2019; ImageStar CAV 2020; NNV 2.0 CAV 2023); Albarghouthi, *Introduction to NN Verification* (free); Liu et al. survey (FnT Optimization 2021).
 - **Frontier / next directions** — Johnson, *Is Neural Network Verification Useful and What Is Next?* (Allerton 2025, [hdl 2142/130315](https://hdl.handle.net/2142/130315)); Serbinowska et al. *BehaVerify* / neuro-symbolic behavior trees ([verivital/behaverify](https://github.com/verivital/behaverify)); Belcak et al. *Small Language Models are the Future of Agentic AI* (arXiv 2506.02153).
 - **AWS Cedar** (Lean spec); **seL4**, **CompCert** (verified systems).
