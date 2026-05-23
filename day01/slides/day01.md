@@ -495,6 +495,24 @@ Work through each one orally for ten seconds. The third one is famously where ph
 
 ---
 
+## Two arrows: $\vdash$ (provable) vs $\models$ (true)
+
+There are two completely different ways to say "$\varphi$ follows from premises $\Gamma$":
+
+- $\Gamma \models \varphi$ — **semantic** ("entails"): *every* interpretation that makes all of $\Gamma$ true also makes $\varphi$ true. About **meaning** — defined by the truth tables.
+- $\Gamma \vdash \varphi$ — **syntactic** ("derives"): there is a *finite proof* of $\varphi$ from $\Gamma$ using a fixed set of **inference rules** (e.g. *modus ponens*: from $a$ and $a \to b$, conclude $b$). About **symbol-pushing** — no truth values mentioned.
+
+A proof system is judged by how these two line up:
+
+- **Sound**: $\Gamma \vdash \varphi \;\Rightarrow\; \Gamma \models \varphi$ — "you can't derive anything false." Anything you *prove* really is *true*.
+- **Complete**: $\Gamma \models \varphi \;\Rightarrow\; \Gamma \vdash \varphi$ — "everything true is derivable." Nothing true escapes the proof system.
+
+::: notes
+This is the single most important conceptual distinction in all of logic, and it's the hinge the whole week turns on. $\models$ (double turnstile) is about models and meaning; $\vdash$ (single turnstile) is about derivations and rules. The instructor frames soundness as "you can't prove anything that's wrong" and completeness as "you can prove anything that's true." A solver/prover is trustworthy only if it's *sound* — when Z3 says `unsat` or Lean accepts a proof, soundness is exactly the guarantee that the verdict reflects truth, not a bug in the rules. Completeness is the nice-to-have that's often unavailable (first-order validity is only semi-decidable; richer logics lose completeness entirely — a Day-3 theme). Today's tools live on the semantic side; Day 3's Lean lives on the syntactic side, and its kernel is the thing enforcing soundness.
+:::
+
+---
+
 ## First-order logic — what's new
 
 Adds:
@@ -530,6 +548,26 @@ What saves us: **decidable fragments**.
 
 ::: notes
 The undecidability result is what motivates the move to SMT — instead of trying to decide satisfiability over arbitrary structures, we fix the structure (the integers, the real numbers, bit-vectors of fixed width) and decide satisfiability *over that one structure*. That's the trick.
+:::
+
+---
+
+## Quantifier order changes the meaning
+
+A **structure** (the integers $\mathbb{Z}$ with $+$, $<$, etc.) is what makes a quantified sentence true or false. The *order* of mixed quantifiers is not cosmetic — swap $\forall$ and $\exists$ and you usually change the claim:
+
+| Sentence | Reading | Over $\mathbb{Z}$ |
+|---|---|---|
+| $\forall x.\,\exists y.\; y > x$ | every $x$ has *some* bigger $y$ (depends on $x$) | **true** |
+| $\exists y.\,\forall x.\; y > x$ | *one* $y$ beats *every* $x$ at once | **false** |
+
+Same atoms, opposite verdicts. The first lets $y$ depend on $x$; the second demands a single $y$ that works for all $x$.
+
+- **Same-type swaps are safe**: $\forall x.\forall y \equiv \forall y.\forall x$, and $\exists x.\exists y \equiv \exists y.\exists x$.
+- **De Morgan for quantifiers** (negation toggles the quantifier): $\neg\forall x.\,\varphi \equiv \exists x.\,\neg\varphi$ and $\neg\exists x.\,\varphi \equiv \forall x.\,\neg\varphi$.
+
+::: notes
+This is the FOL subtlety the instructor stresses with the Lyapunov-stability example: "for all $\epsilon>0$ there exists $\delta>0$ ..." means something completely different from "there exists $\delta>0$ for all $\epsilon>0$ ..." — in the first, $\delta$ may depend on $\epsilon$; swapping forces one $\delta$ to work uniformly. Engineers who have seen $\epsilon$–$\delta$ definitions in control theory or analysis already have the intuition; this slide just names it. Practical payoff for tool use: when you write a spec for Z3 or Lean, the quantifier order *is* the specification — getting it backwards is the classic way to "verify" the wrong property. The quantifier De Morgan laws are exactly what a solver uses to push a goal into the $\Gamma \cup \{\neg\varphi\}$ refutation form.
 :::
 
 ---
@@ -920,6 +958,76 @@ The whole DPLL loop on the smallest formula that exercises it: one decision, a u
 
 ---
 
+## DPLL's two free moves: unit propagation + pure literals
+
+Before DPLL ever *guesses*, it applies two rules that force assignments for free:
+
+- **Unit propagation** — a clause with one unassigned literal left *forces* that literal true (it's the only way to satisfy the clause). One forced literal often shrinks other clauses to units → a **cascade**.
+- **Pure literal** — a variable that appears with only *one* polarity (always $x$, or always $\neg x$) in the remaining clauses can be set to satisfy all of them. It can never cause a conflict, so set it and drop those clauses.
+
+Worked run on
+$$\varphi = (\neg a \vee b)\,(\,\neg b \vee c)\,(a \vee c)\,(d \vee \neg c)\,(e).$$
+
+| Step | Rule | Action | Result |
+|---|---|---|---|
+| 1 | unit | clause $(e)$ is a unit | $e = \top$ |
+| 2 | pure | $d$ appears only positively | $d = \top$, drop $(d \vee \neg c)$ |
+| 3 | decide | guess on $a$ | $a = \top$ |
+| 4 | unit | $(\neg a \vee b)$ now forces $b$ | $b = \top$ |
+| 5 | unit | $(\neg b \vee c)$ now forces $c$ | $c = \top$ |
+| 6 | done | $(a\vee c)$ already true | **SAT**: $a{=}b{=}c{=}d{=}e{=}\top$ |
+
+::: notes
+This is the deeper companion to the tiny-trace slide: it exercises *both* free rules plus one decision, exactly the components the instructor calls out in Week 8 ("early termination, pure literals, unit clauses"). Talk through the intuition the instructor gives for pure literals: if a variable only ever shows up positive, making it true can only *help* — it satisfies clauses and can never falsify one — so there's no risk in setting it without a decision. Unit propagation is the workhorse; on industrial instances the solver spends ~90% of its time here. Note we got all the way to SAT with a *single* decision (step 3) — the two free rules did the rest. That ratio (lots of propagation, few decisions) is why DPLL beats the 2^n truth table so badly in practice, even though no one can prove a good average-case bound (the instructor's honest "probably no one knows").
+:::
+
+---
+
+## Boolean resolution: a proof of UNSAT
+
+When a formula is unsatisfiable, DPLL's failure is itself a **proof** — and the proof rule is **resolution**:
+
+$$\frac{(A \vee \ell)\qquad (B \vee \neg \ell)}{(A \vee B)}$$
+
+Two clauses sharing a variable $\ell$ with *opposite* signs resolve into a new clause that drops $\ell$ (the **resolvent**). Keep resolving; if you ever derive the **empty clause** $\square$ (a clause with no literals — unsatisfiable by definition), the original formula is UNSAT.
+
+Refute $\varphi = (p)\,(\neg p \vee q)\,(\neg q)$:
+
+| # | Clauses resolved | On | Resolvent |
+|---|---|---|---|
+| 1 | $(p)$, $(\neg p \vee q)$ | $p$ | $(q)$ |
+| 2 | $(q)$, $(\neg q)$ | $q$ | $\square$ |
+
+Empty clause derived $\Rightarrow$ **UNSAT**. This is a checkable certificate: a referee re-runs the two steps without trusting the solver.
+
+<svg viewBox="0 0 560 256" style="display:block;margin:0.3em auto;max-width:62%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="res-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="92" y1="62" x2="188" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
+  <line x1="240" y1="62" x2="222" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
+  <text x="128" y="96" text-anchor="middle" font-size="11.5" fill="#146a96">resolve p</text>
+  <line x1="210" y1="158" x2="318" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
+  <line x1="446" y1="62" x2="364" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
+  <text x="300" y="186" text-anchor="middle" font-size="11.5" fill="#146a96">resolve q</text>
+  <rect x="52" y="24" width="78" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="91" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(p)</text>
+  <rect x="180" y="24" width="120" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="240" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬p ∨ q)</text>
+  <rect x="400" y="24" width="92" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="446" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬q)</text>
+  <rect x="170" y="118" width="80" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="210" y="142" text-anchor="middle" font-size="14" fill="#1c1c1c">(q)</text>
+  <rect x="296" y="204" width="92" height="40" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+  <text x="342" y="230" text-anchor="middle" font-size="13.5" fill="#922b21">▢ empty</text>
+</svg>
+
+*A resolution derivation: each node is a clause; the two parents resolve away one variable; reaching the empty clause $\square$ certifies UNSAT.*
+
+::: notes
+Resolution is the instructor's "another way to implement a SAT solver" and, crucially, the source of UNSAT *certificates*. The teaching point: SAT answers are asymmetric. A `sat` answer comes with a model anyone can plug in and check; an `unsat` answer needs a *proof*, and resolution is that proof — a sequence of clauses ending in the empty clause. Modern CDCL solvers emit exactly this (in the DRAT proof format) so the result can be independently verified; this matters enormously in verification, where you must trust the "no counterexample" verdict. Tie it back: resolution is the same inference rule from the Week 3 propositional-logic section (from $a\vee b$ and $\neg b\vee c$ derive $a\vee c$) — here aimed at deriving falsehood to prove unsatisfiability. The empty clause is "the disjunction of nothing," which is false, so deriving it from the premises means the premises entail false, i.e. are contradictory.
+:::
+
+---
+
 ## What makes modern SAT solvers actually fast
 
 Four key engineering choices, each circa 1996–2003:
@@ -1002,6 +1110,59 @@ The EUF (equality + uninterpreted functions) decision procedure from Week 8 — 
 
 ---
 
+## The DPLL(T) loop: SAT engine ⇄ theory solver
+
+The congruence-closure procedure (previous slide) is one **theory solver**. DPLL(T) wires it to the SAT engine in a loop. First, **abstract** each theory atom to a fresh Boolean:
+
+$$\underbrace{x \ge 0}_{p_1}\quad \underbrace{y \ge 0}_{p_2}\quad \underbrace{x + y < 0}_{p_3}$$
+
+Now the SAT engine sees only $p_1 \wedge p_2 \wedge p_3$ and reasons Boolean-only. The cycle:
+
+1. **SAT proposes** a Boolean assignment: $p_1 = p_2 = p_3 = \top$.
+2. **Theory solver checks** the *concrete* meaning for $T$-consistency: is $x \ge 0 \wedge y \ge 0 \wedge x + y < 0$ satisfiable over the reals? **No.**
+3. Theory solver returns one of:
+   - **$T$-conflict** — the assignment is theory-inconsistent. Hand back a **theory lemma** $\neg(p_1 \wedge p_2 \wedge p_3)$, i.e. $\neg p_1 \vee \neg p_2 \vee \neg p_3$.
+4. **SAT learns** that lemma as a new clause and **backjumps** — it will never propose all three together again.
+
+Loop until the SAT engine finds a theory-consistent model (**sat**) or runs out of assignments (**unsat**).
+
+::: notes
+This is the loop the instructor describes in the "Adding the Theory Solvers" slide: theory atoms map to Boolean atoms, the SAT solver builds a partial assignment, the theory solver checks T-consistency and can report conflicts, propagate literals, or learn clauses. The linear-arithmetic conflict here is the instructor's own example ("a > 0, c > 0, a + c < 0 — theory conflict, backtrack"); I've renamed to x, y for the running counter's variable style. The key mental model: the SAT engine is colorblind — it only sees p1, p2, p3 and has no idea that p3 contradicts p1 ∧ p2. The theory solver supplies that missing knowledge as a *clause*, in the SAT engine's own language, and the two keep talking until they agree. That hand-off (theory lemma expressed as a Boolean clause) is the entire trick that lets one SAT engine drive any theory — LIA via simplex, EUF via congruence closure, bit-vectors via bit-blasting. It's why Z3 is modular.
+:::
+
+---
+
+## DPLL(T) round, drawn
+
+<svg viewBox="0 0 720 210" style="display:block;margin:0.3em auto;max-width:84%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="dpllt-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="284" y1="84" x2="436" y2="84" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
+  <text x="360" y="74" text-anchor="middle" font-size="11.5" fill="#146a96">propose: p₁ = p₂ = p₃ = ⊤</text>
+  <line x1="436" y1="132" x2="284" y2="132" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
+  <text x="360" y="150" text-anchor="middle" font-size="11.5" fill="#922b21">T-conflict: learn ¬p₁ ∨ ¬p₂ ∨ ¬p₃</text>
+  <rect x="40" y="68" width="244" height="80" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="162" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">SAT engine (Boolean DPLL)</text>
+  <text x="162" y="120" text-anchor="middle" font-size="12" fill="#5b6168">clauses { p₁, p₂, p₃ }</text>
+  <rect x="436" y="68" width="244" height="80" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="558" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">theory solver</text>
+  <text x="558" y="118" text-anchor="middle" font-size="12" fill="#5b6168">linear arithmetic (simplex)</text>
+  <text x="558" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">x ≥ 0 ∧ y ≥ 0 ∧ x+y &lt; 0 : UNSAT over ℝ</text>
+</svg>
+
+The SAT engine and the theory solver pass messages until they agree:
+
+- **propose** → SAT sends a candidate Boolean assignment.
+- **check** → theory solver tests it over the real structure ($\mathbb{Z}$, $\mathbb{R}$, bit-vectors, …).
+- **respond** → `T`-conflict (learn a clause), `T`-propagate (force a literal), or `T`-consistent (accept).
+
+When the theory solver finally says *consistent*, that Boolean model **plus** the theory witness is the SMT model.
+
+::: notes
+The companion figure slide for the DPLL(T) loop, requested in the brief. Keep narration tight on delivery — the previous slide carries the worked numbers; this one is the picture to point at. Emphasize the three possible theory-solver responses (the instructor's T-conflict / T-propagate / T-learn) and that the loop is *exactly* the SAT loop from L3's DPLL slides with one extra participant. T-propagate is the optimization we're glossing: the theory solver can sometimes tell the SAT engine "given what you've committed to, this other literal is forced" before a full assignment, pruning the search early. Mention that this is live every time they run Z3 today — when z3_counter_bounded.py comes back sat/unsat, this loop ran underneath, with LIA as the theory.
+:::
+
+---
+
 ## SMT-LIB: the standard input language
 
 ```smt2
@@ -1040,6 +1201,50 @@ SMT-LIB is the lingua franca; every SMT solver in the last 15 years reads it. Th
 
 ::: notes
 Pick the most restrictive logic that fits your problem; the solver will be faster. `QF_LIA` is what most Day 1 examples use. `QF_BV` is what Day 4's Cryptol/SAW work compiles to. `QF_AUFLIA` is what CBMC compiles to for memory-safety checks. The `ALL` logic is convenient for prototyping; never use it in production because the solver has to figure out what theories to bring in.
+:::
+
+---
+
+## SMT in the wild: generating a test case
+
+We don't only ask "is this safe?" — we can ask the solver to **build an input** that drives code down a chosen path. Take Euclid's GCD:
+
+```c
+unsigned GCD(unsigned x, unsigned y) {   // requires y > 0
+  while (true) {
+    unsigned m = x % y;
+    if (m == 0) return y;
+    x = y;
+    y = m;
+  }
+}
+```
+
+**Goal:** find inputs that make the loop run *exactly twice*. We can't know the trip count by hand — so we ask Z3.
+
+::: notes
+This is the instructor's Week-8 test-case-generation example, verbatim down to the GCD function. The framing: a `while(true)` loop whose iteration count depends on the inputs in a way that's painful to reason about by hand. Generating "an input that runs the loop exactly twice" (or ten times, or that hits a specific branch) is exactly what symbolic execution and tools like KLEE/CBMC do under the hood, and it's a different *use* of the same solver — synthesis of a witness rather than refutation. Tie it to the verification triple: here the "spec" is a path condition (loop runs twice), and the model Z3 returns is the test input. Next slide shows the encoding trick that makes the loop body into a flat formula.
+:::
+
+---
+
+## The trick: single static assignment (SSA)
+
+A variable is reassigned each iteration, but a formula can't reassign anything. **SSA** fixes this: give each write a **fresh subscripted name** ($x_0, x_1, \dots$), then conjoin one equation per statement. Unroll two iterations:
+
+$$
+\begin{aligned}
+&\;(y_0 > 0) && \text{precondition}\\
+\wedge\;&\;(m_0 = x_0 \bmod y_0)\;\wedge\;\neg(m_0 = 0) && \text{iter 1: didn't return}\\
+\wedge\;&\;(x_1 = y_0)\;\wedge\;(y_1 = m_0) && \text{iter 1: updates}\\
+\wedge\;&\;(m_1 = x_1 \bmod y_1)\;\wedge\;(m_1 = 0) && \text{iter 2: returned}
+\end{aligned}
+$$
+
+`check-sat` → **sat**, with model $x_0 = 2,\; y_0 = 4$ (then $m_0=2,\ x_1=4,\ y_1=2,\ m_1=0$). So `GCD(2, 4)` runs the loop exactly twice. ($a \bmod b$ = remainder; the subscripts are *versions*, not array indices.)
+
+::: notes
+SSA is the encoding backbone of every program-level verification tool we'll meet — and it returns explicitly in Day 4 with CBMC, which SSA-converts and unrolls C automatically. The instructor's note nails it: "conversion is to single static assignment (SSA) form prior to asserting." Spell out *why* it's needed: logic is timeless — `x = y; y = m` can't be two assignments to one `x`, so we mint x_0, x_1, ... and turn assignment (a command) into equality (a constraint). The two-iteration unrolling is structurally identical to the BMC unrolling we're about to do for the counter: same idea — replace state-over-time with subscripted copies and conjoin a transition per step. Worth saying out loud: this is the *same* solver, same SMT-LIB, just pointed at a path condition instead of a safety property. The model x0=2, y0=4 is the instructor's own answer.
 :::
 
 ---
@@ -1141,6 +1346,111 @@ The pattern for asking "can the counter reach $x = 11$ in $\le N$ steps?":
 
 ::: notes
 This is the BMC pattern, and it's the same pattern Day 4's CBMC implements on actual C code. The key insight: bounded model checking trades completeness for not needing to construct the state space. It's a refutation tool. If you want to *prove* the property, you need either an unbounded model checker (Day 2) or an inductive argument (Day 3).
+:::
+
+---
+
+## BMC, written as one formula
+
+The five steps collapse into a single formula. Let $I(s)$ mean "$s$ is initial", $T(s, s')$ mean "$s$ can step to $s'$", and $p(s)$ be the safety property. The **bounded unrolling** to depth $k$:
+
+$$
+W(k)\;=\;\underbrace{I(s_0)}_{\text{start legal}}\;\wedge\;\underbrace{\bigwedge_{i=0}^{k-1} T(s_i, s_{i+1})}_{\text{a real }k\text{-step path}}\;\wedge\;\underbrace{\bigvee_{i=0}^{k}\neg p(s_i)}_{p\text{ fails somewhere}}
+$$
+
+Read it as three demands at once: *begin in an initial state*, *follow the transition relation for $k$ steps*, *and break $p$ at some step*.
+
+$$\boxed{\;p \text{ holds on all paths of length} \le k \;\iff\; W(k) \text{ is UNSAT}\;}$$
+
+- **SAT** → the model *is* a concrete counterexample trace $s_0 \to s_1 \to \dots$ that reaches a bad state.
+- **UNSAT** → no violation within $k$ steps (says **nothing** about step $k{+}1$).
+
+::: notes
+This is the heart of the Week-8 "BMC as a SAT/SMT problem" slides, made explicit. The three conjuncts map one-to-one onto the instructor's encoding: initial-state constraint, the conjunction of transition relations joining step i to i+1, and the disjunction of ¬p over all steps. The boxed equivalence is the whole theory of BMC: "valid up to k iff the unrolling is unsatisfiable" — and it's just the $\Gamma \models \varphi \iff \Gamma \cup \{\neg\varphi\}$ unsat principle from L2, applied to a transition system. The big_or over ¬p is what makes this catch a violation at *any* step ≤ k, not just the last — matching the z3_counter_bounded.py code that ORs x[k]==forbidden over all k. Stress the asymmetry one more time: SAT hands you a trace you can replay; UNSAT is only a bounded guarantee. de Moura's Z3 runs the DPLL(T) loop on exactly this W(k).
+:::
+
+---
+
+## The unrolling, drawn
+
+<svg viewBox="0 0 620 184" style="display:block;margin:0.3em auto;max-width:76%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="bmc1-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="8" y1="46" x2="32" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
+  <text x="20" y="37" text-anchor="middle" font-size="11.5" fill="#5b6168">I</text>
+  <line x1="116" y1="46" x2="154" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
+  <text x="135" y="37" text-anchor="middle" font-size="12" fill="#146a96">T</text>
+  <line x1="238" y1="46" x2="276" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
+  <text x="257" y="37" text-anchor="middle" font-size="12" fill="#146a96">T</text>
+  <line x1="360" y1="46" x2="438" y2="46" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#bmc1-ah)"/>
+  <text x="399" y="38" text-anchor="middle" font-size="16" fill="#5b6168">⋯</text>
+  <rect x="34" y="26" width="82" height="40" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="75" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₀</text>
+  <rect x="156" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="197" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₁</text>
+  <rect x="278" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="319" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₂</text>
+  <rect x="440" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="481" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s_k</text>
+  <line x1="75" y1="66" x2="75" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="197" y1="66" x2="197" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="319" y1="66" x2="319" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <line x1="481" y1="66" x2="481" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="75" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
+  <text x="197" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
+  <text x="319" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
+  <text x="481" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
+  <line x1="75" y1="120" x2="481" y2="120" stroke="#5b6168" stroke-width="1.4"/>
+  <line x1="278" y1="120" x2="278" y2="142" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bmc1-ah)"/>
+  <rect x="150" y="142" width="256" height="32" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+  <text x="278" y="163" text-anchor="middle" font-size="12.5" fill="#922b21">⋁ ¬p(sᵢ)?  →  SAT = a real bad path</text>
+</svg>
+
+*Every step is a fresh copy of the state variables; $T$ chains them; the property $p$ is tested at each copy, and the $\bigvee$ asks "did it fail anywhere?"*
+
+::: notes
+The requested BMC-unrolling figure: s0 → … → sk with ¬p checked at each step. This is the picture to leave on screen while running the live demo. The single most important thing to convey: "unrolling" literally means making k+1 timestamped copies of the state variables and wiring consecutive copies together with the transition relation — the exact same move as SSA on the GCD loop two slides back, just for a reactive system instead of straight-line code. Point out that the width of this picture (k) is the only knob; widen it and you search deeper. Day 2's nuXmv draws the same picture but can also stop widening once it proves a fixpoint — the completeness threshold, next slide.
+:::
+
+---
+
+## When does bounded become complete?
+
+BMC is a bug-finder: UNSAT at depth $k$ only certifies "safe for $\le k$ steps." When can we stop and claim "safe, **ever**"?
+
+- **Completeness threshold (CT)** — a depth such that UNSAT up to $CT$ implies the property holds at *every* depth. If you check that far and still get UNSAT, you've actually proved it.
+- One sound (if loose) value of $CT$ is the **diameter**: the longest shortest-path between any two reachable states — once you've unrolled past it, every reachable state has already appeared.
+
+The catch (instructor's own caveat): **computing the exact $CT$ is as hard as model checking itself.** In practice we use an over-approximation, and often just run out of resources first.
+
+- Good case: systems *without counters* (e.g. some hardware) have small diameters — BMC closes quickly.
+- Bad case: a counter to $N$ has diameter $\sim N$; deep bugs hide past any practical $k$.
+
+::: notes
+This is the Week-8 "completeness threshold" and "complexity of BMC" material, kept gentle. The honest story: BMC is fundamentally a refutation engine, and turning it into a proof requires knowing you've gone deep enough — the CT. The instructor stresses that finding the exact CT is itself as hard as the model-checking problem you were trying to avoid, so real tools over-approximate (via graph structure / diameter). Connect to the running example: our counter literally counts, so its diameter grows with the bound — which is *exactly* why Day 1's bounded check can never prove "x ≤ 10 forever" no matter how large we make k, and why we need Day 2 (fixpoint/BDD reachability) or Day 3 (induction). This is the precise mechanism behind the "reachable vs reachable-in-≤N" Euler picture from L2. The complexity punchline the instructor gives — SAT-based BMC is worst-case doubly exponential because k can reach the diameter (exponential in state vars) and each SAT call is exponential — is optional depth if time allows.
+:::
+
+---
+
+## Worked BMC: the two-bit counter
+
+The smallest system where the bound *matters*. Two bits $\ell, r$ count $00 \to 01 \to 10 \to 11 \to 00$; property $p = \neg(\ell \wedge r)$ ("never both bits set"):
+
+$$
+I:\;\neg \ell \wedge \neg r \qquad
+T:\; \ell' = (\ell \oplus r) \;\wedge\; r' = \neg r
+$$
+
+($\oplus$ = exclusive-or; primes = next state.) Unroll and ask $W(k)$:
+
+| $k$ | states reached | $\neg p$ hit? | $W(k)$ |
+|---|---|---|---|
+| 2 | $00, 01, 10$ | no | **UNSAT** — safe so far |
+| 3 | $00, 01, 10, 11$ | **yes** at $s_3$ | **SAT** — counterexample! |
+
+The model at $k=3$ is the trace $00 \to 01 \to 10 \to 11$ — the solver hands you the exact path to the bug.
+
+::: notes
+This is the instructor's own two-bit-counter BMC example ("for k = 2, W(k) is unsatisfiable; for k = 3, W(k) is satisfiable"). It's the perfect closing example because it shows *both* verdicts on one tiny system: at depth 2 the bad state 11 simply isn't reachable yet (UNSAT, false comfort), and at depth 3 it appears and BMC produces the trace (SAT). That jump from UNSAT to SAT as k crosses the depth of the bug is the entire personality of bounded model checking in one table. Contrast with our counter-to-10, where the *good* property holds and BMC keeps saying UNSAT forever — here the property is genuinely violated, so deeper search finds it. The transition relation ℓ' = ℓ⊕r, r' = ¬r is worth checking by hand on delivery: from 10, r flips to 1 and ℓ becomes 1⊕0=1, giving 11 — the violating state. Then Day 2 will verify the *fixed* counter (or prove this one violates G¬(ℓ∧r)) without picking any k.
 :::
 
 ---
