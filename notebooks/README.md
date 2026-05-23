@@ -1,7 +1,10 @@
-# Run the tools online — no install needed
+# Run the whole course online — no install needed
 
-These notebooks let students run the course's formal-methods tools from the
-browser, in case they didn't install them locally. There are two ways in.
+Every day of the course runs in the browser, in case you didn't install the
+tools locally. All four days' tools (z3, NuSMV, Lean 4, CBMC, Cryptol, SAW,
+smvis) are preinstalled in the Codespace image, and every `dayNN/examples/`
+file is right there in the repo. There are two ways in; see
+**"Run any day in the Codespace"** below for the exact commands.
 
 ## Option 1 — GitHub Codespaces (full toolset, recommended)
 
@@ -29,6 +32,41 @@ installs only what's missing, so the same notebook works in both Codespaces and 
 
 In Colab, `z3`, `cbmc`, and `NuSMV` install in seconds. `cryptol`/`saw` are large
 downloads — for those, prefer **Codespaces** (preinstalled).
+
+## Run any day in the Codespace
+
+Open a terminal in the Codespace (or `jupyter lab`) and run these — all verified
+working in the image. Each day's `assignments/dayNN.md` has the exercises, and
+the slides are at <https://ttj.github.io/fmaiv/>.
+
+**Day 1 — SAT/SMT with Z3** (or the interactive `notebooks/01_z3_python.ipynb`)
+```bash
+python3 day01/examples/z3_smoke.py
+python3 day01/examples/z3_pigeonhole.py
+python3 day01/examples/z3_counter_bounded.py
+python3 day01/examples/puzzles/nqueens.py     # also: sudoku.py, magic_square.py, kenken.py
+```
+
+**Day 2 — Model checking with NuSMV** (or `notebooks/02_tools_cli.ipynb`; for nuXmv + visualization use the smvis web app below)
+```bash
+NuSMV day02/examples/counter.smv              # also: mutex, peterson, elevator, prodcons, traffic_light, gcd_01
+```
+
+**Day 3 — Theorem proving with Lean 4** (toolchain v4.29.0 preinstalled, Mathlib-free → builds offline)
+```bash
+cd day03/examples/CounterDemo
+lake build                                    # solution modules build clean; *Starter modules show `sorry` warnings
+lake build CounterDemo.CounterStarter         # a starter to fill in
+```
+
+**Day 4 — CBMC / Cryptol / SAW**
+```bash
+cd day04/examples
+cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions   # → VERIFICATION SUCCESSFUL
+cryptol counter.cry        # then  :prove bounded_invariant   :prove inductive_invariant   → Q.E.D.
+cryptol popcount.cry       # then  :prove popcount_kernighan_eq                            → Q.E.D.
+clang -c -emit-llvm -O0 -o popcount.bc popcount.c && saw popcount.saw   # → Proof succeeded!
+```
 
 ## What about nuXmv?
 
