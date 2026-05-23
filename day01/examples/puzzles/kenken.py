@@ -17,9 +17,11 @@ Run:  python kenken.py
 """
 import z3
 
-N = 4
+N = 4   # board is N x N, digits 1..N
 
-# Each cage: (target, op, [(row, col), ...]). Cells are 0-indexed.
+# The puzzle itself, as a list of cages. Each cage = (target, op, [cells]),
+# where op is one of + - * / =, and cells are (row, col) pairs (0-indexed).
+# Example: (3, "+", [(0,0),(0,1)]) means cells (0,0) and (0,1) add up to 3.
 CAGES = [
     (3,  "+", [(0, 0), (0, 1)]),
     (1,  "-", [(0, 2), (0, 3)]),
@@ -33,35 +35,48 @@ CAGES = [
 
 
 def _cage_constraint(x, target, op, cells):
+    # Build the Z3 rule for one cage. vs = the cell variables in this cage.
     vs = [x[r][c] for (r, c) in cells]
     if op == "+":
+        # Sum of the cage's cells equals the target.
         return z3.Sum(vs) == target
     if op == "*":
+        # Product of the cells equals the target (multiply them one by one,
+        # since z3 has no built-in "product of a list").
         prod = vs[0]
         for v in vs[1:]:
             prod = prod * v
         return prod == target
     if op == "-":
+        # Subtraction cages always have exactly two cells; we don't know which
+        # is larger, so allow either order. z3.Or(...) = "at least one holds".
         a, b = vs
         return z3.Or(a - b == target, b - a == target)
     if op == "/":
+        # Division, two cells, either order. Written as multiplication
+        # (a == b*target OR b == a*target) to sidestep integer-division
+        # rounding issues in Z3, and to keep it exact.
         a, b = vs
         # exact division either way, avoiding Z3 integer-division pitfalls
         return z3.Or(a == b * target, b == a * target)
     if op == "=":
+        # A single given cell: it just equals the target (a clue).
         return vs[0] == target
     raise ValueError(f"unknown op {op!r}")
 
 
 def _base_solver():
+    # Build a solver with all the puzzle rules but no answer chosen yet.
+    # Returns (solver, grid-of-variables) so callers can reuse it.
     x = [[z3.Int(f"x_{r}_{c}") for c in range(N)] for r in range(N)]
     s = z3.Solver()
     for r in range(N):
         for c in range(N):
-            s.add(x[r][c] >= 1, x[r][c] <= N)
-        s.add(z3.Distinct(x[r]))                       # rows
+            s.add(x[r][c] >= 1, x[r][c] <= N)          # each cell holds 1..N
+        s.add(z3.Distinct(x[r]))                       # rows: all different (Latin row)
     for c in range(N):
-        s.add(z3.Distinct([x[r][c] for r in range(N)]))  # columns
+        s.add(z3.Distinct([x[r][c] for r in range(N)]))  # columns: all different
+    # Add one arithmetic rule per cage (sum / product / difference / etc.).
     for (target, op, cells) in CAGES:
         s.add(_cage_constraint(x, target, op, cells))
     return s, x
@@ -69,6 +84,7 @@ def _base_solver():
 
 def solve():
     s, x = _base_solver()
+    # Find any grid satisfying every row, column, and cage rule.
     if s.check() != z3.sat:
         return None
     m = s.model()
@@ -76,6 +92,9 @@ def solve():
 
 
 def is_unique(solution):
+    # Same trick as in sudoku.py: rebuild the rules, then forbid the answer we
+    # found (require at least one cell to differ). If now unsat, it was the
+    # only solution; if sat, a different valid grid exists.
     s, x = _base_solver()
     s.add(z3.Or([x[r][c] != solution[r][c]
                  for r in range(N) for c in range(N)]))
@@ -89,7 +108,11 @@ def render(grid=None):
     """Draw the KenKen with cage borders and clues. With `grid`, also fills in
     the digits (so the same function shows the input puzzle and the solution).
     Clue notation: target then operation, e.g. `3+`, `12x` (times), `2/` (divide)
-    shown in the top-left cell of each cage. `x` = multiply, `/` = divide."""
+    shown in the top-left cell of each cage. `x` = multiply, `/` = divide.
+
+    This function is pure ASCII-art for the terminal -- no Z3 here. You can
+    skim it; the solving logic is all above.
+    """
     cage_of, clue, anchor = {}, {}, {}
     for idx, (t, op, cells) in enumerate(CAGES):
         clue[idx] = f"{t}{_OP_SYM[op]}"
@@ -141,10 +164,13 @@ if __name__ == "__main__":
     print("\nSolution:\n")
     print(render(sol))
 
-    # Self-checks: Latin square + every cage satisfied.
+    # Independent checks. First: every row and column is exactly {1..N}.
     rng = set(range(1, N + 1))
     assert all(set(sol[r]) == rng for r in range(N)), "row not a permutation"
     assert all({sol[r][c] for r in range(N)} == rng for c in range(N)), "col not a permutation"
+    # Second: re-check the cages by plugging the actual numbers back in. z3.IntVal
+    # wraps a fixed number as a Z3 value, so the cage rules become true/false facts;
+    # if they're all satisfiable together, no cage was violated.
     chk = z3.Solver()
     xs = [[z3.IntVal(sol[r][c]) for c in range(N)] for r in range(N)]
     for (t, op, cells) in CAGES:

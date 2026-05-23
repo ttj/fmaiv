@@ -12,28 +12,69 @@
 // The first should report "Q.E.D."; the second should report "no
 // satisfying assignment" (which is the same statement).
 
+// "popcount" = population count = how many 1-bits are in a number.
+// `module popcount where` names this file's collection of definitions.
 module popcount where
 
 /** Textbook popcount: sum of the bits. */
+// Type: takes an 8-bit word, returns a 4-bit word. Why [4]? The answer is at
+// most 8, and 8 fits in 4 bits (4 bits hold 0..15), so [4] is wide enough.
 popcount_simple : [8] -> [4]
+// `[0 # [b] | b <- x]` is a comprehension over the bits of x:
+//   b <- x      -- draw each bit b from x (an [8] is a sequence of 8 Bits).
+//   [b]         -- wrap that one bit into a 1-bit word, type [1].
+//   0 # [b]     -- `#` concatenates sequences; here it glues zeros in front of
+//                  the 1-bit word to widen it to a [4] (so 0 or 1 as a 4-bit
+//                  number). Cryptol infers how many zeros from the [4] needed.
+// So the comprehension is a list of eight 4-bit numbers, each 0 or 1.
+// `sum` adds them all up -> the count of 1-bits, as a [4].
 popcount_simple x = sum [0 # [b] | b <- x]
 
 /** Kernighan's trick: repeatedly clear the lowest set bit. The number
  *  of iterations until x = 0 is popcount(x). At 8 bits this loop
  *  terminates after at most 8 steps; we unfold a fixed eight-step
  *  schedule so the function is total at this width. */
+// Key fact: the expression `y && (y - 1)` (bitwise AND of y with y-1) erases
+// exactly ONE set bit -- the lowest 1-bit -- from y. Do it until you reach 0,
+// and the number of times you did it equals the number of 1-bits.
 popcount_kernighan : [8] -> [4]
+// Outer plan: add up an indicator for each of 8 possible iteration steps.
+//   [0..7]            -- the sequence 0,1,2,3,4,5,6,7 (eight step indices).
+//   [step k | k<-...] -- for each index k, compute step k (0 or 1), then `sum`.
 popcount_kernighan x = sum [step k | k <- [0..7]]
+  // `where` introduces local helper definitions used only in the line above.
   where
     // 1 if the k-th iteration still has a bit to clear, 0 otherwise.
+    // `if ... then 1 else 0`: turns a yes/no into a number we can sum.
+    // `!=` is "not equal". So: contribute 1 while x (after k clears) is nonzero.
     step k = if iterate k != 0 then 1 else 0
-    // value of x after `k` Kernighan iterations
+    // value of x after `k` Kernighan iterations.
+    // `steps @ k`: `@` indexes a sequence -- `steps @ k` is element number k.
+    // The `: [8]` is a type annotation pinning the result to an 8-bit word.
     iterate k = (steps @ k) : [8]
+    // `steps` is a 9-long sequence of 8-bit words: x, then x after 1 clear,
+    // after 2 clears, ... after 8 clears. (9 = the start plus 8 steps.)
     steps : [9][8]
+    // This builds `steps` from itself (a recursive/self-referential sequence):
+    //   [x]                       -- element 0 is the original x.
+    //   # [ y && (y - 1) | ... ]  -- `#` appends the next 8 elements; each one
+    //                                is the PREVIOUS element y with its lowest
+    //                                set bit cleared.
+    //   | y <- steps | _ <- [0..7] -- two bars = a PARALLEL comprehension: it
+    //                                walks `steps` and `[0..7]` together in
+    //                                lockstep (like a zip). Drawing y from
+    //                                `steps` feeds each computed element back in
+    //                                as the input to the next; `[0..7]` just
+    //                                caps the count at 8 (the `_` ignores its
+    //                                value -- it is only there to bound length).
     steps = [x] # [ y && (y - 1) | y <- steps | _ <- [0..7] ]
 
 /** Equivalence: the two definitions agree on every 8-bit input.
  *  `:prove popcount_kernighan_eq` discharges this via Cryptol's built-in
  *  SBV / What4 backend (Z3 under the hood). */
+// Type: takes an [8], returns a Bit (a single true/false). A property must
+// ultimately produce a Bit (the claim, true or false, for given inputs).
 popcount_kernighan_eq : [8] -> Bit
+// The claim: for every 8-bit x, the two implementations give the same count.
+// `:prove popcount_kernighan_eq` -> "Q.E.D." (proved for all 256 inputs).
 property popcount_kernighan_eq x = popcount_simple x == popcount_kernighan x

@@ -4,36 +4,54 @@
 -- picks producer, consumer, or idle: the producer adds an item only if there
 -- is room; the consumer removes one only if the buffer is non-empty. This is
 -- the classic concurrency example for "no overflow / no underflow".
-MODULE main
-DEFINE CAP := 3;
+--
+-- "Concurrency without process": instead of the old `process` keyword we model
+-- who-acts-next with a single free variable `act` that the model re-chooses
+-- every step. Each spec below is marked HOLDS (should pass) or DELIBERATELY
+-- FALSE (should fail with a counterexample).
+-- Operators: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- the single top-level component; "main" is the entry point
+DEFINE CAP := 3;     -- a named constant (a textual abbreviation, NOT a variable)
 VAR
-  buf : 0..3;                 -- must match CAP
-  act : {prod, cons, idle};   -- free: chosen nondeterministically each step
+  buf : 0..3;                 -- count of items in the buffer; range must match CAP
+  act : {prod, cons, idle};   -- a FREE INPUT: it has no init/next, so the model
+                              -- picks one of these three values fresh each step
+                              -- (this is how the "scheduler" is modeled)
 
 ASSIGN
-  init(buf) := 0;
+  init(buf) := 0;                       -- start with an empty buffer
+  -- next(buf): try guards top to bottom, first true one wins; TRUE = otherwise.
   next(buf) := case
-    act = prod & buf < CAP : buf + 1;   -- produce only with room
-    act = cons & buf > 0   : buf - 1;   -- consume only when non-empty
-    TRUE                   : buf;
+    act = prod & buf < CAP : buf + 1;   -- produce only with room (no overflow)
+    act = cons & buf > 0   : buf - 1;   -- consume only when non-empty (no underflow)
+    TRUE                   : buf;       -- idle, or a blocked produce/consume: unchanged
   esac;
 
+-- FAIRNESS c tells the checker to only consider runs in which condition c is
+-- true infinitely often. Here it rules out unfair schedules that, e.g., let the
+-- producer act forever but never the consumer.
 -- Producer and consumer each act infinitely often.
 FAIRNESS act = prod;
 FAIRNESS act = cons;
 
+-- INVARSPEC = safety: must be true in every reachable state.
 -- SAFETY: the buffer never overflows or underflows (HOLDS).
 INVARSPEC buf <= CAP;
 INVARSPEC buf >= 0;
 
+-- CTLSPEC AG EF p = "from every reachable state, p is still reachable on some
+-- path" (A=all paths, E=some path, G=always, F=eventually).
 -- REACHABILITY: the buffer can be full, and can be empty (both HOLD).
 CTLSPEC AG EF (buf = CAP);
 CTLSPEC AG EF (buf = 0);
 
--- LIVENESS under fairness: there is always room again, and an item again
+-- LTLSPEC reasons about each single run over time. G F p = "infinitely often p"
+-- (always, at every point, p happens again later). Holds thanks to the FAIRNESS
+-- above. LIVENESS under fairness: there is always room again, and an item again
 -- (HOLD: a fair consumer keeps making room; a fair producer keeps adding).
 LTLSPEC G F (buf < CAP);
 LTLSPEC G F (buf > 0);
 
--- DELIBERATELY FALSE: claims the buffer never fills — counterexample produced.
+-- DELIBERATELY FALSE: claims the buffer never fills -- counterexample produced
+-- (a run where prod fires enough times to reach buf = CAP).
 INVARSPEC buf != CAP;

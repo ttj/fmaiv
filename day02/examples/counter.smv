@@ -1,35 +1,50 @@
-MODULE main
+-- A simple counter with an on/off mode, driven by a button "press".
+-- When on (and not pressed) it counts x up by 1 each step; once x reaches
+-- count_max (= 10), or whenever press happens, it switches off and resets x = 0.
+-- This file is a SAMPLER: many specs below are intentionally duplicated or
+-- contradictory so you can see which pass and which fail and why. Each spec is
+-- annotated with what it claims in English and whether it should pass or fail.
+-- Operators: ! = not, & = and, | = or, -> = "implies". x >= y, x < y as usual.
+MODULE main          -- single top-level component; "main" is the entry point
   VAR
-    mode : {off,on};
-    press : boolean;
+    mode : {off,on};  -- enumerated: the counter is either off or on
+    press : boolean;  -- a FREE INPUT (no init/next): the button, chosen
+                      -- TRUE or FALSE fresh each step (models a user)
     -- what happens if we increase the range of x values allowed?
-    x : 0..25;
+    -- (Answer: count_max stays 10, so x still tops out at 10 -- the larger
+    --  ranges below just permit unused values and a bigger state space.)
+    x : 0..25;        -- the count, an integer 0..25
     --x : 0..1000;
     --x : 0..10000;
     --x : 0..100000;
 
-  DEFINE count_max := 10;
+  DEFINE count_max := 10;  -- named constant (textual abbreviation, not a variable)
 
   ASSIGN
+    -- next(mode): case picks the FIRST true guard top to bottom.
     next(mode) := case
-                    mode = off & !press : off;
-                    mode = off & press : on;
-                    mode = on & !press & x < count_max : on;
-                    mode = on & (press | x >= count_max) : off;
+                    mode = off & !press : off;                    -- off, no press -> stay off
+                    mode = off & press : on;                      -- off + press -> turn on
+                    mode = on & !press & x < count_max : on;      -- on, counting up -> stay on
+                    mode = on & (press | x >= count_max) : off;   -- pressed OR maxed out -> turn off
                     TRUE : mode; -- stay same otherwise
                 esac;
+    -- next(x): mirrors mode -- climb while counting, reset to 0 when turning off.
     next(x)    := case
-                    mode = on & !press & x < count_max : x+1;
-                    mode = on & (press | x >= count_max) : 0;
-                    TRUE : x;
+                    mode = on & !press & x < count_max : x+1;     -- count up by one
+                    mode = on & (press | x >= count_max) : 0;     -- reset on turn-off
+                    TRUE : x;                                     -- otherwise hold (e.g. while off)
                 esac;
-    init(mode) := off;
-    init(x)    := 0;
+    init(mode) := off;   -- start off...
+    init(x)    := 0;     -- ...with the count at 0
 
+-- FAIRNESS c: only consider runs where c is true infinitely often. Here it
+-- forbids "stuck off forever" runs, so liveness specs see real cycling.
 -- fairness condition: it is not always possible to remain in the mode off
 FAIRNESS
   mode != off;
 
+-- (Alternative fairness/justice constraints, left disabled for experimentation.)
 --FAIRNESS
 --  mode = off -> !press;
 
@@ -39,96 +54,124 @@ FAIRNESS
 --JUSTICE
 --  x < count_max;
 
+-- INVARSPEC = safety: must hold in EVERY reachable state.
+-- "the count never exceeds the max" -- holds (x tops out at 10) -> should pass
 INVARSPEC
   x <= count_max;
 
+-- "whenever off, the count is 0" -- holds (turning off resets x) -> should pass
 INVARSPEC
   (mode = off) -> (x = 0);
 
+-- "a nonzero count means we are on" -- holds (x only grows while on) -> should pass
 INVARSPEC
   (x > 0) -> (mode = on);
 
+-- "count is strictly below the max always" -- FALSE: x does reach 10 -> should fail
 INVARSPEC
   x < count_max;
 
+-- "count never passes the halfway mark (5)" -- FALSE: x climbs to 10 -> should fail
 INVARSPEC
   x <= count_max / 2;
 
+-- LTL: G = always, F = eventually, X = next, U = until (one run over time).
+-- F G p = "eventually, p holds forever after". Here: stuck at (on & x=10)
+-- forever -- impossible (x=10 immediately forces off) -> should fail
 LTLSPEC
   F G (mode = on & x = count_max);
 
 LTLSPEC
-  F G (mode = on & x = count_max);
+  F G (mode = on & x = count_max);   -- duplicate of the line above -> should fail
 
+-- "the count is always 0" -- FALSE the moment it counts up -> should fail
 LTLSPEC
   G (x = 0);
 
+-- SPEC is CTL (same as CTLSPEC). AG p = "p in every reachable state".
+-- "count always 0" -- false -> should fail
 SPEC
   AG (x = 0);
 
+-- EF p = "on SOME path, p is eventually reachable".
+-- "the count CAN reach the max" -- true via the counting-up path -> should pass
 SPEC
   EF (x = count_max);
 
 
+-- F p over all (fair) runs: "every run eventually hits (on & x=10)". A fair run
+-- can keep toggling off/on so x never climbs to 10 -> should fail
 LTLSPEC
   F (mode = on & x = count_max);
 
 LTLSPEC
-  F (x = count_max);
+  F (x = count_max);   -- "every run eventually reaches x=10" -- same toggling escape -> should fail
 
 
+-- G F p = "infinitely often p". Off always coincides with x=0, and fair runs
+-- return to off forever -> should pass
 -- always eventually mode is off and x is 0
 LTLSPEC
   G F (mode = off & x = 0);
 
+-- F G p = "eventually off-and-0 forever" -- that is "stuck off", which fairness
+-- forbids -> should fail
 LTLSPEC
   F G (mode = off & x = 0);
 
 LTLSPEC
-  F (x = count_max);
+  F (x = count_max);   -- same as earlier "eventually x=10" -> should fail
 
 LTLSPEC
-  G F (x = count_max);
+  G F (x = count_max);  -- "infinitely often x=10" -- toggling run avoids it -> should fail
 
 
+-- CTLSPEC: A = all paths, E = some path, with fairness restricting to fair paths.
+-- AG AF p = "from everywhere, on all (fair) paths, p recurs". off&x=0 recurs
+-- on every fair run -> should pass
 CTLSPEC
   AG AF (mode = off & x = 0);
-  
-CTLSPEC
-  AG (x < count_max);
 
 CTLSPEC
-  AG (x <= count_max);
-  
-CTLSPEC
-  AF (x = count_max);
+  AG (x < count_max);   -- "count always below 10" -- false, x reaches 10 -> should fail
 
+CTLSPEC
+  AG (x <= count_max);  -- "count always at most 10" -- true -> should pass
+
+CTLSPEC
+  AF (x = count_max);   -- "on all fair paths eventually x=10" -- toggling path avoids it -> should fail
+
+-- both conjuncts hold (off recurs; x=0 recurs whenever off) -> should pass
 -- always eventually mode is off AND always eventually x is 0
 LTLSPEC
   G F (mode = off) & G F (x = 0);
 
+-- "infinitely often (on & x=10)" -- toggling run avoids x=10 -> should fail
 -- always eventually mode is off and x is count_max
 LTLSPEC
   G F (mode = on & x = count_max);
 
+-- G F(on) holds, but G F(x=10) can fail on a toggling run, so the AND -> should fail
 -- always eventually mode is off AND always eventually x is count_max
 LTLSPEC
   G F (mode = on) & G F (x = count_max);
 
+-- "eventually on forever" -- impossible (reaching x=10 forces off) -> should fail
 -- eventually always mode is on
 LTLSPEC
   F G (mode = on);
 
+-- "eventually off forever" -- that is "stuck off", forbidden by fairness -> should fail
 -- eventually always mode is off
 LTLSPEC
   F G (mode = off);
 
 
 LTLSPEC
-  G (mode = off);
+  G (mode = off);   -- "always off" -- false (a press turns it on) -> should fail
 
 LTLSPEC
-  G (x <= count_max);
+  G (x <= count_max);  -- "count always at most 10" -- true -> should pass
 
 LTLSPEC
-  F (x > count_max);
+  F (x > count_max);   -- "eventually x exceeds 10" -- never happens -> should fail

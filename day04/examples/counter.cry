@@ -23,40 +23,68 @@
  * Both should report "Q.E.D.".
  */
 
+// `module counter where` names this file's collection of definitions.
 module counter where
 
+// A named constant. `COUNT_MAX : [4]` declares it as a 4-bit word; `= 10` is
+// its value. (4 bits hold 0..15, so 10 fits.) This is a *value*, unlike the
+// `type N = ...` constants in the cipher files which are compile-time SIZES.
 COUNT_MAX : [4]
 COUNT_MAX = 10
 
+// A type alias for the counter's state: a PAIR (a "tuple") written with commas
+// in parentheses. `(Bit, [4])` = (a single true/false flag, a 4-bit number).
+// Here the Bit is the on/off mode and the [4] is the current count x.
 type State = (Bit, [4])  // (mode, x); False = OFF, True = ON
 
+// The starting state: mode OFF (False) and count 0, written as a tuple literal.
 initial : State
 initial = (False, 0)
 
 /* One step of the counter. The four guards match the cases in counter.c,
  * counter.lean, and counter.smv. Cryptol's `if-then-else` chain plays the
  * role of the SMV `next(...)` block. */
+// Type: `State -> Bit -> State` = takes a State AND a Bit (two arguments, one
+// per arrow), returns the next State. The Bit is the button-press input.
 step : State -> Bit -> State
 step s press =
-    if (~mode) && (~press)                            then (False, x)
-    else if (~mode) && press                          then (True,  x)
-    else if mode && (~press) && (x < COUNT_MAX)       then (True,  x + 1)
-    else if mode && (press || (x >= COUNT_MAX))       then (False, 0)
-    else                                                   (mode,  x)
+    // An if/else-if chain that picks the next (mode, x) tuple. `~` is logical
+    // NOT (on a Bit), `&&` is AND, `||` is OR. Exactly one branch is taken.
+    if (~mode) && (~press)                            then (False, x)      // OFF, no press -> stay OFF, count unchanged
+    else if (~mode) && press                          then (True,  x)      // OFF, pressed  -> turn ON,  count unchanged
+    else if mode && (~press) && (x < COUNT_MAX)       then (True,  x + 1)  // ON, no press, room to count -> increment
+    else if mode && (press || (x >= COUNT_MAX))       then (False, 0)      // ON and (pressed OR maxed)   -> turn OFF, reset
+    else                                                   (mode,  x)      // anything else -> no change
     where
-        mode = s.0
-        x    = s.1
+        // Pull the two parts out of the state tuple `s` for readability:
+        mode = s.0   // `.0` is the FIRST tuple element (the mode Bit).
+        x    = s.1   // `.1` is the SECOND tuple element (the count [4]).
 
 /* The invariant we want to hold of every reachable state. */
+// "Invariant" = a property we claim is always true. Here: the count never
+// exceeds COUNT_MAX. Returns a Bit (true if the state is OK). `<=` is "<=".
 inv : State -> Bit
-inv s = s.1 <= COUNT_MAX
+inv s = s.1 <= COUNT_MAX   // s.1 is the count x; check x <= COUNT_MAX
 
 /* Property (a): bounded reachability. Every 25-press trajectory keeps
  * the invariant. Same statement CBMC discharges on counter_check.c. */
+// `(presses : [25]Bit)` is one argument named `presses`, typed as 25 Bits
+// (a sequence of 25 button presses). The prover will try ALL such sequences.
 property bounded_invariant (presses : [25]Bit) =
+    // `foldl (&&) True xs` combines all elements of xs with AND, starting from
+    // True -- i.e. it asks "are ALL of xs true?". Here xs is [inv s | s <- states],
+    // the invariant checked at every state, so this says "inv holds everywhere".
     foldl (&&) True [ inv s | s <- states ]
     where
+        // The 26 states visited: the start, plus one after each of 25 presses.
         states : [26]State
+        // Self-referential sequence (like `steps` in popcount.cry):
+        //   [initial]                       -- state 0 is the initial state.
+        //   # [ step s p | ... ]            -- `#` appends the next 25 states.
+        //   | s <- states | p <- presses    -- PARALLEL (lockstep) draw: take
+        //                                      each state s and the matching
+        //                                      press p, and feed `step s p` back
+        //                                      in as the next state.
         states = [initial] # [ step s p | s <- states | p <- presses ]
 
 /* Property (b): inductive invariant. If a state satisfies inv, one step
@@ -64,5 +92,10 @@ property bounded_invariant (presses : [25]Bit) =
  * this implies the invariant on every reachable state, for every length
  * of trajectory — the inductive proof from Day 3, but discharged by Z3
  * instead of written by hand. */
+// Two arguments here: any state `s` and any single `press`. No starting state
+// and no fixed length -- this reasons about ONE arbitrary step.
 property inductive_invariant (s : State) (press : Bit) =
+    // Read: "IF s already satisfies the invariant, THEN so does the next state;
+    // otherwise we make no claim (True)." This is the inductive step: holds-now
+    // implies holds-after-one-step, which (with inv initial) covers all lengths.
     if inv s then inv (step s press) else True

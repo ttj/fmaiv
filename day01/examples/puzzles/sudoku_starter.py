@@ -25,19 +25,28 @@ PUZZLE = [
 
 
 def solve(puzzle):
+    # 81 unknown integers, one per cell; cells[r][c] is what Z3 will fill in.
     cells = [[z3.Int(f"c_{r}_{c}") for c in range(9)] for r in range(9)]
-    s = z3.Solver()
+    s = z3.Solver()   # collects the rules you are about to add with s.add(...)
 
     # TODO 1: constrain every cell to a digit in 1..9.
+    #   Loop over all r, c and add BOTH cells[r][c] >= 1 and cells[r][c] <= 9.
     #         (hint: cells[r][c] >= 1, cells[r][c] <= 9)
 
     # TODO 2: every row contains distinct values.
+    #   For each row r, add that its 9 cells are all different. z3.Distinct(xs)
+    #   means "no two of xs are equal", which for digits 1..9 forces a full 1..9.
     #         (hint: z3.Distinct(cells[r]))
 
     # TODO 3: every column, and every 3x3 box, contains distinct values.
+    #   Column c: the cells [cells[0][c], cells[1][c], ...] must be Distinct.
+    #   Box: for each of the 9 boxes, gather its 3x3 = 9 cells (top-left corner
+    #   is row 3*br, col 3*bc) and make them Distinct too.
 
     # TODO 4: pin each given clue (puzzle[r][c] != 0) to its value.
+    #   Where the puzzle already shows a digit, add cells[r][c] == puzzle[r][c].
 
+    # Once all four TODOs are in, ask Z3 to find an assignment; unsat -> None.
     if s.check() != z3.sat:
         return None
     m = s.model()

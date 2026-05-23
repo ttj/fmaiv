@@ -1,5 +1,5 @@
 -- Euclid's GCD algorithm for naturals a, b
--- 
+--
 -- l1: while (a != b) {
 -- l2:   if (a > b)
 -- l3:     a = a - b;
@@ -7,24 +7,31 @@
 -- l4:     b = b - a;
 -- l5: }
 --
+-- This file shows the standard recipe for turning a small PROGRAM into a state
+-- machine NuSMV can check. Read it as: pc ("program counter") tracks which line
+-- we are on; a and b are the program's variables.
 -- general process
 -- 1) introduce a program counter (pc) variable
 --    that ranges over the lines of code (l1, l2, etc.)
--- 2) for any loops, have to in essence convert them 
+-- 2) for any loops, have to in essence convert them
 --    into gotos (see from l3/l4 back to l1)
--- 3) sequentially go over the lines of code, add updates 
+-- 3) sequentially go over the lines of code, add updates
 --    for the pc going to subsequent lines based on conditions, etc
 -- 4) add termination condition at end (so infinite execs)
+-- Operators: ! = not, & = and, | = or, -> = "implies"; != means "not equal".
 
-MODULE main
+MODULE main          -- single top-level component; "main" is the entry point
 VAR
-  a : 0..10;
-  b : 0..10;
-  pc : {l1, l2, l3, l4, l5};
+  a : 0..10;         -- program variable a, an integer in 0..10
+  b : 0..10;         -- program variable b, an integer in 0..10
+  pc : {l1, l2, l3, l4, l5};  -- the program counter: which line we are at
 ASSIGN
-  init(pc) := l1;
+  init(pc) := l1;    -- execution starts at line l1
+-- a and b are given NO init() here, so they are FREE INPUTS: NuSMV considers
+-- EVERY starting pair (a,b) in 0..10 x 0..10 at once. (Uncomment to pin them.)
 --  init(a) := 10;
 --  init(b) := 1;
+  -- next(pc): the control flow. Guards tried top to bottom, first true wins.
   next(pc) :=
     case
 -- just copy of code for explanation
@@ -33,21 +40,23 @@ ASSIGN
 -- l3:     a = a - b;
 --       else
 -- l4:     b = b - a;
--- l5: }    
-      pc = l1 & a != b : l2; -- while (a != b) is true
-      pc = l1 & a = b : l5; -- while (a != b) is false, done
-      pc = l2 & a > b : l3; -- if (a > b): first if
+-- l5: }
+      pc = l1 & a != b : l2; -- while (a != b) is true -> enter loop body
+      pc = l1 & a = b : l5; -- while (a != b) is false -> done, jump to end
+      pc = l2 & a > b : l3; -- if (a > b): take the "then" branch
       pc = l2 & a <= b : l4; -- else case, negation of (a > b)
-      pc = l3 | pc = l4 : l1; -- repeat loop, goto
-      pc = l5 : l5; -- terminate, just stay here (so inf executions)
-    esac;
+      pc = l3 | pc = l4 : l1; -- after either branch, loop back to the test (goto)
+      pc = l5 : l5; -- terminate: stay here forever (so the run is infinite)
+    esac;            -- note: no TRUE branch needed -- the cases above are exhaustive
+  -- next(a): a only changes on its own line (l3), and only when its condition holds.
   next(a) :=
     case
       -- remark: we must repeat the condition (a > b) here, because this has
       -- to hold for all the program locations inside the "if" block...
-      pc = l3 & a > b : a - b;
-      TRUE : a;
+      pc = l3 & a > b : a - b;  -- execute "a = a - b"
+      TRUE : a;                 -- on every other line, a is unchanged
     esac;
+  -- next(b): symmetric -- b changes only on line l4 when b > a ("b = b - a").
   next(b) :=
     case
       pc = l4 & b > a : b - a;
@@ -55,38 +64,48 @@ ASSIGN
     esac;
 
 -- general pattern: if we don't specify initial
--- values for variables, then we can specify them 
--- as the 1st element along a trace in ltl, e.g., 
+-- values for variables, then we can specify them
+-- as the 1st element along a trace in ltl, e.g.,
 -- set the values a and b here outside the temporal operators
+-- (so "(start values) -> F (goal)" only constrains runs that begin that way).
 --LTLSPEC (a = 16 & b = 12) -> F (a = 4 & b = 4);
 
+-- CTLSPEC uses A = all paths, E = some path, G = always, F = eventually.
 -- CTL specs: eventually reach termination state (a = b)
+-- This first one claims: from ANY reachable state where a != b, all paths reach
+-- a = b. It is expected to FAIL: if a = 0 (or b = 0) the loop subtracts forever
+-- without a and b ever meeting, so NuSMV prints a counterexample.
 CTLSPEC AG ((a != b) -> AF (a = b))
+-- The next three start from a SPECIFIC (a,b) at l1 and claim the run reaches the
+-- correct gcd. gcd(6,9)=3 -> should pass:
 CTLSPEC AG ((a = 6 & b = 9 & pc = l1) -> AF (a = 3 & b = 3))
 
-CTLSPEC AG ((a = 5 & b = 9 & pc = l1) -> AF (a = 1 & b = 1))
+CTLSPEC AG ((a = 5 & b = 9 & pc = l1) -> AF (a = 1 & b = 1))   -- gcd(5,9)=1 -> should pass
 
-CTLSPEC AG ((a = 9 & b = 4 & pc = l1) -> AF (a = 4 & b = 5))
+CTLSPEC AG ((a = 9 & b = 4 & pc = l1) -> AF (a = 4 & b = 5))   -- WRONG target (gcd(9,4)=1, not 4,5) -> should fail
 
 
-LTLSPEC (a = 4 & b = 3) -> F (a = 1 & b = 1);
+-- LTL form: "(initial a,b) -> F (goal)" -- pin the start values outside the
+-- temporal operator, then ask F (eventually) the goal holds on that run.
+LTLSPEC (a = 4 & b = 3) -> F (a = 1 & b = 1);   -- gcd(4,3)=1 -> should pass
 
-LTLSPEC (a = 4 & b = 3) -> F (a = 2 & b = 2);
+LTLSPEC (a = 4 & b = 3) -> F (a = 2 & b = 2);   -- wrong target (1, not 2) -> should fail
 
-LTLSPEC (a = b) -> F (a = b);
+LTLSPEC (a = b) -> F (a = b);                   -- trivially true (goal already holds) -> should pass
 
 --LTLSPEC (a / b = 0) -> F (a = b);
 
-LTLSPEC (a = 4 & b = 2) -> F (a = 2 & b = 2);
+LTLSPEC (a = 4 & b = 2) -> F (a = 2 & b = 2);   -- gcd(4,2)=2 -> should pass
 
-LTLSPEC (a = 4 & b = 8) -> F (a = 2 & b = 2);
+LTLSPEC (a = 4 & b = 8) -> F (a = 2 & b = 2);   -- gcd(4,8)=4, wrong target -> should fail
 
-LTLSPEC (a = 5 & b = 5) -> F (a = 5 & b = 5);
-
-
-LTLSPEC (a = 3 & b = 9) -> F (a = 3 & b = 3);
+LTLSPEC (a = 5 & b = 5) -> F (a = 5 & b = 5);   -- already equal -> should pass
 
 
+LTLSPEC (a = 3 & b = 9) -> F (a = 3 & b = 3);   -- gcd(3,9)=3 -> should pass
+
+
+-- (commented out: values exceed the 0..10 range of a and b)
 --LTLSPEC (a = 99 & b = 33) -> F (a = 33 & b = 33);
 
 --LTLSPEC (a = 99 & b = 27) -> F (a = 9 & b = 9);
@@ -98,9 +117,10 @@ LTLSPEC (a = 3 & b = 9) -> F (a = 3 & b = 3);
 --LTLSPEC (a = 21 & b = 7) -> F (a = 3 & b = 3);
 
 
-INVARSPEC a > 0 & b > 0;
+-- INVARSPEC = safety: must hold in EVERY reachable state.
+INVARSPEC a > 0 & b > 0;     -- should FAIL: a and b may be 0 (range starts at 0)
 
-INVARSPEC a >= 0 & b >= 0;
+INVARSPEC a >= 0 & b >= 0;   -- should pass: the 0..10 range guarantees this
 
-INVARSPEC a = 0 & b = 0;
+INVARSPEC a = 0 & b = 0;     -- should FAIL: most states do not have both at 0
 

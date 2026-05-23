@@ -29,6 +29,24 @@
                       split into one sub-goal per field
     • ⟨_, _⟩         — anonymous constructor for And/Exists/structures
     • h.1 / h.2     — first / second component of an And
+    • obtain ⟨a, b⟩ := h — destructure h (an ∃/∧/structure) into named pieces a, b
+    • rw [h]        — rewrite the goal left-to-right using equation h;
+                      `rw [h] at H` rewrites in hypothesis H instead
+    • by_cases h:P  — classical split into the case P holds and the case ¬P
+    • omega         — decide a goal that is linear arithmetic over Nat/Int
+    • simp / simp_all / simpa — simplify (the goal / incl. all hypotheses / then close)
+    • have h : T := e — record a proved intermediate fact h of type T
+    • suffices h : T by .. — it's enough to prove T (then the `by` block uses it);
+                      the new goal becomes T
+    • refine ⟨?_, ?_⟩ — like exact but leaves `?_` holes as new sub-goals
+    • t <;> s       — run tactic s on EVERY sub-goal that t produced
+
+  MORE NOTATION:
+    • `∀ x, P x` — for all x, P;   `∃ x, P x` — there exists an x with P
+    • `P ↔ Q`    — P iff Q;   `.mp` is the → direction, `.mpr` the ←
+    • `P ∧ Q`    — and;   `a ≤ b`, `a < b` — at-most / less-than on numbers
+    • `.init` / `.step` — dotted constructor (the constructor of the expected type)
+    • `⊢`        — in the InfoView, marks the current goal (what's left to prove)
 
   Reading tip: Lean 4 displays the current goal in the InfoView while
   you write a proof; each tactic transforms that goal step-by-step
@@ -130,23 +148,23 @@ inductive ReachableInK {State : Type} (ts : TransitionSystem State) : Nat → St
     Forgets the step count, connecting to the unindexed `Reachable`. -/
 theorem reachableInK_reachable {State : Type} (ts : TransitionSystem State) :
     ∀ k s, ReachableInK ts k s → Reachable ts s := by
-  intro k s hrk
-  induction hrk with
-  | init s hi => exact Reachable.init s hi
-  | step _ s s' _ hn ih => exact Reachable.step s s' ih hn
+  intro k s hrk                          -- name the count k, state s, and proof hrk
+  induction hrk with                     -- recurse on how hrk was built
+  | init s hi => exact Reachable.init s hi          -- base: rebuild via Reachable's init constructor
+  | step _ s s' _ hn ih => exact Reachable.step s s' ih hn  -- step: ih gives Reachable s, then take one step
 
 /-- Every reachable state is reachable in some number of steps. -/
 theorem reachable_iff_reachableInK {State : Type} (ts : TransitionSystem State)
     (s : State) : Reachable ts s ↔ ∃ k, ReachableInK ts k s := by
-  constructor
-  · intro hr
+  constructor                            -- prove the ↔ as two directions
+  · intro hr                             -- (→) assume Reachable s
     induction hr with
-    | init s hi => exact ⟨0, .init s hi⟩
+    | init s hi => exact ⟨0, .init s hi⟩              -- initial ⇒ reachable in 0 steps
     | step s s' _ hn ih =>
-      obtain ⟨k, hk⟩ := ih
-      exact ⟨k + 1, .step k s s' hk hn⟩
-  · intro ⟨k, hk⟩
-    exact reachableInK_reachable ts k s hk
+      obtain ⟨k, hk⟩ := ih               -- ih says s is reachable in some k; name k and its proof hk
+      exact ⟨k + 1, .step k s s' hk hn⟩  -- one more step ⇒ reachable in k+1
+  · intro ⟨k, hk⟩                         -- (←) assume "reachable in some k"; unpack k and hk
+    exact reachableInK_reachable ts k s hk            -- forget the count via the previous theorem
 
 /-- ★ THEOREM 5 — Step-indexed invariant.
     If a property `P` (indexed by step count) holds for all k-step
@@ -159,10 +177,10 @@ theorem step_indexed_invariant {State : Type}
     (ts : TransitionSystem State) (P : Nat → State → Prop)
     (h : ∀ k s, ReachableInK ts k s → P k s) :
     ∀ s, Reachable ts s → ∃ k, P k s := by
-  intro s hr
-  rw [reachable_iff_reachableInK] at hr
-  obtain ⟨k, hk⟩ := hr
-  exact ⟨k, h k s hk⟩
+  intro s hr                             -- name the state s and reachability proof hr
+  rw [reachable_iff_reachableInK] at hr  -- rewrite hr into the "∃ k, reachable in k" form
+  obtain ⟨k, hk⟩ := hr                    -- pull out that k and its proof hk
+  exact ⟨k, h k s hk⟩                     -- supply k together with P k s (from hypothesis h)
 
 /-- ★ THEOREM 6 — K-induction principle.
     A step-indexed property `P` is a step-indexed invariant if:
@@ -175,10 +193,10 @@ theorem k_induction {State : Type}
     (hinit : ∀ s, ts.init s → P 0 s)
     (hstep : ∀ k s s', ReachableInK ts k s → P k s → ts.next s s' → P (k + 1) s') :
     ∀ k s, ReachableInK ts k s → P k s := by
-  intro k s hrk
-  induction hrk with
-  | init s hi => exact hinit s hi
-  | step k s s' hrk hn ih => exact hstep k s s' hrk ih hn
+  intro k s hrk                          -- name count k, state s, proof hrk
+  induction hrk with                     -- recurse on the k-step reachability proof
+  | init s hi => exact hinit s hi        -- step 0: use the init hypothesis
+  | step k s s' hrk hn ih => exact hstep k s s' hrk ih hn  -- inductive step: ih = P k s, push through hstep
 
 /-- If a 1-step inductive invariant Q holds AND a step-indexed property
     P holds for all k-step reachable states satisfying Q, then P holds
@@ -190,12 +208,13 @@ theorem k_induction_with_invariant {State : Type}
     (hinit : ∀ s, ts.init s → P 0 s)
     (hstep : ∀ k s s', ReachableInK ts k s → Q s → P k s → ts.next s s' → P (k + 1) s') :
     ∀ k s, ReachableInK ts k s → P k s := by
-  intro k s hrk
+  intro k s hrk                          -- name count k, state s, proof hrk
   induction hrk with
-  | init s hi => exact hinit s hi
+  | init s hi => exact hinit s hi        -- step 0: use the init hypothesis
   | step k s s' hrk hn ih =>
+    -- first establish Q s (the ordinary invariant) at the pre-state, then push P forward
     have hqs : Q s := inductive_invariant_holds ts Q hQ s (reachableInK_reachable ts k s hrk)
-    exact hstep k s s' hrk hqs ih hn
+    exact hstep k s s' hrk hqs ih hn     -- ih = P k s; combine with Q s and the step to get P (k+1) s'
 
 /- ------------------------------------------------------------------- -/
 /- Ranking functions and liveness.                                     -/
@@ -231,33 +250,37 @@ theorem ranking_bounded_progress {State : Type}
     (hG : InductiveInvariant ts G)
     (exec : Execution ts) :
     ∃ k : Nat, k ≤ V (exec.states 0) ∧ V (exec.states k) = 0 := by
+  -- First fact: every state along the execution is reachable (by induction on the index).
   have exec_reachable : ∀ k, Reachable ts (exec.states k) := by
-    intro k; induction k with
-    | zero => exact Reachable.init _ exec.init_ok
-    | succ k ih => exact Reachable.step _ _ ih (exec.step_ok k)
+    intro k; induction k with            -- induct on the step index k (a plain Nat: 0 or succ)
+    | zero => exact Reachable.init _ exec.init_ok      -- index 0 is the initial state
+    | succ k ih => exact Reachable.step _ _ ih (exec.step_ok k)  -- ih: state k reachable; take one step
   -- Core: from any index j, if V(states j) ≤ fuel, then V reaches 0
   -- within fuel more steps. Induction on fuel avoids strong recursion.
+  -- `suffices`: it is ENOUGH to prove this `core` statement; the block after `by`
+  -- shows how the original goal follows from it (specialize to j=0).
   suffices core : ∀ fuel j : Nat, V (exec.states j) ≤ fuel →
       ∃ k : Nat, k ≤ fuel ∧ V (exec.states (j + k)) = 0 by
-    obtain ⟨k, hk, hv⟩ := core _ 0 (Nat.le_refl _)
-    exact ⟨k, hk, by simpa using hv⟩
-  intro fuel
-  induction fuel with
+    obtain ⟨k, hk, hv⟩ := core _ 0 (Nat.le_refl _)    -- apply core at j=0 (fuel = V(states 0)); unpack result
+    exact ⟨k, hk, by simpa using hv⟩    -- `simpa` = simp then close; cleans `0 + k` to `k`
+  intro fuel                             -- now prove `core`; introduce the fuel budget
+  induction fuel with                    -- induct on fuel
   | zero =>
+    intro j hle                          -- fuel = 0: hle : V(states j) ≤ 0
+    have : V (exec.states j) = 0 := by omega          -- so V here is already 0
+    exact ⟨0, Nat.le_refl _, by simp_all⟩             -- answer k=0; simp_all uses that fact to finish
+  | succ fuel ih =>                      -- fuel = fuel+1; ih = the claim for `fuel`
     intro j hle
-    have : V (exec.states j) = 0 := by omega
-    exact ⟨0, Nat.le_refl _, by simp_all⟩
-  | succ fuel ih =>
-    intro j hle
-    by_cases hv : V (exec.states j) = 0
-    · exact ⟨0, by omega, by simp_all⟩
-    · have hGj := inductive_invariant_holds ts G hG _ (exec_reachable j)
-      have hdec := hrank _ _ hGj (by omega) (exec.step_ok j)
-      have hle' : V (exec.states (j + 1)) ≤ fuel := by omega
-      obtain ⟨k', hk', hv'⟩ := ih (j + 1) hle'
-      refine ⟨k' + 1, by omega, ?_⟩
-      simp only [Nat.add_assoc, Nat.add_comm 1 k'] at hv' ⊢
-      exact hv'
+    by_cases hv : V (exec.states j) = 0  -- has V already hit 0 at index j?
+    · exact ⟨0, by omega, by simp_all⟩   -- yes: stop now (k=0)
+    · -- no: V > 0, so the ranking function strictly decreases on the next step
+      have hGj := inductive_invariant_holds ts G hG _ (exec_reachable j)  -- guard G holds at states j
+      have hdec := hrank _ _ hGj (by omega) (exec.step_ok j)  -- V(states (j+1)) < V(states j)
+      have hle' : V (exec.states (j + 1)) ≤ fuel := by omega  -- so it fits in one less fuel
+      obtain ⟨k', hk', hv'⟩ := ih (j + 1) hle'        -- apply IH from index j+1; get k' more steps to 0
+      refine ⟨k' + 1, by omega, ?_⟩      -- our answer is k'+1; leave the equation as a hole `?_`
+      simp only [Nat.add_assoc, Nat.add_comm 1 k'] at hv' ⊢  -- reassociate indices so hv' matches the goal (⊢)
+      exact hv'                          -- close with the (now matching) hv'
 
 /-- A predicate holds *eventually* along an execution: there exists
     some step k at which it holds. -/
@@ -274,8 +297,8 @@ theorem ranking_implies_eventually {State : Type}
     (hG : InductiveInvariant ts G)
     (exec : Execution ts) :
     Eventually exec (fun s => V s = 0) := by
-  obtain ⟨k, _, hv⟩ := ranking_bounded_progress ts V G hrank hG exec
-  exact ⟨k, hv⟩
+  obtain ⟨k, _, hv⟩ := ranking_bounded_progress ts V G hrank hG exec  -- get a step k with V=0 (ignore the bound)
+  exact ⟨k, hv⟩                          -- "Eventually" just needs that witnessing k and proof hv
 
 /-- A fairness condition on an execution: a predicate `enabled` that,
     whenever it holds at some step, is eventually *discharged* (the

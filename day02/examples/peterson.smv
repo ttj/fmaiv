@@ -1,39 +1,50 @@
 -- Peterson's mutual-exclusion algorithm for two processes.
 --
+-- The goal: let two programs share one "critical section" (code only one may be
+-- in at a time, e.g. updating a shared file) without ever both being inside it.
+--
 -- Concurrency WITHOUT the deprecated `process` keyword: a free scheduler
 -- variable `run` is chosen nondeterministically each step, and a process only
 -- moves when it is scheduled. This is the standard interleaving model.
 --
--- Each process runs the entry protocol:
+-- Each process runs the entry protocol (pc1/pc2 are "program counters", i.e.
+-- which line of its protocol each process is currently at, 0..5):
 --   L0 idle      L1 flag[i] := TRUE     L2 turn := other
 --   L3 wait until (flag[other] = FALSE | turn = me)
 --   L4 critical  L5 flag[i] := FALSE -> back to L0
-MODULE main
+-- flag[i] = "I want in"; turn = "whose go it is" when both want in.
+-- Each spec is marked HOLDS (should pass) or DELIBERATELY FALSE (should fail).
+-- Operators: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- the single top-level component; "main" is the entry point
 VAR
-  pc1   : 0..5;
-  pc2   : 0..5;
-  flag1 : boolean;
-  flag2 : boolean;
-  turn  : 1..2;
-  run   : 1..2;          -- free scheduler: who takes the next step (interleaving)
+  pc1   : 0..5;          -- process 1's program counter (line 0..5 of protocol)
+  pc2   : 0..5;          -- process 2's program counter
+  flag1 : boolean;       -- TRUE when process 1 wants to enter
+  flag2 : boolean;       -- TRUE when process 2 wants to enter
+  turn  : 1..2;          -- tie-breaker: whose turn it is to go first
+  run   : 1..2;          -- free scheduler (no init/next): who takes the next
+                         -- step. Re-chosen each step = arbitrary interleaving.
 
 ASSIGN
-  init(pc1) := 0;  init(pc2) := 0;
-  init(flag1) := FALSE;  init(flag2) := FALSE;
-  init(turn) := 1;
+  init(pc1) := 0;  init(pc2) := 0;            -- both start idle (line 0)
+  init(flag1) := FALSE;  init(flag2) := FALSE;-- neither wants in yet
+  init(turn) := 1;                            -- arbitrary starting turn
 
+  -- next(pc1): guards tried top to bottom, FIRST true one wins. Process 1 only
+  -- moves on steps where it is scheduled (run = 1); otherwise it stays put.
   next(pc1) := case
-    run != 1                          : pc1;        -- not scheduled
-    pc1 = 0                           : {0, 1};     -- may begin entry
-    pc1 = 1                           : 2;          -- set flag1
-    pc1 = 2                           : 3;          -- set turn
-    pc1 = 3 & (!flag2 | turn = 1)     : 4;          -- wait clears -> enter
-    pc1 = 3                           : 3;          -- still waiting
+    run != 1                          : pc1;        -- not scheduled -> no change
+    pc1 = 0                           : {0, 1};     -- may begin entry (free choice)
+    pc1 = 1                           : 2;          -- set flag1 (see next(flag1))
+    pc1 = 2                           : 3;          -- set turn (see next(turn))
+    pc1 = 3 & (!flag2 | turn = 1)     : 4;          -- wait clears -> enter critical
+    pc1 = 3                           : 3;          -- still waiting (guard above false)
     pc1 = 4                           : 5;          -- leave critical
-    pc1 = 5                           : 0;          -- clear flag, idle
-    TRUE                              : pc1;
+    pc1 = 5                           : 0;          -- clear flag, back to idle
+    TRUE                              : pc1;        -- otherwise unchanged
   esac;
 
+  -- next(pc2): identical protocol for process 2 (note it watches flag1/turn=2).
   next(pc2) := case
     run != 2                          : pc2;
     pc2 = 0                           : {0, 1};
@@ -46,10 +57,11 @@ ASSIGN
     TRUE                              : pc2;
   esac;
 
+  -- flag1 is raised when P1 takes its L1 step and lowered at its L5 step.
   next(flag1) := case
-    run = 1 & pc1 = 1 : TRUE;     -- L1 action
-    run = 1 & pc1 = 5 : FALSE;    -- L5 action
-    TRUE             : flag1;
+    run = 1 & pc1 = 1 : TRUE;     -- L1 action: announce "I want in"
+    run = 1 & pc1 = 5 : FALSE;    -- L5 action: announce "I'm done"
+    TRUE             : flag1;     -- otherwise unchanged
   esac;
 
   next(flag2) := case
@@ -58,17 +70,21 @@ ASSIGN
     TRUE             : flag2;
   esac;
 
+  -- At L2 each process politely sets turn to the OTHER process; this is the
+  -- trick that breaks ties so they cannot both wait forever.
   next(turn) := case
     run = 1 & pc1 = 2 : 2;        -- P1 yields turn to P2
     run = 2 & pc2 = 2 : 1;        -- P2 yields turn to P1
-    TRUE             : turn;
+    TRUE             : turn;      -- otherwise unchanged
   esac;
 
+-- FAIRNESS c restricts attention to runs where c happens infinitely often.
 -- Each process is scheduled infinitely often (otherwise "no starvation"
 -- is trivially violable by a scheduler that ignores a process forever).
 FAIRNESS run = 1;
 FAIRNESS run = 2;
 
+-- INVARSPEC = safety: must hold in EVERY reachable state.
 -- SAFETY: mutual exclusion — never both in the critical section (HOLDS).
 INVARSPEC !(pc1 = 4 & pc2 = 4);
 
@@ -76,12 +92,16 @@ INVARSPEC !(pc1 = 4 & pc2 = 4);
 INVARSPEC pc1 = 4 -> flag1;
 INVARSPEC pc2 = 4 -> flag2;
 
+-- LTLSPEC reasons over each single run. G = always, F = eventually, so
+-- G (waiting -> F critical) reads "every time it is waiting, it later gets in".
 -- LIVENESS / no starvation under fair scheduling: a waiting process
--- eventually enters its critical section (HOLDS — Peterson guarantees this).
+-- eventually enters its critical section (HOLDS — Peterson guarantees this,
+-- and the FAIRNESS above is what makes it true).
 LTLSPEC G (pc1 = 3 -> F pc1 = 4);
 LTLSPEC G (pc2 = 3 -> F pc2 = 4);
 
--- Each process can reach its critical section (HOLDS).
+-- CTLSPEC AG EF p = "from every reachable state, p stays reachable on some path"
+-- (A=all paths, E=some path). Each process can reach its critical section (HOLDS).
 CTLSPEC AG EF (pc1 = 4);
 CTLSPEC AG EF (pc2 = 4);
 

@@ -7,13 +7,22 @@
  */
 module caesar_starter where
 
-type N = 16
+type N = 16   // message length in bytes (compile-time size constant)
 
+// encrypt takes a key byte [8] and an N-byte message [N][8], returns N bytes.
+// The comprehension `[ c + k | c <- msg ]` reads: "for each byte c drawn (`<-`)
+// from msg, produce c + k". `+` on [8] is addition mod 256 (wraps at 256).
 encrypt : [8] -> [N][8] -> [N][8]
 encrypt k msg = [ c + k | c <- msg ]
 
 /* TODO: undo the shift (hint: subtract the key byte). */
+// YOUR JOB: make decrypt reverse encrypt. Right now it returns the ciphertext
+// untouched, so decrypt(encrypt(msg)) != msg and `:prove roundtrip` gives a
+// COUNTEREXAMPLE. Replace the stub with a comprehension like encrypt's, but
+// undo the +k on each byte. Then `:prove roundtrip` should report "Q.E.D.".
 decrypt : [8] -> [N][8] -> [N][8]
 decrypt k ct = ct          // stub: returns the ciphertext unchanged
 
+// `property` = a claim checked for ALL keys k and messages msg.
+// `:prove roundtrip` -> COUNTEREXAMPLE now; -> "Q.E.D." once decrypt is fixed.
 property roundtrip k msg = decrypt k (encrypt k msg) == msg

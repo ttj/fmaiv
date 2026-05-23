@@ -4,33 +4,51 @@
 --   (1) make the door closed in any step where the car will be moving;
 --   (2) make the car move one floor only when `moving` is true;
 --   (3) write the safety spec "moving implies the door is closed".
-MODULE main
+--
+-- This is a fill-in-the-blank version of elevator.smv. The spots marked TODO
+-- are placeholders (intentionally too simple) for you to replace. As written
+-- it still PARSES and runs, but TODO 1 lets the door be open while moving, so
+-- the intended safety property would not hold yet.
+-- Operator reminder: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- single top-level component; "main" is the entry point
 VAR
-  floor  : 0..2;
-  door   : {open, closed};
-  moving : boolean;
+  floor  : 0..2;            -- floor the car is on: 0, 1, or 2
+  door   : {open, closed};  -- enumerated type: exactly one of these values
+  moving : boolean;         -- TRUE while the car is in motion
 
 ASSIGN
-  init(floor)  := 0;
-  init(door)   := open;
-  init(moving) := FALSE;
+  init(floor)  := 0;        -- start on the ground floor...
+  init(door)   := open;     -- ...with the door open...
+  init(moving) := FALSE;    -- ...and stopped
 
+  -- next(moving): a case picks the first true guard. The car may only START
+  -- moving while the door is closed; if closed it freely chooses move or stay.
   next(moving) := case
-    door = open : FALSE;
-    TRUE        : {FALSE, TRUE};
+    door = open : FALSE;          -- door open -> cannot move
+    TRUE        : {FALSE, TRUE};  -- otherwise free choice (nondeterministic)
   esac;
 
   -- TODO 1: if next(moving) is TRUE, force the door closed; otherwise allow
   -- {open, closed}.
-  next(door) := {open, closed};
+  -- HINT: replace the line below with a "case" whose first guard is
+  -- next(moving) -> closed, and whose TRUE branch is {open, closed}.
+  -- As written, the door may be open even while moving (safety not yet met).
+  next(door) := {open, closed};   -- PLACEHOLDER: door changes with no rule
 
   -- TODO 2: when next(moving) is TRUE, move one floor (0->1, 2->1, 1->{0,2});
   -- otherwise stay put.
-  next(floor) := floor;
+  -- HINT: use a "case" guarded on next(moving) & floor = N for each floor,
+  -- with a final "TRUE : floor;" so the car stays put when not moving.
+  next(floor) := floor;           -- PLACEHOLDER: car never actually moves
 
 -- TODO 3: write the safety property — moving implies the door is closed.
+-- INVARSPEC is a safety claim that must hold in EVERY reachable state.
+-- Uncomment the line below once TODO 1 is done (it should then pass):
 -- INVARSPEC moving -> door = closed;
 
--- These help you sanity-check once TODO 1/2 are done:
-CTLSPEC AG EF (floor = 2);
-CTLSPEC AG EF (door = open);
+-- These help you sanity-check once TODO 1/2 are done. CTLSPEC AG EF p means
+-- "from every reachable state, p is still reachable on some path" (A=all paths,
+-- E=some path, G=always, F=eventually). With the placeholders these may behave
+-- oddly (e.g. the car never leaves floor 0); they should pass once TODOs work.
+CTLSPEC AG EF (floor = 2);   -- top floor stays reachable
+CTLSPEC AG EF (door = open); -- an open door stays reachable

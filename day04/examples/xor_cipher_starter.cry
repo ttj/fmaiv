@@ -7,17 +7,28 @@
  */
 module xor_cipher_starter where
 
-type N = 16
-type K = 4
+type N = 16   // message length in bytes (compile-time size constant)
+type K = 4    // key length in bytes
 
+// Builds the keystream: `repeat`{N / K} key` makes N/K = 4 copies of the
+// 4-byte key (the backtick `{...}` supplies that count as a type-level number),
+// and `join` flattens those copies into one flat N-byte sequence.
 keystream : [K][8] -> [N][8]
 keystream key = join (repeat`{N / K} key)
 
 /* TODO: XOR the message with the keystream. */
+// YOUR JOB: make encrypt actually encrypt. Right now it returns the message
+// unchanged, so `:prove roundtrip` gives a COUNTEREXAMPLE. Combine msg with
+// `keystream key` using `^` (bitwise XOR). Hint: look at how decrypt does it
+// just below -- encryption with XOR is the SAME operation. Then "Q.E.D.".
 encrypt : [K][8] -> [N][8] -> [N][8]
 encrypt key msg = msg          // stub: no encryption yet
 
+// decrypt is already done: `^` is bitwise XOR of the ciphertext with the
+// keystream, byte by byte. (XOR is its own inverse, so this also encrypts.)
 decrypt : [K][8] -> [N][8] -> [N][8]
 decrypt key ct = ct ^ keystream key
 
+// `property` = claim checked for ALL keys and messages.
+// `:prove roundtrip` -> COUNTEREXAMPLE now; -> "Q.E.D." once encrypt is fixed.
 property roundtrip key msg = decrypt key (encrypt key msg) == msg

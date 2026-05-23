@@ -11,24 +11,43 @@
  *     xor_cipher> :prove involutive
  * Both should report "Q.E.D."
  */
+// `module xor_cipher where` names this file's collection of definitions.
 module xor_cipher where
 
+// Two compile-time size constants (see caesar.cry for what `type ... =` means).
 type N = 16                       // message length in bytes
 type K = 4                        // key length in bytes
 
 /* The keystream is the key repeated to the message length. (N is a multiple
  * of K here, so we repeat exactly N/K times and flatten.) */
+// Type: takes K bytes (the key) and returns N bytes (the keystream).
+//   [K][8]  = K of ([8])  = K bytes ;  [N][8] = N bytes.
 keystream : [K][8] -> [N][8]
+// Read this inside-out:
+//   repeat`{N / K} key  -- `repeat` makes copies of `key`; the backtick part
+//                          `{N / K}` tells it HOW MANY copies (a type-level
+//                          number = 16/4 = 4). Result: 4 copies of a 4-byte key,
+//                          i.e. a [4][4][8] (four groups of four bytes).
+//   join (...)          -- `join` flattens one level of nesting: it glues the
+//                          4 groups into one flat [16][8] (= [N][8]). So the
+//                          key 4 bytes long becomes a 16-byte keystream.
 keystream key = join (repeat`{N / K} key)
 
+// Encrypt: XOR the message with the keystream, byte by byte.
 encrypt : [K][8] -> [N][8] -> [N][8]
+// `^` is bitwise XOR. Applied to two N-byte sequences it XORs them
+// position-by-position (lined up in lockstep). XOR is the whole cipher here.
 encrypt key msg = msg ^ keystream key
 
+// Decrypt is byte-for-byte IDENTICAL to encrypt -- that is the point of XOR:
+// XORing with the same keystream a second time cancels the first.
 decrypt : [K][8] -> [N][8] -> [N][8]
 decrypt key ct = ct ^ keystream key
 
 /* Decryption recovers the message, for every key and message. */
+// `property` = a claim checked for ALL inputs; `:prove roundtrip` -> "Q.E.D.".
 property roundtrip key msg = decrypt key (encrypt key msg) == msg
 
 /* Encrypting twice returns the original (XOR is involutive). */
+// "Involutive" = doing it twice gets you back where you started. `:prove involutive`.
 property involutive key msg = encrypt key (encrypt key msg) == msg

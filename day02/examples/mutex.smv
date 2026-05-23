@@ -1,40 +1,51 @@
--- Mutual exclusion protocol for 2 processes
-MODULE main
+-- Mutual exclusion protocol for 2 processes.
+-- Goal: two processes share a "critical section" that only one may occupy at a
+-- time. Each process cycles idle -> waiting -> critical -> idle. flag1/flag2
+-- mean "I want in"; turn is a tie-breaker. Unlike peterson.smv there is no
+-- scheduler variable: BOTH processes are updated every step (synchronous).
+-- The inline tags below say whether each spec is expected to pass or fail.
+-- Operators: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- single top-level component; "main" is the entry point
 VAR
-  process1 : {idle, waiting, critical};
-  process2 : {idle, waiting, critical};
-  turn : 1..2;
-  flag1 : boolean;
-  flag2 : boolean;
+  process1 : {idle, waiting, critical};  -- enumerated state of process 1
+  process2 : {idle, waiting, critical};  -- enumerated state of process 2
+  turn : 1..2;        -- tie-breaker: integer 1 or 2
+  flag1 : boolean;    -- TRUE while process 1 wants/has the section
+  flag2 : boolean;    -- TRUE while process 2 wants/has the section
 
 ASSIGN
+  -- init(...) sets each variable's value at time 0 (the start state).
   init(process1) := idle;
   init(process2) := idle;
   init(turn) := 1;
   init(flag1) := FALSE;
   init(flag2) := FALSE;
 
+  -- next(...) := case ... esac: guards tried top to bottom, FIRST true wins;
+  -- the trailing "TRUE : ..." is the default (means "in every other case").
   next(process1) :=
     case
-      process1 = idle : {idle, waiting};
-      process1 = waiting & (!flag2 | turn = 1) : critical;
-      process1 = critical : idle;
-      TRUE : process1;
+      process1 = idle : {idle, waiting};                 -- free choice: stay idle or ask to enter
+      process1 = waiting & (!flag2 | turn = 1) : critical;-- enter only if other isn't claiming, or it's my turn
+      process1 = critical : idle;                        -- finish and leave
+      TRUE : process1;                                   -- otherwise (still waiting): unchanged
     esac;
 
   next(process2) :=
     case
       process2 = idle : {idle, waiting};
-      process2 = waiting & (!flag1 | turn = 2) : critical;
+      process2 = waiting & (!flag1 | turn = 2) : critical;-- mirror condition: watches flag1 and turn = 2
       process2 = critical : idle;
       TRUE : process2;
     esac;
 
+  -- flag1 is raised the instant P1 moves idle->waiting and lowered when it
+  -- moves critical->idle. next(process1) refers to P1's brand-new value.
   next(flag1) :=
     case
-      process1 = idle & next(process1) = waiting : TRUE;
-      process1 = critical & next(process1) = idle : FALSE;
-      TRUE : flag1;
+      process1 = idle & next(process1) = waiting : TRUE;   -- just decided to wait -> raise flag
+      process1 = critical & next(process1) = idle : FALSE; -- just left critical -> lower flag
+      TRUE : flag1;                                        -- otherwise unchanged
     esac;
 
   next(flag2) :=
@@ -44,27 +55,36 @@ ASSIGN
       TRUE : flag2;
     esac;
 
+  -- Whenever a process is in the critical section, the turn is handed to the
+  -- OTHER process (so it gets the next chance). This is the tie-break trick.
   next(turn) :=
     case
-      process1 = critical : 2;
-      process2 = critical : 1;
-      TRUE : turn;
+      process1 = critical : 2;     -- P1 in critical -> give turn to P2
+      process2 = critical : 1;     -- P2 in critical -> give turn to P1
+      TRUE : turn;                 -- otherwise unchanged
     esac;
 
+-- INVARSPEC = safety: the property must hold in EVERY reachable state.
 -- Safety properties (mutual exclusion)
-INVARSPEC !(process1 = critical & process2 = critical);  -- Mutual exclusion (should pass)
-INVARSPEC process1 = critical -> !flag2 | turn = 1;  -- Entry condition (should pass)
-INVARSPEC process2 = critical -> !flag1 | turn = 2;  -- Entry condition (should pass)
-INVARSPEC process1 = idle | process1 = waiting | process1 = critical;  -- Valid states (should pass)
+INVARSPEC !(process1 = critical & process2 = critical);  -- never both in critical at once (should pass)
+INVARSPEC process1 = critical -> !flag2 | turn = 1;  -- P1 in critical only under its entry rule (should pass)
+INVARSPEC process2 = critical -> !flag1 | turn = 2;  -- P2 in critical only under its entry rule (should pass)
+INVARSPEC process1 = idle | process1 = waiting | process1 = critical;  -- P1 is always in one of its 3 states (trivially true; should pass)
 
--- Liveness properties
-CTLSPEC AG(process1 = waiting -> AF(process1 = critical));  -- No starvation P1 (should pass)
-CTLSPEC AG(process2 = waiting -> AF(process2 = critical));  -- No starvation P2 (should pass)
-CTLSPEC AG(EF(process1 = critical));  -- P1 can enter critical (should pass)
-CTLSPEC AG(EF(process2 = critical));  -- P2 can enter critical (should pass)
-CTLSPEC AG(process1 = critical);  -- P1 always in critical (should fail)
+-- Liveness properties. CTL operators range over the tree of possible futures:
+-- A = "on all paths", E = "on some path", G = "always", F = "eventually".
+-- AG(p -> AF q) reads "in every reachable state, if p holds then on ALL future
+-- paths q eventually holds". NOTE: there is no FAIRNESS in this model, so a
+-- path may exist where the other process loops forever and the waiting one
+-- never gets in -- so these "no starvation" AF claims can in fact FAIL here
+-- (the "should pass" tag assumes fair progress; verify by running NuSMV).
+CTLSPEC AG(process1 = waiting -> AF(process1 = critical));  -- No starvation P1 (tagged should pass; see note above)
+CTLSPEC AG(process2 = waiting -> AF(process2 = critical));  -- No starvation P2 (tagged should pass; see note above)
+CTLSPEC AG(EF(process1 = critical));  -- from anywhere, P1 CAN still reach critical on some path (should pass)
+CTLSPEC AG(EF(process2 = critical));  -- from anywhere, P2 CAN still reach critical on some path (should pass)
+CTLSPEC AG(process1 = critical);  -- claims P1 is ALWAYS critical -- obviously false (should fail)
 
--- LTL properties
-LTLSPEC G(process1 = waiting -> F(process1 = critical));  -- P1 no starvation
-LTLSPEC G(process2 = waiting -> F(process2 = critical));  -- P2 no starvation
-LTLSPEC F(process1 = critical);  -- P1 eventually enters critical
+-- LTL properties reason about each single run over time (G = always, F = eventually).
+LTLSPEC G(process1 = waiting -> F(process1 = critical));  -- P1 no starvation (same fairness caveat as the CTL versions)
+LTLSPEC G(process2 = waiting -> F(process2 = critical));  -- P2 no starvation (same caveat)
+LTLSPEC F(process1 = critical);  -- claims every run eventually puts P1 in critical (can fail: a run may keep P1 idle)

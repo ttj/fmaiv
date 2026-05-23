@@ -27,24 +27,32 @@ CAGES = [
 
 
 def cage_constraint(x, target, op, cells):
+    # vs = the cell variables belonging to this cage.
     vs = [x[r][c] for (r, c) in cells]
-    # TODO: return a Z3 boolean constraint encoding this cage.
+    # TODO: look at `op` and return the matching Z3 boolean constraint.
+    #   Use an if/elif chain on op and return one constraint per case:
     #   '+' -> z3.Sum(vs) == target
-    #   '*' -> product of vs == target
-    #   '-' -> two cells a,b with z3.Or(a-b==target, b-a==target)
-    #   '/' -> two cells a,b with z3.Or(a==b*target, b==a*target)
+    #   '*' -> product of vs == target   (loop to multiply; z3 has no list-product)
+    #   '-' -> two cells a,b with z3.Or(a-b==target, b-a==target)   (order unknown)
+    #   '/' -> two cells a,b with z3.Or(a==b*target, b==a*target)   (exact, either order)
     #   '=' -> vs[0] == target
+    # Until you implement it, this returns "always true", i.e. no real
+    # restriction -- so the grid below will look wrong until you fill this in.
     return z3.BoolVal(True)  # placeholder: no constraint yet
 
 
 def solve():
+    # One unknown integer per cell of the N x N grid.
     x = [[z3.Int(f"x_{r}_{c}") for c in range(N)] for r in range(N)]
     s = z3.Solver()
     for r in range(N):
         for c in range(N):
-            s.add(x[r][c] >= 1, x[r][c] <= N)
+            s.add(x[r][c] >= 1, x[r][c] <= N)   # each cell is a digit 1..N
         # TODO: every row is a Latin row (distinct values).
+        #   Add z3.Distinct(x[r]) here so a row never repeats a digit.
     # TODO: every column is distinct.
+    #   For each column c, add z3.Distinct([x[r][c] for r in range(N)]).
+    # Add each cage's arithmetic rule (works once cage_constraint is done).
     for (target, op, cells) in CAGES:
         s.add(cage_constraint(x, target, op, cells))
     if s.check() != z3.sat:

@@ -3,47 +3,64 @@
 -- The safety property of interest: the doors are CLOSED whenever the car is
 -- moving. We enforce it by construction (the door is forced closed in any step
 -- where `moving` becomes true) and then ask the model checker to confirm it.
-MODULE main
+--
+-- How to read this file: each VAR is one piece of the elevator's state. ASSIGN
+-- says where each variable starts (init) and how it changes each step (next).
+-- The specs at the bottom are the questions we ask the checker; each is marked
+-- HOLDS (expected to pass) or DELIBERATELY FALSE (expected to fail and print a
+-- counterexample trace). Operators: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- the one top-level component; "main" is the entry point
 VAR
-  floor  : 0..2;
-  door   : {open, closed};
-  moving : boolean;
+  floor  : 0..2;            -- which floor the car is on: an integer 0,1, or 2
+  door   : {open, closed};  -- an enumerated type: door is exactly one of these
+  moving : boolean;         -- TRUE = car is in motion this step, FALSE = stopped
 
 ASSIGN
-  init(floor)  := 0;
-  init(door)   := open;
-  init(moving) := FALSE;
+  -- init(...) gives the starting value of each variable (the state at time 0).
+  init(floor)  := 0;        -- start parked on the ground floor
+  init(door)   := open;     -- start with the door open
+  init(moving) := FALSE;    -- start stopped
 
+  -- next(v) := case ... esac defines v's value one step later. In a case, the
+  -- guards are tried top to bottom and the FIRST one that is true wins.
   -- The car may decide to move only when the door is currently closed.
   next(moving) := case
     door = open : FALSE;          -- door open: cannot start moving
-    TRUE        : {FALSE, TRUE};  -- door closed: free to move or stay
-  esac;
+    TRUE        : {FALSE, TRUE};  -- door closed: nondeterministic CHOICE -
+                                  -- the model is free to pick move or stay
+  esac;                           -- (TRUE is the catch-all "otherwise" guard)
 
   -- If the car will be moving this step, the door must be closed; otherwise
-  -- it may open or close freely (passengers boarding).
+  -- it may open or close freely (passengers boarding). Note next(moving) lets
+  -- us refer to moving's brand-new value while computing the door's new value.
   next(door) := case
-    next(moving) : closed;
-    TRUE         : {open, closed};
+    next(moving) : closed;        -- about to move -> force door shut
+    TRUE         : {open, closed};-- otherwise either is allowed (free choice)
   esac;
 
-  -- Move one floor when moving; stay otherwise. Ends (0,2) bounce off.
+  -- Move one floor when moving; stay otherwise. Ends (0,2) bounce off:
+  -- from floor 1 the car may go either down to 0 or up to 2 (a free choice).
   next(floor) := case
-    next(moving) & floor = 0 : 1;
-    next(moving) & floor = 2 : 1;
-    next(moving) & floor = 1 : {0, 2};
-    TRUE                     : floor;
+    next(moving) & floor = 0 : 1;       -- moving from ground -> floor 1
+    next(moving) & floor = 2 : 1;       -- moving from top -> floor 1
+    next(moving) & floor = 1 : {0, 2};  -- moving from middle -> 0 or 2
+    TRUE                     : floor;   -- not moving -> stay put
   esac;
 
+-- INVARSPEC = a safety claim: this must be true in EVERY reachable state.
 -- SAFETY: the door is closed whenever the car is moving (HOLDS).
 INVARSPEC moving -> door = closed;
 
+-- CTLSPEC uses branching-time operators over the tree of possible futures:
+-- A = "for all paths", E = "there exists a path", G = "always", F = "eventually".
+-- AG EF p reads: from every reachable state (AG), there is some path (E) that
+-- eventually (F) reaches p -- i.e. p stays perpetually reachable.
 -- REACHABILITY: the car can always eventually reach the top floor (HOLDS).
 CTLSPEC AG EF (floor = 2);
 
 -- REACHABILITY: the door can always eventually open (HOLDS).
 CTLSPEC AG EF (door = open);
 
--- DELIBERATELY FALSE: claims the door is always closed — NuSMV returns a
--- trace where the door is open (e.g. the initial state).
+-- DELIBERATELY FALSE: claims the door is always closed -- NuSMV returns a
+-- trace where the door is open (e.g. the initial state, which starts open).
 INVARSPEC door = closed;

@@ -1,5 +1,10 @@
 -- Peterson's mutual exclusion — STARTER (fill in the TODOs).
 --
+-- This is the fill-in-the-blank version of peterson.smv. Goal of the algorithm:
+-- let two processes share a "critical section" so they are NEVER both inside it.
+-- pc1/pc2 are program counters (which protocol line 0..5 each process is at);
+-- flag1/flag2 mean "I want in"; turn is the tie-breaker.
+--
 -- The interleaving scaffold is given. Two things are missing:
 --   (1) the WAIT conditions at L3 (currently every process enters immediately,
 --       so mutual exclusion is VIOLATED — run it and watch INVARSPEC fail);
@@ -7,45 +12,55 @@
 --
 -- Fix the two `next(pcN)` L3 lines to encode Peterson's wait:
 --   process i may leave L3 only when (flag[other] = FALSE | turn = i).
-MODULE main
+-- Operators: ! = not, & = and, | = or, -> = "implies".
+MODULE main          -- single top-level component; "main" is the entry point
 VAR
-  pc1   : 0..5;
-  pc2   : 0..5;
-  flag1 : boolean;
-  flag2 : boolean;
-  turn  : 1..2;
-  run   : 1..2;          -- free scheduler (interleaving)
+  pc1   : 0..5;          -- process 1's program counter (protocol line 0..5)
+  pc2   : 0..5;          -- process 2's program counter
+  flag1 : boolean;       -- TRUE when process 1 wants in
+  flag2 : boolean;       -- TRUE when process 2 wants in
+  turn  : 1..2;          -- tie-breaker: whose turn it is
+  run   : 1..2;          -- free scheduler (no init/next): chosen each step =
+                         -- arbitrary interleaving; a process moves only if run=it
 
 ASSIGN
-  init(pc1) := 0;  init(pc2) := 0;
-  init(flag1) := FALSE;  init(flag2) := FALSE;
+  init(pc1) := 0;  init(pc2) := 0;             -- both start idle
+  init(flag1) := FALSE;  init(flag2) := FALSE; -- neither wants in yet
   init(turn) := 1;
 
+  -- next(pc1): first true guard wins. P1 only advances on steps where run = 1.
   next(pc1) := case
-    run != 1   : pc1;
-    pc1 = 0    : {0, 1};
-    pc1 = 1    : 2;
-    pc1 = 2    : 3;
+    run != 1   : pc1;     -- not scheduled -> stay put
+    pc1 = 0    : {0, 1};  -- may begin entry (free choice)
+    pc1 = 1    : 2;       -- raise flag1 (handled in next(flag1))
+    pc1 = 2    : 3;       -- set turn (handled in next(turn))
     pc1 = 3    : 4;   -- TODO: only enter when (!flag2 | turn = 1), else stay at 3
-    pc1 = 4    : 5;
-    pc1 = 5    : 0;
+                      -- As written P1 enters with NO wait, so both processes can
+                      -- be at line 4 together -> the safety INVARSPEC fails.
+                      -- HINT: split into two guards: "pc1 = 3 & (!flag2 | turn = 1) : 4;"
+                      -- followed by "pc1 = 3 : 3;" (keep waiting otherwise).
+    pc1 = 4    : 5;       -- leave critical
+    pc1 = 5    : 0;       -- clear flag, back to idle
     TRUE       : pc1;
   esac;
 
+  -- next(pc2): same protocol for P2 (it should watch flag1 and turn = 2).
   next(pc2) := case
     run != 2   : pc2;
     pc2 = 0    : {0, 1};
     pc2 = 1    : 2;
     pc2 = 2    : 3;
     pc2 = 3    : 4;   -- TODO: only enter when (!flag1 | turn = 2), else stay at 3
+                      -- (same fix as above, mirrored: watch flag1 and turn = 2).
     pc2 = 4    : 5;
     pc2 = 5    : 0;
     TRUE       : pc2;
   esac;
 
+  -- flag1 raised at L1, lowered at L5 (only on P1's scheduled steps).
   next(flag1) := case
-    run = 1 & pc1 = 1 : TRUE;
-    run = 1 & pc1 = 5 : FALSE;
+    run = 1 & pc1 = 1 : TRUE;     -- "I want in"
+    run = 1 & pc1 = 5 : FALSE;    -- "I'm done"
     TRUE             : flag1;
   esac;
 
@@ -55,18 +70,25 @@ ASSIGN
     TRUE             : flag2;
   esac;
 
+  -- At L2 each process hands the turn to the OTHER (the tie-break trick).
   next(turn) := case
-    run = 1 & pc1 = 2 : 2;
-    run = 2 & pc2 = 2 : 1;
+    run = 1 & pc1 = 2 : 2;        -- P1 yields to P2
+    run = 2 & pc2 = 2 : 1;        -- P2 yields to P1
     TRUE             : turn;
   esac;
 
+-- FAIRNESS: only consider runs that schedule each process infinitely often
+-- (needed so "no starvation" is meaningful).
 FAIRNESS run = 1;
 FAIRNESS run = 2;
 
--- This SHOULD pass once your wait conditions are correct (it FAILS now):
+-- INVARSPEC = safety (must hold in every reachable state).
+-- This SHOULD pass once your wait conditions are correct (it FAILS now,
+-- because without the L3 wait both processes can reach line 4 at once):
 INVARSPEC !(pc1 = 4 & pc2 = 4);
 
--- TODO: add the two no-starvation LTL specs, e.g.
+-- TODO: add the two no-starvation LTL specs. G = always, F = eventually, so
+-- each reads "whenever a process is waiting (line 3) it eventually gets in
+-- (line 4)". They should pass once the wait conditions above are filled in:
 --   LTLSPEC G (pc1 = 3 -> F pc1 = 4);
 --   LTLSPEC G (pc2 = 3 -> F pc2 = 4);

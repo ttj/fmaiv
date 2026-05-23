@@ -12,18 +12,46 @@
  *     caesar> :prove decrypt_inverts
  * Both should report "Q.E.D."
  */
+// `module caesar where` just names this file's collection of definitions.
+// The file name (caesar.cry) and the module name (caesar) match, by convention.
 module caesar where
 
+// A *type alias*: from now on `N` is shorthand for the number 16, fixed at
+// compile time (a "type-level" constant, not a normal variable). We use it as
+// the message length below. Change this one line to verify a different length.
 type N = 16                       // message length in bytes
 
+// ----- TYPE SIGNATURE, read left to right -----
+// `encrypt : [8] -> [N][8] -> [N][8]` says encrypt is a function. Read the `->`
+// arrows as "takes ... and then takes ... and gives back ...". So:
+//   [8]      -- first argument: an 8-bit word (8 bits = one byte = the key).
+//             In Cryptol a size in [] reads as "that many of the thing after it";
+//             with nothing after it, [8] means [8]Bit, i.e. 8 bits.
+//   [N][8]   -- second argument: N of ([8]), i.e. N bytes = the message.
+//   [N][8]   -- result (after the last arrow): N bytes = the ciphertext.
+// Two arrows means TWO arguments; the part after the final arrow is the result.
 encrypt : [8] -> [N][8] -> [N][8]
+// `[ c + k | c <- msg ]` is a *comprehension*. Read it as: "for each byte c
+// drawn from msg (the `<-` means 'drawn from'), produce the value c + k."
+// It builds a new N-byte sequence, one output byte per input byte.
+// `+` on an [8] is addition MOD 256 (it wraps around at 256). The width 8 is
+// taken from the type, so there is no separate "mod 256" written anywhere --
+// that wrap-around IS the cipher's shift. `k` is the same key byte each time.
 encrypt k msg = [ c + k | c <- msg ]
 
+// Decrypt has the same shape; it just subtracts the key byte from each byte.
 decrypt : [8] -> [N][8] -> [N][8]
+// `-` on [8] is also mod-256, so subtracting exactly undoes the wrap-around add.
 decrypt k ct = [ c - k | c <- ct ]
 
 /* For every key and message, decrypting an encryption recovers the message. */
+// `property` marks a CLAIM that Cryptol can check for ALL possible inputs (here
+// every key k and every message msg). `==` tests equality. At the prompt,
+// `:prove roundtrip` asks an automatic prover (SMT/Z3) to confirm it for every
+// input -- "Q.E.D." means proved. (`:check` would just try many random inputs.)
 property roundtrip k msg = decrypt k (encrypt k msg) == msg
 
 /* The other direction also holds (encryption inverts decryption). */
+// Same idea, with encrypt and decrypt swapped: encrypting a "decryption" also
+// returns the original. Prove it with `:prove decrypt_inverts`.
 property decrypt_inverts k msg = encrypt k (decrypt k msg) == msg

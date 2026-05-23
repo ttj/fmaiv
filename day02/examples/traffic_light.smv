@@ -1,67 +1,80 @@
-MODULE main
+MODULE main          -- single top-level component; "main" is the entry point
 -- Traffic light controller for a main road / side road intersection.
 -- Main road gets a longer green phase; side road gets a shorter one.
 -- Cycle: main_green -> main_yellow -> side_green -> side_yellow -> repeat
+-- A shared `timer` counts ticks within each phase. The specs check the obvious
+-- safety rules (never both green, etc.) plus liveness (each road keeps getting
+-- green). Each spec is annotated with what it claims and pass/fail.
+-- Operators: ! = not, & = and, | = or, -> = "implies".
 
 VAR
-    main_light : {green, yellow, red};
-    side_light : {green, yellow, red};
-    timer : 0..5;
+    main_light : {green, yellow, red};  -- enumerated: main road's light color
+    side_light : {green, yellow, red};  -- enumerated: side road's light color
+    timer : 0..5;                       -- tick counter within the current phase
 
 ASSIGN
+    -- init(...) = value at time 0 (the start state): main green, side red.
     init(main_light) := green;
     init(side_light) := red;
     init(timer) := 0;
 
+    -- next(...) := case ... esac: guards checked top to bottom, FIRST true one
+    -- wins; the trailing "TRUE : timer" is the catch-all default (no change).
     next(timer) := case
         -- main green phase: 4 ticks (0..3), yellow: 1 tick (4)
-        main_light = green & timer < 4 : timer + 1;
-        main_light = green & timer = 4 : 0;
-        main_light = yellow : 0;
+        main_light = green & timer < 4 : timer + 1;  -- still in main-green: count up
+        main_light = green & timer = 4 : 0;          -- end of main-green: reset
+        main_light = yellow : 0;                     -- yellow lasts one tick: reset
         -- side green phase: 2 ticks (0..1), yellow: 1 tick (2)
-        side_light = green & timer < 2 : timer + 1;
-        side_light = green & timer = 2 : 0;
-        side_light = yellow : 0;
-        TRUE : timer;
+        side_light = green & timer < 2 : timer + 1;  -- still in side-green: count up
+        side_light = green & timer = 2 : 0;          -- end of side-green: reset
+        side_light = yellow : 0;                     -- side yellow: reset
+        TRUE : timer;                                -- otherwise unchanged
     esac;
 
+    -- main light advances green -> yellow -> red, and back to green only after
+    -- the side road has had its turn (side_light = yellow signals handover).
     next(main_light) := case
-        main_light = green & timer = 4 : yellow;
-        main_light = yellow : red;
-        main_light = red & side_light = yellow : green;
-        TRUE : main_light;
+        main_light = green & timer = 4 : yellow;             -- green time up -> yellow
+        main_light = yellow : red;                           -- yellow -> red
+        main_light = red & side_light = yellow : green;      -- side finishing -> main green again
+        TRUE : main_light;                                   -- otherwise unchanged
     esac;
 
+    -- side light mirrors it: turns green once the main road hits yellow.
     next(side_light) := case
-        side_light = red & main_light = yellow : green;
-        side_light = green & timer = 2 : yellow;
-        side_light = yellow : red;
-        TRUE : side_light;
+        side_light = red & main_light = yellow : green;      -- main finishing -> side green
+        side_light = green & timer = 2 : yellow;             -- side green time up -> yellow
+        side_light = yellow : red;                           -- yellow -> red
+        TRUE : side_light;                                   -- otherwise unchanged
     esac;
 
--- SAFETY: both lights are never green at the same time
+-- INVARSPEC = safety: must hold in EVERY reachable state.
+-- SAFETY: both lights are never green at the same time (should pass)
 INVARSPEC !(main_light = green & side_light = green)
 
--- SAFETY: both lights are never yellow at the same time
+-- SAFETY: both lights are never yellow at the same time (should pass)
 INVARSPEC !(main_light = yellow & side_light = yellow)
 
--- LIVENESS: main road always eventually gets green
+-- CTLSPEC AG AF p = "on every path, from every state, p happens again later"
+-- (A = all paths, G = always, F = eventually) -- i.e. p recurs forever.
+-- LIVENESS: main road always eventually gets green (should pass)
 CTLSPEC AG AF (main_light = green)
 
--- LIVENESS: side road always eventually gets green
+-- LIVENESS: side road always eventually gets green (should pass)
 CTLSPEC AG AF (side_light = green)
 
--- timer stays in range
+-- timer stays in range (should pass: by the rules above it never exceeds 5)
 INVARSPEC timer <= 5
 
--- main road starts green
+-- at least one direction is non-red (green or yellow) at all times (should pass)
 INVARSPEC main_light = green | side_light = green | main_light = yellow | side_light = yellow
 
--- exactly one direction has a non-red light at any time
-INVARSPEC (main_light != red) -> (side_light = red)
-INVARSPEC (side_light != red) -> (main_light = red)
+-- exactly one direction has a non-red light at any time (both should pass):
+INVARSPEC (main_light != red) -> (side_light = red)   -- if main is lit, side is red
+INVARSPEC (side_light != red) -> (main_light = red)   -- if side is lit, main is red
 
--- LTL properties for Buchi analysis
-LTLSPEC G F(main_light = green)    -- passes: always eventually green
-LTLSPEC F G(main_light = green)    -- fails: light keeps cycling
-LTLSPEC G(!(main_light = green & side_light = green))  -- passes: mutual exclusion
+-- LTL properties for Buchi analysis (LTL = one run over time; G=always, F=eventually)
+LTLSPEC G F(main_light = green)    -- passes: always eventually green (recurs forever)
+LTLSPEC F G(main_light = green)    -- fails: light keeps cycling, so it is NOT green-forever-eventually
+LTLSPEC G(!(main_light = green & side_light = green))  -- passes: mutual exclusion restated in LTL
