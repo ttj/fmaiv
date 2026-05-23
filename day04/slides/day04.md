@@ -380,6 +380,23 @@ A major selling point: CBMC's default checks catch the classic memory-safety and
 
 ---
 
+## The complement to CBMC: deductive verification
+
+CBMC is **bounded** — it checks every run up to depth `N`. The other major style proves correctness for **all** inputs and **all** depths — the price is that *you* supply the invariants.
+
+- **Hoare triple** $\{P\}\;c\;\{Q\}$: if precondition `P` holds and `c` terminates, postcondition `Q` holds.
+- The creative work is the **loop invariant** (true on entry, preserved each iteration); add a **variant** (a measure that strictly decreases) to also prove **termination** — *partial* vs *total* correctness.
+- You write `requires` / `ensures` / `invariant`; an **SMT solver discharges** the proof obligations — Day 1's Z3, finally cashed out on real code.
+- Tools: **Dafny** (gentlest, web IDE), **Verus** (verifies **Rust** — squarely on the AI-generated-code thesis), **Frama-C, Why3, Viper**.
+
+> Two complementary guarantees: CBMC finds bugs *fast* (bounded, push-button); deductive verification proves *everything* (unbounded — you write the invariant).
+
+::: notes
+The structural bridge the course was missing — and the single most-corroborated gap when FMAIV was compared against CMU 15-414, ETH's Program Verification, MIT FRAP, and the SRI/Marktoberdorf summer schools (five of six teach exactly this). For a general audience: CBMC and deductive verification are the two faces of program verification. CBMC is bounded model checking — automatic but only to depth N. Deductive verification (Hoare logic) proves the program for all inputs and all iterations, but you must supply the loop invariant — the creative step. Make partial-vs-total concrete: a loop invariant gives partial correctness (IF it terminates, the answer is right); a variant — a well-founded, strictly decreasing measure — adds termination for total correctness. Crucially this *cashes out Day 1*: you annotate requires/ensures/invariant and an SMT solver (Z3/cvc5) discharges the verification conditions — the same solver, now proving real code. Tools by teaching value: Dafny (Leino; gentlest, browser IDE, ideal first contact), Verus (verifies Rust — directly relevant as AI increasingly generates Rust), plus Frama-C/ACSL, Why3, Viper. It also bridges to Day 3: a Hoare-logic proof and a Lean proof are the same activity — establish that a spec holds — at different automation levels.
+:::
+
+---
+
 ## L1 recap
 
 - A C program is a **transition system on memory**; CBMC builds it from source.
@@ -925,12 +942,13 @@ The breadth slide. Formal methods is mandatory-by-economics in chips (post-FDIV)
 
 The convergence, both directions:
 
-- **FM for AI** — verify neural networks (α,β-CROWN, NNV); the systems generating code/proofs.
-- **AI for FM** — LLMs draft Lean proofs (AlphaProof, DeepSeek-Prover), SAW scripts, CBMC harnesses.
-- The constant: a **trusted checker** (SMT kernel, Lean kernel) arbitrates. AI proposes; the kernel disposes.
+- **FM for AI** — verify neural networks (α,β-CROWN, NNV) and gate agent/LLM outputs (AWS Bedrock Automated Reasoning).
+- **AI for FM** — LLMs draft *and repair* proofs, specs, invariants, and harnesses: retrieval-augmented proving (**LeanDojo / ReProver**, **Lean Copilot**), **AlphaProof** (IMO-medal level), DeepSeek-Prover, and **autoformalization** (natural language → Lean).
+- **How we know it works — benchmarks:** **miniF2F / ProofNet / PutnamBench** (proving), **VERINA** (verifiable code-gen), **SV-COMP** (software), **VNN-COMP** (neural nets) — the field's honest scoreboards.
+- The constant: a **trusted checker** (SMT kernel, Lean kernel) arbitrates. AI proposes; the kernel disposes — and a benchmark says by how much.
 
 ::: notes
-The synthesis of the entire course. Two arrows: formal methods verifies AI systems (NN verification), and AI accelerates formal methods (proof/harness drafting). The invariant across both — and across all four days — is that a small trusted checker has the final say. That is the architecture that makes AI-generated artifacts trustworthy, which is the thesis the workshop opened with on Day 1.
+The synthesis of the entire course, sharpened into the field's organizing frame: a *bidirectional* relationship. **FM for AI** — formal methods verifies AI systems (NN verification; and, in production, AWS Bedrock's Automated Reasoning checks gate LLM outputs against formal policies). **AI for FM** — AI accelerates formal methods, and this half is richer than "drafts a proof": retrieval-augmented provers select premises and draft Lean proofs (LeanDojo/ReProver, Lean Copilot), AlphaProof reaches IMO-medal level, and *autoformalization* turns informal statements into checkable Lean — the CACM survey's thesis is literally "don't trust, verify," using the Lean kernel to ground LLM reasoning. The third bullet fills the gap a course on this topic must not skip: *how do we measure progress?* Benchmarks/competitions are the answer — miniF2F/ProofNet/PutnamBench for proving, VERINA for verifiable code generation, SV-COMP for software, VNN-COMP for neural nets — the same competition culture as SAT-/SMT-COMP. The invariant across both arrows and all four days: a small trusted checker has the final say, which is the architecture that makes AI-generated artifacts trustworthy — the thesis the workshop opened with on Day 1. (This bidirectional taxonomy + benchmark culture is the strongest pattern from comparing FMAIV to the AAAI NN-verification tutorial and the CACM "Formal Reasoning Meets LLMs" survey.)
 :::
 
 ---
