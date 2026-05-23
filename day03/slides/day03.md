@@ -263,13 +263,13 @@ theorem two_plus_two : 2 + 2 = 4 := by
   rfl                                  -- tactic mode: short to WRITE
 -- but what the kernel RECEIVES and re-checks is a finished term:
 #print two_plus_two
--- theorem two_plus_two : 2 + 2 = 4 := Eq.refl 4   (roughly)
+-- theorem two_plus_two : 2 + 2 = 4 := Eq.refl (2 + 2)   (roughly)
 ```
 
-You wrote one tactic; the kernel checked a concrete term (`Eq.refl 4`) and confirmed both sides really compute to `4`. The tactic was just a *convenient way to produce* that term — it earns no trust of its own.
+You wrote one tactic; the kernel checked a concrete term (`Eq.refl (2 + 2)`) and confirmed both sides really compute to `4`. The tactic was just a *convenient way to produce* that term — it earns no trust of its own.
 
 ::: notes
-Grounds the "re-checked from scratch" claim in something students can see, and ties directly to the transcript: math proofs are informal and "some of the formal details are too cumbersome to check," whereas in a theorem prover "all of that reasoning would have to exist." `#print` reveals the term behind a tactic proof — here `rfl` elaborates to roughly `Eq.refl 4`, and the kernel verifies that `2 + 2` and `4` are definitionally equal (both reduce to 4). The pedagogical beat: the thing you TYPE (a tactic script) and the thing the kernel CHECKS (a proof term) are different artifacts; the script's only job is to build the term, and if it builds a bad term the kernel says no. This is the concrete version of "AI proposes, kernel disposes."
+Grounds the "re-checked from scratch" claim in something students can see, and ties directly to the transcript: math proofs are informal and "some of the formal details are too cumbersome to check," whereas in a theorem prover "all of that reasoning would have to exist." `#print` reveals the term behind a tactic proof — here `rfl` elaborates to roughly `Eq.refl (2 + 2)`, and the kernel verifies that `2 + 2` and `4` are definitionally equal (both reduce to 4). The pedagogical beat: the thing you TYPE (a tactic script) and the thing the kernel CHECKS (a proof term) are different artifacts; the script's only job is to build the term, and if it builds a bad term the kernel says no. This is the concrete version of "AI proposes, kernel disposes."
 :::
 
 ---
@@ -309,7 +309,7 @@ But `0 + n = n` is **not** `rfl` — `n` is a variable on the recursing side, so
 theorem zero_add (n : Nat) : 0 + n = n := by
   induction n with
   | zero      => rfl                      -- base:  0 + 0 = 0
-  | succ k ih => simp [Nat.add_succ, ih]  -- step:  ih : 0 + k = k  ⊢  0 + (k+1) = k+1
+  | succ k ih => rw [Nat.add_succ, ih]  -- step:  ih : 0 + k = k  ⊢  0 + (k+1) = k+1
 ```
 
 ::: notes
@@ -917,23 +917,24 @@ The fully-worked leaf the brief asks for — the `on / ¬press / x<10` case, ann
 
 ---
 
-## Why `<;> simp <;> omega` collapses all four leaves
+## Why one blanket tactic is *not* enough
 
-Every leaf has the **same shape**: feed the branch guards to `simp` (reducing the if-then-else), then let `omega` finish the arithmetic. When all four leaves close the *same way*, one line does the lot:
+Tempting: split all the cases, then close them uniformly —
 
 ```lean
-theorem counterInv_step : ∀ s s', counterInv s → CounterTS.next s s' → counterInv s' := by
-  intro s s' ⟨hx, hmode⟩ ⟨p', hp, hmode_next, hx_next⟩
-  cases hm : s.mode <;>
-    by_cases hpr : s.press = true <;>
-    by_cases hlt : s.x < 10 <;>
-    simp_all <;> omega        -- run simp_all then omega on EVERY generated subgoal
+  cases hm : s.mode <;> by_cases hpr : s.press = true <;>
+    by_cases hlt : s.x < 10 <;> simp_all <;> omega   -- ✗ doesn't close every leaf
 ```
 
-`t <;> s` means "after `t`, run `s` on **every** subgoal `t` produced." So the three splits fan out into the leaves, and `simp_all <;> omega` closes them all at once.
+`t <;> s` runs `s` on **every** subgoal `t` produced — perfect for the shared work. But the leaves are **not** uniform:
+
+- **on-branches** end in *arithmetic* (`x < 10 ⊢ x + 1 ≤ 10`) — `omega` closes these.
+- **off-branches** end in a *constructor fact* (the goal reduces to `on ≠ off`) — not arithmetic, so `omega` fails; you need `decide` / `absurd`.
+
+So the shipped proof closes each leaf with the *right* tool — `simp` + `omega` on the counting leaves, `absurd … (by decide)` on the impossible-mode leaves — rather than one blanket tactic.
 
 ::: notes
-This pays off the `<;>` combinator the existing tree slide advertised, by showing the whole step proof collapsed. The teaching point: the explicit per-leaf proof on the previous slide and this one-liner produce the *same proof term* — the one-liner just exploits that all leaves are uniform. `cases hm : s.mode <;> by_cases … <;> by_cases …` builds the 2×2×2 fan of subgoals (some impossible and discharged immediately); then `simp_all <;> omega` applies the same closer everywhere. Warn beginners: the compressed form is satisfying but *opaque when it fails* — if one leaf doesn't close, you expand back to explicit bullets to see which. This is exactly the place an AI assistant is useful (draft the one-liner) and also where it bluffs (a one-liner that doesn't quite close), tying to L3.
+A deliberately honest slide. The `<;>` combinator collapses the *shared* work, but a single `simp_all <;> omega` does NOT finish the proof — omega even prints a counterexample on the off-mode leaves, because their goal is a constructor disequality (`on ≠ off`), not an arithmetic fact. That's exactly why the shipped counterInv_step in Counter.lean closes the impossible-mode leaves with `absurd … (by decide)` and the counting leaves with `omega`. Teaching point: match the closer to the goal's *kind* — arithmetic → omega, decidable equality → decide. This is also where an AI assistant bluffs: it'll happily propose a tidy one-liner the elaborator then rejects (ties to L3).
 :::
 
 ---
@@ -1271,7 +1272,7 @@ Self-contained, runs in the room. The deliverable is one new proved corollary pl
 Pick **one** (see [`assignments/day03.md`](../assignments/day03.md)):
 
 - Prove the **combined** invariant `(x ≤ 10) ∧ (mode = off → x = 0) ∧ (x > 0 → mode = on)` is inductive.
-- Change `count_max` to 25 and re-prove `CounterTS_inv1` (use Claude Code for the edits).
+- Change the bound `10` to `25` (it appears in the `next` guards and in `counterInv`) and re-prove `CounterTS_inv1` (use Claude Code for the edits).
 - Translate `traffic_light.smv` into Lean by hand and prove one invariant.
 
 Use Claude Code as a partner; note one thing it got right and one it got wrong.

@@ -91,15 +91,15 @@ The conceptual bridge. We saw this by hand in gcd_01.smv (Day 2) — add a progr
 ## What CBMC actually does
 
 ```
-C source → goto-program → unwound goto-program → SMT formula → Z3
+C source → goto-program → unwound goto-program → SAT/SMT formula → solver
 ```
 
 1. Parse and simplify C into a control-flow "goto-program."
 2. **Unwind** loops a fixed number of times.
-3. Encode every path as one big SMT formula (bit-precise).
+3. Encode every path as one big bit-precise formula.
 4. Ask the solver whether any path violates an assertion.
 
-Same engine as Day 1 — CBMC is a front-end that turns C into the SMT query you wrote by hand.
+Same idea as Day 1 — CBMC turns C into a satisfiability query (it bit-blasts to **SAT** by default; `--smt2 --z3` emits SMT for Z3 instead).
 
 ::: notes
 The pipeline. The key realization for students: CBMC is not magic, it is automation of exactly the Day-1 encoding. It compiles C to a goto-program (control flow made explicit), unwinds loops to bound the depth, bit-blasts everything to a precise SMT formula, and hands it to a solver. Bit-precise matters — it models machine integers exactly, so it catches overflow (the Ariane bug from Day 1) that integer-abstraction tools miss.
@@ -370,7 +370,7 @@ Even with no assertions you write, CBMC checks for:
 - integer **overflow** (the Ariane 5 bug),
 - array **out-of-bounds**,
 - null / invalid **pointer** dereference,
-- **division by zero**, use-after-free, uninitialized reads.
+- **division by zero**, use-after-free.
 
 Each is a built-in assertion; the counter run shows dozens of `SUCCESS` lines for these.
 
@@ -383,7 +383,7 @@ A major selling point: CBMC's default checks catch the classic memory-safety and
 ## L1 recap
 
 - A C program is a **transition system on memory**; CBMC builds it from source.
-- CBMC = C → goto-program → unwound → SMT → Z3 (Day 1's engine, automated).
+- CBMC = C → goto-program → unwound → SAT/SMT → solver (Day 1's decision procedure, automated; SAT by default, Z3 optional).
 - Harness with `nondet_*()` + `assert` + `__CPROVER_assume`; `--unwind N` bounds loops (CBMC 6 checks `N` is big enough by default).
 - Default checks catch overflow, bounds, null deref, division-by-zero for free.
 
@@ -598,7 +598,7 @@ m <- llvm_load_module "popcount.bc";         // load the compiled C
 llvm_verify m "popcount_loop" [] false (do {
     x <- llvm_fresh_var "x" (llvm_int 8);    // a SYMBOLIC 8-bit input (all bytes at once)
     llvm_execute_func [llvm_term x];         // call the C function on it
-    llvm_return (llvm_term {{ popcount_simple x }});  // claim: result == Cryptol spec
+    llvm_return (llvm_term {{ (zero : [4]) # popcount_simple x }});  // result == spec (pad [4]→[8])
 }) z3;                                        // discharge with the z3 solver
 ```
 

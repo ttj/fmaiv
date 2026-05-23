@@ -165,7 +165,7 @@ MODULE main
 
 - `VAR` declares state variables **and** inputs.
 - A variable with **no** `init`/`next` clause is a free input — nuXmv lets the environment pick any value each round (this is our `press`).
-- `0..25` makes `x` finite, so the state space is finite.
+- `0..25` makes `x` finite, so the state space is finite. (Only 0–10 are *reachable*; the headroom lets the off-by-one demo reach `x = 11`.)
 
 ::: notes
 The single most important SMV idiom for newcomers: a VAR with no assignment is an unconstrained input. That is how press becomes "nondeterministic each step" without any extra syntax. The bounded range on x (0..25) is what keeps the model finite — model checking needs a finite state space (or a symbolic decision procedure for the infinite case, which nuXmv also has, but our examples are finite).
@@ -450,6 +450,8 @@ mode=on:   ○    ●    ●    ●    ●    ○    ●   ...
 ```
 
 We'll read each LTL operator against **this one trace**, from position `s0`. The valuation function gives each proposition a 0/1 at each position; an operator is a claim about the rest of the trace from where you stand.
+
+Notation on the next slides: `(ρ, n) ⊨ φ` reads "trace `ρ` at position `n` **satisfies** `φ`"; `∃` = "there exists", `∀` = "for all".
 
 <svg viewBox="0 0 760 140" style="display:block;margin:0.3em auto;max-width:94%;height:auto" font-family="Inter, system-ui, sans-serif">
   <circle cx="57"  cy="30" r="7" fill="#ffffff" stroke="#5b6168" stroke-width="1.6"/>
@@ -906,7 +908,7 @@ Safety counterexample = finite path (Week 9 "violation of a safety property is d
 Real `counter.smv` spec `G F (mode = on & x = count_max)` ("infinitely often we're on with x=10") is **false**. A liveness violation is a **lasso** — a stem into a repeating cycle where the good event never recurs:
 
 ```text
--- specification G F (mode = on & x = 10) is false
+-- specification G F (mode = on & x = count_max) is false
  -> State 1.1 <- mode=off, press=FALSE, x=0     <-- stem
  -- Loop starts here
  -> State 1.2 <- mode=off, press=FALSE, x=0
@@ -986,7 +988,7 @@ Straight from Week 7's "complexity of model checking" video. The headline beginn
 Make every variable finite and the problem becomes **decidable** — but not cheap:
 
 - `k` boolean variables ⇒ up to $2^k$ states. A verifier *can* search them all, so it terminates.
-- Invariant / reachability checking for finite-state systems is **PSPACE-complete** — harder than NP-complete SAT (each step may itself need a SAT-like solve).
+- Invariant / reachability checking for finite-state systems is **PSPACE-complete** — at least as hard as, and widely believed strictly harder than, NP-complete SAT.
 - The practical face of that exponent is the **state-explosion problem**: state count blows up with variables, components, and interleavings.
 
 | Property logic | Model-checking complexity |
@@ -1273,7 +1275,7 @@ The same function can be **tiny or exponential** depending on variable order.
 Arithmetic (multipliers) has **no** good order — BDDs are bad at it. That's where SAT/SMT (Day 1, Day 4) wins.
 
 ::: notes
-The Achilles' heel of BDDs: variable ordering. A classic example is the middle output bit of a multiplier circuit, whose BDD is exponential under every variable order (Bryant 1991) — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. NuSMV and nuXmv both support dynamic reordering; the autograder runs `NuSMV -dynamic`. The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
+The Achilles' heel of BDDs: variable ordering. A classic example is the middle output bit of a multiplier circuit, whose BDD is exponential under every variable order (Bryant 1991) — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. NuSMV and nuXmv both support dynamic reordering (the `-dynamic` flag). The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
 :::
 
 ---

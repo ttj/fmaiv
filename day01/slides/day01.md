@@ -184,7 +184,7 @@ Ariane 5 is the founding bug-story for arithmetic verification. The immediate co
 
 **Intel Pentium FDIV** (1994) — division returned wrong answer for ~1 in 9 billion inputs.
 
-Five entries in the floating-point divider's SRT lookup table (2048 cells) returned the wrong value (0 instead of +2). The bug cost Intel **$475M** in replacement chips and reshaped industry practice forever.
+Five entries in the floating-point divider's SRT lookup table — 5 of the ~1066 cells that should have held a value (the table has 2048 slots) — returned 0 instead of +2. The bug cost Intel **$475M** in replacement chips and reshaped industry practice forever.
 
 - After FDIV, Intel built an in-house formal-verification capability based on Symbolic Trajectory Evaluation and progressively made formal proof of arithmetic datapaths part of release sign-off.
 - Today, Intel, AMD, Apple, ARM, and every major semiconductor company runs formal hardware verification at scale. Cadence JasperGold and Synopsys VC Formal are the products.
@@ -462,7 +462,7 @@ For a propositional formula $\varphi$:
 |---|---|---|
 | **Satisfiability** | exists $v$ with $v \models \varphi$ | NP-complete (Cook 1971) |
 | **Validity** | every $v$ satisfies $\varphi$ | co-NP-complete |
-| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | reducible to (un)satisfiability |
+| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | co-NP-complete (check $\Gamma \cup \{\neg\varphi\}$ unsat) |
 
 Everything reduces to satisfiability:
 
@@ -645,7 +645,7 @@ This is the central formalism for the entire week. Every model checker, theorem 
 State and input:
 
 - `mode ∈ {off, on}` (∈ = "is an element of"; mode is off or on)
-- `x ∈ ℕ` (ℕ = the natural numbers 0, 1, 2, …)
+- `x ∈ ℕ` (ℕ = the natural numbers 0, 1, 2, …; the dynamics keep it in 0–10 — exactly what we'll *prove*)
 - `press : Bool` (external input — true if the button is pressed this step)
 
 Behavior:
@@ -1145,7 +1145,7 @@ This is the loop the instructor describes in the "Adding the Theory Solvers" sli
   <text x="162" y="120" text-anchor="middle" font-size="12" fill="#5b6168">clauses { p₁, p₂, p₃ }</text>
   <rect x="436" y="68" width="244" height="80" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="558" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">theory solver</text>
-  <text x="558" y="118" text-anchor="middle" font-size="12" fill="#5b6168">linear arithmetic (simplex)</text>
+  <text x="558" y="118" text-anchor="middle" font-size="12" fill="#5b6168">linear real arithmetic (simplex)</text>
   <text x="558" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">x ≥ 0 ∧ y ≥ 0 ∧ x+y &lt; 0 : UNSAT over ℝ</text>
 </svg>
 
