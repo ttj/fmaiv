@@ -1,0 +1,33 @@
+{
+  "name": "FMAIV formal-methods tools (z3, cbmc, cryptol, saw, NuSMV, smvis)",
+
+  // Reuse the course's prebuilt superset image (public on GHCR). It already has:
+  //   z3 (CLI + Python), cbmc 6.9, cryptol + saw, NuSMV 2.6, Lean 4, smvis, pytest.
+  // nuXmv is license-gated and NOT in this public image — see notebooks/README.md
+  // for the add-on, or use the hosted smvis web app for nuXmv.
+  "image": "ghcr.io/verivital/fmaiv-autograde:latest",
+
+  // The image has no non-root user; run as root (Ubuntu 24.04 base).
+  "containerUser": "root",
+  "remoteUser": "root",
+
+  // Add a Jupyter kernel + JupyterLab on top of the grading image. Ubuntu 24.04
+  // is PEP 668 "externally managed", hence --break-system-packages.
+  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel",
+
+  "customizations": {
+    "vscode": {
+      // Open .ipynb directly in the browser VS Code editor.
+      "extensions": ["ms-toolsai.jupyter", "ms-python.python"]
+    }
+  },
+
+  // For students who prefer a full JupyterLab tab: run `jupyter lab` in the
+  // terminal; this forwards the port and opens it.
+  "forwardPorts": [8888],
+  "portsAttributes": {
+    "8888": { "label": "JupyterLab", "onAutoForward": "openBrowser" }
+  },
+
+  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis. Open notebooks/ (.ipynb) or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
+}
