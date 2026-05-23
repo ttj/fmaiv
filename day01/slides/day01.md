@@ -481,6 +481,8 @@ We will:
 4. Observe `unsat` (4 vertices, 3 colors, every pair adjacent — impossible).
 5. Change $K_4$ to the cycle $C_5$ and observe `sat` with a model.
 
+*New notation? `sat`/`unsat`, SMT-LIB, and Z3 all get a proper treatment in the SAT/SMT block later today — here, just watch the workflow.*
+
 **The kernel arbitrates. The LLM proposes.**
 
 ::: notes
