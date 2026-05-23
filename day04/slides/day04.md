@@ -450,7 +450,7 @@ A small functional language for writing **executable specifications** of algorit
 Why it matters today: it's the cleanest place to see "spec = proof target," and it's how AWS verifies real crypto (later this block).
 
 ::: notes
-Motivation before notation — the instructor's explicit fix, since students hit the type table cold and got lost. The single framing that lands: "executable math for bit-vectors." It's a spec language, so the whole file is the thing you prove things about; there's no separate "implementation" to wrestle with until SAW. Keep this slide light and reassuring — the scary-looking types come next, but now they have a purpose.
+Motivation before notation — my explicit fix, since students hit the type table cold and got lost. The single framing that lands: "executable math for bit-vectors." It's a spec language, so the whole file is the thing you prove things about; there's no separate "implementation" to wrestle with until SAW. Keep this slide light and reassuring — the scary-looking types come next, but now they have a purpose.
 :::
 
 ---
@@ -473,7 +473,7 @@ Every type carries a size, checked at compile time. That bit-exactness is why Cr
 - Multiple arrows = multiple arguments: `[8] -> [N][8] -> [N][8]` takes a key byte **and** a message.
 
 ::: notes
-The one thing to internalize before reading any Cryptol — the instructor flagged that `[n]T` was never really explained. Read it left-to-right as "n of T": `[16][8]` = "16 of (8-bit word)" = 16 bytes. The number is the length and it lives in the type, so widths are always known and checked — that's the bit-exactness crypto needs. The `A -> B -> C` "two arrows = two arguments" row heads off the most common beginner confusion when they meet `[8] -> [N][8] -> [N][8]` (it's currying, but you don't need that word).
+The one thing to internalize before reading any Cryptol — I flagged that `[n]T` was never really explained. Read it left-to-right as "n of T": `[16][8]` = "16 of (8-bit word)" = 16 bytes. The number is the length and it lives in the type, so widths are always known and checked — that's the bit-exactness crypto needs. The `A -> B -> C` "two arrows = two arguments" row heads off the most common beginner confusion when they meet `[8] -> [N][8] -> [N][8]` (it's currying, but you don't need that word).
 :::
 
 ---
@@ -702,10 +702,10 @@ The problem: given a trained network `f` and an input region `R`,
 
 $$\forall x \in R,\ f(x)\ \text{still classifies correctly (robustness)}.$$
 
-Here `R` is usually an **ℓ∞ ball** — every input within ε of a sample (each coordinate nudged by ≤ ε). *Robustness* = small input changes never flip the output class. Hard because `f` is **non-convex** (the safe region isn't a simple shape), **non-linear**, and has millions–billions of activations.
+Here `R` is usually an **ℓ∞ ball** — every input within ε of a sample (each coordinate nudged by ≤ ε). *Robustness* = small input changes never flip the output class. Hard because `f` is **non-convex** (the safe region isn't a simple shape, so checking corners is not enough), **non-linear**, and has millions–billions of activations.
 
 ::: notes
-Neural-network verification flips the script: now the *AI itself* is the artifact to verify. The canonical property is local robustness — for every input within an ℓ_∞ ball around a sample, the network gives the same class. This is genuinely hard: a ReLU network is a piecewise-linear function with exponentially many pieces, so exact verification is NP-complete (Katz et al., Reluplex, CAV 2017). This is Taylor's research area (NNV), so there's deep local expertise.
+Neural-network verification flips the script: now the *AI itself* is the artifact to verify. The canonical property is local robustness — for every input within an ℓ_∞ ball around a sample, the network gives the same class. This is genuinely hard: a ReLU network is a piecewise-linear function with exponentially many pieces, so exact verification is NP-complete (Katz et al., Reluplex, CAV 2017). This is my research area (NNV), so there's deep local expertise.
 :::
 
 ---
@@ -724,7 +724,7 @@ $$f(x) = W_L\,\sigma(\cdots \sigma(W_1 x + b_1)\cdots) + b_L$$
 So verifying a network = reasoning about a (big, non-linear) function — the same object we have reasoned about all week.
 
 ::: notes
-The bridge slide, straight from the instructor's neural-networks overview. The single liberating idea for a no-background audience: once a network is trained, the weights and biases are frozen constants, so the network is nothing but a fixed function — a long alternation of "multiply by a matrix, add a vector, apply a simple nonlinearity." No learning, no probabilities, no magic at verification time. The matrix-multiply-add-bias part is linear and easy; the only thing that makes f non-linear is the activation σ, and the workhorse activation ReLU is about as simple as a nonlinearity gets: zero for negatives, identity for positives. The output is a vector of class scores and the prediction is the argmax. Glossing argmax = "which entry is biggest." Everything that follows is "reason about this function over a set of inputs," which is exactly reachability/image-of-a-set from earlier in the week.
+The bridge slide, straight from my neural-networks overview. The single liberating idea for a no-background audience: once a network is trained, the weights and biases are frozen constants, so the network is nothing but a fixed function — a long alternation of "multiply by a matrix, add a vector, apply a simple nonlinearity." No learning, no probabilities, no magic at verification time. The matrix-multiply-add-bias part is linear and easy; the only thing that makes f non-linear is the activation σ, and the workhorse activation ReLU is about as simple as a nonlinearity gets: zero for negatives, identity for positives. The output is a vector of class scores and the prediction is the argmax. Glossing argmax = "which entry is biggest." Everything that follows is "reason about this function over a set of inputs," which is exactly reachability/image-of-a-set from earlier in the week.
 :::
 
 ---
@@ -777,7 +777,7 @@ Each ReLU neuron is **piecewise-linear** — two linear pieces with a kink at 0:
 - Exact ReLU verification is **NP-complete** (Katz et al., *Reluplex*, CAV 2017) — provably as hard as SAT.
 
 ::: notes
-This is the "why we can't just solve it directly" slide, and it comes straight from the instructor's NNV lecture. The mechanism: a ReLU is two straight-line pieces joined at a kink, so for a region of inputs some will land on the "on" side (z>0, pass through) and some on the "off" side (z≤0, zeroed). Each neuron thus cuts the region in two, and k neurons can cut it into 2^k pieces — that exponential is the whole difficulty. Within any one piece the network is linear and trivial; the pain is that there are exponentially many pieces and the union is a jagged, non-convex shape. The instructor states the worst case explicitly (2^k polytopes). And the hardness is not folklore: exact robustness checking for ReLU nets was proven NP-complete by Katz et al. in the Reluplex paper, putting it in the same complexity class as the SAT problem from Day 1. So every practical tool either branches cleverly or over-approximates — the next two slides.
+This is the "why we can't just solve it directly" slide, and it comes straight from my NNV lecture. The mechanism: a ReLU is two straight-line pieces joined at a kink, so for a region of inputs some will land on the "on" side (z>0, pass through) and some on the "off" side (z≤0, zeroed). Each neuron thus cuts the region in two, and k neurons can cut it into 2^k pieces — that exponential is the whole difficulty. Within any one piece the network is linear and trivial; the pain is that there are exponentially many pieces and the union is a jagged, non-convex shape. I state the worst case explicitly (2^k polytopes). And the hardness is not folklore: exact robustness checking for ReLU nets was proven NP-complete by Katz et al. in the Reluplex paper, putting it in the same complexity class as the SAT problem from Day 1. So every practical tool either branches cleverly or over-approximates — the next two slides.
 :::
 
 ---
@@ -788,7 +788,7 @@ This is the "why we can't just solve it directly" slide, and it comes straight f
 |---|---|---|
 | Idea | compute **linear lower/upper bounds** on outputs; **split** cases when too loose | propagate a **set** through every layer; check the **output set** |
 | ReLU handling | relax each ReLU to a linear envelope, tighten by branching | split the set at each kink; track exact/over-approx regions |
-| Representative | **α,β-CROWN** (VNN-COMP winner) | **NNV** (Vanderbilt) with **star sets** |
+| Representative | **α,β-CROWN** (VNN-COMP winner) | **NNV** (our group) with **star sets** (Tran et al., FM 2019) |
 | Verdict | bounds exclude bad outputs ⇒ robust | output set avoids the bad region ⇒ robust |
 
 Both certify robustness the same way: **UNSAT** ⇒ no in-region input reaches a bad output.
@@ -796,25 +796,25 @@ Both certify robustness the same way: **UNSAT** ⇒ no in-region input reaches a
 **A second axis — completeness vs. cost:** *incomplete* methods (bound propagation) are fast but may answer "**unknown**"; *complete* methods add **branch-and-bound** to always decide, at higher cost. Winners run cheap-first, branch only where needed.
 
 ::: notes
-The map of the field, in two columns, plus the orthogonal completeness/scalability axis the AAAI NN-verification tutorial organizes around. Incomplete verifiers (interval-bound propagation, CROWN's linear relaxation) are cheap and sound but one-sided — they prove robustness when bounds are tight enough, else return "unknown." Complete verifiers guarantee a yes/no by branching (β-CROWN splits ReLUs into on/off cases) or by exact reachability (NNV splits the set at each kink); they always decide but cost more. The practical art, and what α,β-CROWN does to win VNN-COMP, is to run the cheap incomplete pass first and invoke branch-and-bound only on the neurons that remain ambiguous. Same completeness/scalability trade-off as everywhere else in the week (BMC vs k-induction; testing vs proof). The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and the instructor's own approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The punchline unifying them with the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
+The map of the field, in two columns, plus the orthogonal completeness/scalability axis the AAAI NN-verification tutorial organizes around. Incomplete verifiers (interval-bound propagation, CROWN's linear relaxation) are cheap and sound but one-sided — they prove robustness when bounds are tight enough, else return "unknown." Complete verifiers guarantee a yes/no by branching (β-CROWN splits ReLUs into on/off cases) or by exact reachability (NNV splits the set at each kink); they always decide but cost more. The practical art, and what α,β-CROWN does to win VNN-COMP, is to run the cheap incomplete pass first and invoke branch-and-bound only on the neurons that remain ambiguous. Same completeness/scalability trade-off as everywhere else in the week (BMC vs k-induction; testing vs proof). The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and our own group's approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The punchline unifying them with the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
 :::
 
 ---
 
 ## Reachability: push a set through the net
 
-NNV's recipe (the instructor's group) — verification *as* reachability:
+NNV's recipe (our group) — verification *as* reachability (Tran et al., *Star-Based Reachability Analysis of Deep Neural Networks*, FM 2019):
 
 $$\text{inputs } R \;\xrightarrow{\ \text{layer 1}\ }\; \cdot \;\xrightarrow{\ \text{layer 2}\ }\; \cdots \;\xrightarrow{\ \text{layer } L\ }\; \text{output set } f(R)$$
 
-- **Affine layers are easy:** an affine map of a polytope is again a polytope (scale/rotate/translate a shape, get a shape). This handles every matrix-multiply + bias.
-- **ReLU layers split:** the set may break into a **union of polytopes** (the $2^k$ blow-up) — the hard part.
+- **Affine layers are easy:** an affine map of a polytope (a flat-sided region like a box/polygon) is again a polytope (scale/rotate/translate a shape, get a shape). This handles every matrix-multiply + bias.
+- **ReLU layers split:** the set may break into a **union of polytopes** (the $2^k$ blow-up) — the hard part. *Exact* reachability splits the set at each ReLU; the **approximate** star method over-approximates each ReLU (**sound, may be incomplete**) to scale to large nets.
 - **Check at the end:** does $f(R)$ intersect the **unsafe** region (a different class scores higher)? **Empty intersection ⇒ robust.**
 
 The transition relation is *the network itself* — Day 1's reachability, with layers as steps.
 
 ::: notes
-This is the instructor's verbatim framing — "our transition function is just the one defined by the layers of the neural network" — so lean into the continuity with model checking. You start with the input set R (the ℓ∞ ball), and you propagate it forward one layer at a time, exactly like computing reachable states one step at a time in Day-1/Day-2 model checking. The affine half of each layer is genuinely easy thanks to a clean theorem the instructor cites: an affine transformation of a polytope is another polytope, so matrix-multiply-plus-bias just maps one shape to another. The ReLU half is where sets fragment into unions of polytopes (the exponential again). At the output you have the full reachable set of class-score vectors; robustness holds iff that set never enters the region where some wrong class outscores the true class — an emptiness check, the same UNSAT-certifies-safety pattern as all week. This is sound: it computes ALL outputs, not samples.
+This is my verbatim framing — "our transition function is just the one defined by the layers of the neural network" — so lean into the continuity with model checking. You start with the input set R (the ℓ∞ ball), and you propagate it forward one layer at a time, exactly like computing reachable states one step at a time in Day-1/Day-2 model checking. The affine half of each layer is genuinely easy thanks to a clean theorem we cite: an affine transformation of a polytope is another polytope, so matrix-multiply-plus-bias just maps one shape to another. The ReLU half is where sets fragment into unions of polytopes (the exponential again). At the output you have the full reachable set of class-score vectors; robustness holds iff that set never enters the region where some wrong class outscores the true class — an emptiness check, the same UNSAT-certifies-safety pattern as all week. This is sound: it computes ALL outputs, not samples.
 :::
 
 ---
@@ -824,9 +824,9 @@ This is the instructor's verbatim framing — "our transition function is just t
 The blow-up is real — so the *representation* of the set is everything. NNV uses **star sets**.
 
 - A **star set** compactly encodes a polytope as a **center + basis vectors + a predicate** (linear constraints) — "this shape = these directions, subject to these inequalities."
-- Closed under exactly the two operations NN verification needs: **affine maps** (for layers) and **intersection with a half-space** (for the safety check).
-- vs. **zonotopes / interval / abstract-domain** representations: stars carry **far less over-approximation** — the instructor reports **10×–10,000× speedups** with **less conservatism** than DeepZ / DeepPoly / ReluVal.
-- Less over-approximation = fewer **spurious** "maybe unsafe" verdicts (the false-positive problem from static analysis, again).
+- Closed under exactly the two operations NN verification needs: **affine maps** (for layers) and **intersection with a half-space** (everything on one side of a plane) — for the safety check.
+- vs. **zonotopes / interval / abstract-domain** representations: stars carry **far less over-approximation** — we report **10×–10,000× speedups** with **less conservatism** than DeepZ / DeepPoly / ReluVal (Tran et al., FM 2019).
+- Less over-approximation = fewer **spurious** "maybe unsafe" verdicts (the false-positive problem from static analysis, again). The approximate star method stays **sound** (it never misses a real violation) but **may be incomplete** — those spurious verdicts are the price of scaling; the exact method splits each ReLU to recover completeness, at higher cost.
 
 <svg viewBox="0 0 520 290" style="display:block;margin:0.3em auto;max-width:50%;height:auto" font-family="Inter, system-ui, sans-serif">
   <polygon points="370,120 300,212 160,212 90,120 160,28 300,28" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.8"/>
@@ -843,26 +843,26 @@ The blow-up is real — so the *representation* of the set is everything. NNV us
 *Caption: for the same true output set, looser representations (zonotopes) over-approximate badly; star sets stay tight.*
 
 ::: notes
-This connects the frontier back to two earlier threads: data structures (BDDs/LDDs) and the over-approximation/false-positive tension from abstract interpretation. The deep point the instructor makes is that the bottleneck is not the algorithm but the geometry — how you represent the set of states you propagate. A star set is a tuple (center, basis vectors, predicate) that represents a polytope efficiently and, critically, is closed under the only two operations the pipeline performs: affine maps (every layer) and intersection with a half-space (the final safety check). The competitive advantage over zonotopes and abstract domains is tightness: the instructor's results show 10× to 10,000× speedups AND less conservatism, because a tighter set means fewer cases where the over-approximation spuriously touches the unsafe region. That "spurious unsafe" is precisely the false-positive failure mode from the abstract-interpretation lecture — same phenomenon, new domain. Stars originated in hybrid-systems reachability, reused here because a network is just another transition system.
+This connects the frontier back to two earlier threads: data structures (BDDs/LDDs) and the over-approximation/false-positive tension from abstract interpretation. The deep point I make is that the bottleneck is not the algorithm but the geometry — how you represent the set of states you propagate. A star set is a tuple (center, basis vectors, predicate) that represents a polytope efficiently and, critically, is closed under the only two operations the pipeline performs: affine maps (every layer) and intersection with a half-space (the final safety check). The competitive advantage over zonotopes and abstract domains is tightness: our results show 10× to 10,000× speedups AND less conservatism, because a tighter set means fewer cases where the over-approximation spuriously touches the unsafe region. That "spurious unsafe" is precisely the false-positive failure mode from the abstract-interpretation lecture — same phenomenon, new domain. Stars originated in hybrid-systems reachability, reused here because a network is just another transition system.
 :::
 
 ---
 
 ## NN verification in the wild
 
-Real networks the instructor's group has verified — beyond toy MLPs:
+Real networks we have verified — beyond toy MLPs:
 
 | System | Network | Property verified |
 |---|---|---|
 | **ACAS Xu** | 45 nets, 6×50 neurons each | collision-avoidance advisories stay correct in safe regions |
-| **VGG16/19** | 16–19 layers, ~140M params, 1000 classes | image-classification **robust** to bounded perturbation (≈10 min, 1 core) |
+| **VGG16/19** (ImageStar; Tran et al., CAV 2020) | 16–19 layers, ~140M params, ImageNet 1000 classes | **robust (sound over-approximation)** to a bounded ℓ∞ perturbation of an ImageNet image (≈10 min, 1 core) |
 | **CARLA / perception** | conv nets on driving images | classification stable under ℓ∞ image noise |
-| **Closed-loop CPS** | net **+** plant dynamics (ACC, cruise control) | the *controlled system* stays safe over time |
+| **Closed-loop CPS** (Lopez et al., *NNV 2.0*, CAV 2023; Verisig: Ivanov et al., HSCC 2019) | net **+** plant dynamics (ACC, cruise control) | the *controlled system* stays safe over time |
 
 The frontier reach: from a 300-neuron advisory net to a 140-million-parameter image classifier, and from a bare network to a **network-in-the-loop** control system.
 
 ::: notes
-This is the "it's not just toys" slide, drawn directly from the instructor's NNV case studies. ACAS Xu — 45 small networks giving aircraft collision-avoidance advisories — is the field's standard benchmark, small but safety-critical and with crisp specs. At the other extreme, VGG16/19 are real ImageNet classifiers with ~140 million parameters and 1000 output classes, verified robust to a bounded perturbation of a specific image in about ten minutes on a single core using ImageStars (the image extension of star sets) — a genuinely large-scale result. CARLA is the driving simulator used for perception robustness. And the closed-loop CPS row is the part unique to this group: they verify the network together with the physical plant it controls (adaptive cruise control), so the property is about the whole controlled system's safety over time, not just one forward pass — that is the hybrid-systems heritage of star sets paying off. The takeaway: the reach now spans five orders of magnitude in network size.
+This is the "it's not just toys" slide, drawn directly from our NNV case studies. ACAS Xu — 45 small networks giving aircraft collision-avoidance advisories — is the field's standard benchmark, small but safety-critical and with crisp specs. At the other extreme, VGG16/19 are real ImageNet classifiers with ~140 million parameters and 1000 output classes, verified robust to a bounded perturbation of a specific image in about ten minutes on a single core using ImageStars (the image extension of star sets) — a genuinely large-scale result. CARLA is the driving simulator used for perception robustness. And the closed-loop CPS row is the part unique to this group: they verify the network together with the physical plant it controls (adaptive cruise control), so the property is about the whole controlled system's safety over time, not just one forward pass — that is the hybrid-systems heritage of star sets paying off. The takeaway: the reach now spans five orders of magnitude in network size.
 :::
 
 ---
@@ -885,16 +885,16 @@ VNN-COMP is the honest answer to "can we verify neural networks yet?" Six runs t
 
 ## The frontier: from images to language & autonomy
 
-The instructor's grand challenge — *"Let's verify ChatGPT"*: what would we even verify, and how? (Johnson, *Is Neural Network Verification Useful and What Is Next?*, Allerton 2025.)
+Our grand challenge — *"Let's verify ChatGPT"*: what would we even verify, and how? (Johnson, *Is Neural Network Verification Useful and What Is Next?*, Allerton 2025.)
 
-- **Today's reach:** VNN-COMP tools verify nets up to ~**100M parameters** — but the field has overwhelmingly targeted **image classification**.
+- **Today's reach:** verifiers handle **hundreds of millions of parameters** (e.g. ResNets; our ImageStar VGG-16/19 work reaches ~140M) for **ℓ∞ robustness** of **image classifiers** — but parameter count alone isn't a clean capability boundary (architecture, the spec, and completeness all matter as much as size).
 - **The needed shift:** to **NLP** (sentiment, hate-speech, and **guardrail** models) and **vision-language-action (VLA)** robot policies — new architectures, new specs.
 - **A realistic near-term target:** fully **open small language models** — Ai2's **OLMo2-1B**, HuggingFace's **SmolLM2-135M** — already near the scalability envelope, and the industry push to shrink models for cheap inference only helps.
-- **Beyond one network:** **neuro-symbolic** systems — neuro-symbolic behavior trees (**BehaVerify**) and neuro-symbolic automata — compose NN verification with classical model checking; **NNV 2.0** now also covers CNNs, neural ODEs, RNNs, and binary nets.
+- **Beyond one network:** **neuro-symbolic** systems — neuro-symbolic behavior trees (**BehaVerify**; Serbinowska & Johnson, SEFM 2022; *Formalizing Stateful Behavior Trees*, FMAS 2024) and neuro-symbolic automata (Sasaki, Lopez & Johnson, NeuS 2025) — compose NN verification with classical model checking; **NNV 2.0** now also covers CNNs, neural ODEs, RNNs, and binary nets.
 - **Both directions:** foundation models *for* verification (draft specs, models, act as oracles) **and** verification *of* foundation models.
 
 ::: notes
-The honest "what's next," straight from the instructor's recent talks (Liverpool, Dagstuhl, RMIT/Shonan) and the Allerton 2025 position paper. The provocation "Let's verify ChatGPT" is deliberately too hard — its value is exposing what's missing: specification languages and verification methods for transformer architectures on NLP tasks. Concretely, VNN-COMP tools now scale to ~100M-parameter networks but almost entirely for ℓ∞ robustness of image classifiers; the community needs to move to NLP (sentiment, hate-speech, and the guardrail models that gate agentic systems) and to vision-language-action policies in robotics, where layer types and specs differ. The pragmatic target is *fully open* small language models — Ai2's OLMo2-1B (open code/data/weights) or HuggingFace's SmolLM2-135M — which sit about at today's scalability frontier, with the bonus that industry's drive toward smaller, cheaper-inference models pulls realistic systems *into* range (the recurring theme: smaller is more verifiable). Beyond single networks, the instructor's group composes NN verification with classical model checking for neuro-symbolic systems — behavior trees that call neural networks (BehaVerify; Serbinowska et al.) and neuro-symbolic finite/pushdown automata (Sasaki, Lopez, Johnson, NeuS 2025) — and NNV 2.0 (Lopez et al., CAV 2023) extends reachability to CNNs, neural ODEs, RNNs, and binary networks. Finally the relationship runs both ways: foundation models can *assist* verification (generating specs and models, serving as oracles) and are themselves *targets* for verification.
+The honest "what's next," straight from my recent talks (Liverpool, Dagstuhl, RMIT/Shonan) and the Allerton 2025 position paper. The provocation "Let's verify ChatGPT" is deliberately too hard — its value is exposing what's missing: specification languages and verification methods for transformer architectures on NLP tasks. Concretely, verifiers now scale to hundreds of millions of parameters (ResNets; our ImageStar VGG-16/19 reaches ~140M) but almost entirely for ℓ∞ robustness of image classifiers, and raw parameter count is not by itself a clean capability boundary — architecture, the spec, and completeness matter as much; the community needs to move to NLP (sentiment, hate-speech, and the guardrail models that gate agentic systems) and to vision-language-action policies in robotics, where layer types and specs differ. The pragmatic target is *fully open* small language models — Ai2's OLMo2-1B (open code/data/weights) or HuggingFace's SmolLM2-135M — which sit about at today's scalability frontier, with the bonus that industry's drive toward smaller, cheaper-inference models pulls realistic systems *into* range (the recurring theme: smaller is more verifiable). Beyond single networks, our group composes NN verification with classical model checking for neuro-symbolic systems — behavior trees that call neural networks (BehaVerify; Serbinowska et al.) and neuro-symbolic finite/pushdown automata (Sasaki, Lopez, Johnson, NeuS 2025) — and NNV 2.0 (Lopez et al., CAV 2023) extends reachability to CNNs, neural ODEs, RNNs, and binary networks. Finally the relationship runs both ways: foundation models can *assist* verification (generating specs and models, serving as oracles) and are themselves *targets* for verification.
 :::
 
 ---
@@ -911,7 +911,7 @@ Fact-checked entry points — the spine of the field:
 - **Frontier** — Shi et al., *Robustness Verification for Transformers*, ICLR 2020 — the formal anchor; full LLMs remain out of sound-verification reach.
 
 ::: notes
-The "where to read next" slide the participants asked for, every entry checked against its venue. The two families mirror the earlier taxonomy: (a) the optimization / bound-propagation lineage that culminates in α,β-CROWN, and (b) the reachability / abstract-interpretation lineage that includes the instructor's own NNV (star sets, ImageStar) plus the ETH ERAN line (DeepZ/DeepPoly), itself descended from the abstract-interpretation breakthrough AI2. Reluplex is the origin point — the SMT-style solver that also proved NP-completeness — and Marabou is its modern successor. For self-study the two books are the best on-ramps: Albarghouthi's is free online and gentle; the Liu et al. survey is the comprehensive technical reference. Verisig is the bridge to the closed-loop CPS row earlier — verifying a hybrid system whose controller is a neural network. The transformer/LLM line is deliberately short because the science is: one solid formal result (Shi et al. 2020) and an otherwise open frontier — the honest thing to tell a faculty audience.
+The "where to read next" slide the participants asked for, every entry checked against its venue. The two families mirror the earlier taxonomy: (a) the optimization / bound-propagation lineage that culminates in α,β-CROWN, and (b) the reachability / abstract-interpretation lineage that includes our own NNV (star sets, ImageStar) plus the ETH ERAN line (DeepZ/DeepPoly), itself descended from the abstract-interpretation breakthrough AI2. Reluplex is the origin point — the SMT-style solver that also proved NP-completeness — and Marabou is its modern successor. For self-study the two books are the best on-ramps: Albarghouthi's is free online and gentle; the Liu et al. survey is the comprehensive technical reference. Verisig is the bridge to the closed-loop CPS row earlier — verifying a hybrid system whose controller is a neural network. The transformer/LLM line is deliberately short because the science is: one solid formal result (Shi et al. 2020) and an otherwise open frontier — the honest thing to tell a faculty audience.
 :::
 
 ---
@@ -951,7 +951,7 @@ Three very different Day-4 tools, one mental model — **compile the artifact to
 |---|---|---|---|
 | **CBMC** | C program + assertion | loops unrolled → SAT/SMT | SAT / Z3 |
 | **SAW** | C/LLVM vs Cryptol spec | symbolic execution → "impl = spec?" | SAT / SMT |
-| **α,β-CROWN / NNV** | network + ℓ∞ ball | bounds / reachable set → "bad output reachable?" | LP / MILP / SMT |
+| **α,β-CROWN / NNV** | network + ℓ∞ ball | bounds / reachable set → "bad output reachable?" | LP / MILP (linear / mixed-integer programming) / SMT |
 
 Each asks the solver the *same* question — **is a bad behavior satisfiable?** — and reads **UNSAT** as a proof. It is the Day-1 move (assert the negation) wearing three costumes.
 

@@ -151,9 +151,9 @@ The types-of-types are called **universes**. Two matter to us:
 | `Prop` | **propositions** (things to prove) | `5 = 5`, `x ≤ 10`, `p ∧ q` |
 | `Type` (`= Type 0`) | ordinary **data types** | `Nat`, `Bool`, `CounterState` |
 
-`Type 0 : Type 1 : Type 2 : …` is an infinite tower (so nothing contains itself). `Sort` is the umbrella word covering both (`Prop = Sort 0`, `Type u = Sort (u+1)`).
+`Type 0 : Type 1 : Type 2 : …` is an infinite tower (so nothing contains itself). `Sort` is the umbrella word covering both (`Prop = Sort 0`, `Type u = Sort (u+1)`). (You will never need to manipulate universe levels in this course — skim this.)
 
-The key asymmetry: in `Prop`, **all proofs of one proposition are interchangeable** ("proof irrelevance") — we only care *that* it's proved, not *which* proof.
+The key asymmetry: in `Prop`, **all proofs of one proposition are interchangeable** — Lean's *definitional proof irrelevance* for `Prop` (any two proofs of the same proposition are treated as equal). We only care *that* it's proved, not *which* proof.
 
 ::: notes
 One slide on universes, kept deliberately light. The single conceptual point worth carrying: `Prop` and `Type` are different universes for a reason — `Prop` is "proof-irrelevant" (any two proofs of the same proposition are treated as equal, because a proof is evidence, not data), whereas in `Type` two values of `Nat` like 3 and 4 are genuinely different data. That distinction is why `5 = 5` lives in `Prop` and `Nat` lives in `Type`. The `Sort u` umbrella and the universe tower are mentioned only so the words aren't mysterious if they appear in an error message; nobody in this audience needs to manipulate universe levels.
@@ -358,7 +358,7 @@ $$0+\dots+k+(k{+}1)=\underbrace{\tfrac{k(k+1)}{2}}_{\text{by IH}}+(k{+}1)=\tfrac
 </svg>
 
 ::: notes
-Ground induction in exactly the instructor's recap example before showing it in Lean, so the Lean version feels like a transcription, not a new idea. Read the dominoes metaphor aloud: base case = knock over the first domino; inductive step = guarantee each domino knocks the next; conclusion = all fall. The IH is the phrase to land — "assume it for k" is not circular, it's the engine. The sum formula is the canonical instance and it's in the lecture; we do the algebra on the slide so the audience sees the IH actually getting *used* (the underbrace). The figure is the base/step + IH diagram the brief requests.
+Ground induction in exactly our recap example before showing it in Lean, so the Lean version feels like a transcription, not a new idea. Read the dominoes metaphor aloud: base case = knock over the first domino; inductive step = guarantee each domino knocks the next; conclusion = all fall. The IH is the phrase to land — "assume it for k" is not circular, it's the engine. The sum formula is the canonical instance and it's in the lecture; we do the algebra on the slide so the audience sees the IH actually getting *used* (the underbrace). The figure is the base/step + IH diagram the brief requests.
 :::
 
 ---
@@ -601,7 +601,7 @@ The example files use a few beyond the workhorse set — terse meanings:
 | `t <;> s` | run tactic `s` on **every** subgoal that `t` produced |
 
 ::: notes
-These are the tactics a student meets the moment they open Counter.lean / TransitionSystem.lean / Gcd.lean, so each gets a one-line gloss (the instructor's explicit request). induction is the engine — it's how inductive_invariant_holds is proved. refine/obtain/⟨⟩ (de)construct conjunctions and existentials. decide/native_decide compute decidable facts; native_decide is the one tactic that *enlarges* the trusted base (it trusts the compiler), so mention that caveat. `<;>` is the "do the same thing to all cases" combinator that collapses the four counter branches into one line.
+These are the tactics a student meets the moment they open Counter.lean / TransitionSystem.lean / Gcd.lean, so each gets a one-line gloss (our explicit request). induction is the engine — it's how inductive_invariant_holds is proved. refine/obtain/⟨⟩ (de)construct conjunctions and existentials. decide/native_decide compute decidable facts; native_decide is the one tactic that *enlarges* the trusted base (it trusts the compiler), so mention that caveat. `<;>` is the "do the same thing to all cases" combinator that collapses the four counter branches into one line.
 :::
 
 ---
@@ -826,18 +826,18 @@ step:  if x < m then  x := x + 1 ;  y := y − 1
 
 Claim: `0 ≤ y ≤ m` is an invariant. **Try to prove it inductive — and watch it fail:**
 
-- Step case: assume only `0 ≤ y ≤ m`. Take a state with `y = 0` but (say) `x = 0`. The guard `x < m` is **enabled**, so we step: `y := y − 1` → `y` underflows below 0. ✗
-- The catch: that state (`x = 0, y = 0` with `m > 0`) is **not actually reachable** — but the weak invariant can't *see* that. It never tied `x` and `y` together.
+- Step case: assume only `0 ≤ y ≤ m`. Take a state with `y = 0` but (say) `x = 0`. The guard `x < m` is **enabled**, so we step: `y := y − 1` → `y` underflows below 0. ✗ *so `0 ≤ y ≤ m` fails to be **inductive**.*
+- The catch: that state (`x = 0, y = 0` with `m > 0`) is **not actually reachable** — so `0 ≤ y ≤ m` really *is* an invariant; it just isn't inductive. The weak invariant can't *see* unreachability: it never tied `x` and `y` together.
 
 ::: notes
-This is the instructor's own two-variable example from the lecture, and it's pedagogically sharper than the counter for *seeing* why strengthening is needed, because the failure is a concrete underflow rather than an abstract gap. Walk it slowly: with only `0 ≤ y ≤ m` in hand, the inductive step must cope with ANY state satisfying it — including the bogus `x=0, y=0` state — and there the decrement breaks the bound. The whole point (straight from the transcript): the proof fails on an UNREACHABLE state, because the invariant didn't capture the relationship between the variables. Model checking would never visit that state; induction, reasoning locally about one step, has no such protection unless we encode the relationship. Sets up the fix on the next slide.
+This is our two-variable example from the lecture, and it's pedagogically sharper than the counter for *seeing* why strengthening is needed, because the failure is a concrete underflow rather than an abstract gap. Walk it slowly: with only `0 ≤ y ≤ m` in hand, the inductive step must cope with ANY state satisfying it — including the bogus `x=0, y=0` state — and there the decrement breaks the bound. The whole point (straight from the transcript): the proof fails on an UNREACHABLE state, because the invariant didn't capture the relationship between the variables. Model checking would never visit that state; induction, reasoning locally about one step, has no such protection unless we encode the relationship. Sets up the fix on the next slide.
 :::
 
 ---
 
 ## The fix: strengthen with the missing relationship
 
-The repair (the instructor's): add the conserved quantity the program maintains — **`x + y = m`**:
+The repair I use: add the conserved quantity the program maintains — **`x + y = m`**:
 
 $$\Psi(s)\ \equiv\ (0 \le y \le m)\ \wedge\ (x + y = m)$$
 
@@ -850,7 +850,7 @@ Now the step case goes through: if `x < m`, then since `x + y = m` we get `y ≥
 > To prove $\Phi$ is an invariant: find $\Psi$ with $\Psi \Rightarrow \Phi$, and show $\Psi$ is **inductive**. The strongest possible $\Psi$ is "the reachable states themselves."
 
 ::: notes
-The payoff half of the worked example, again from the transcript. The added conjunct `x + y = m` is a *conserved quantity* (an "energy" the loop preserves) — and it's precisely the relationship whose absence let the proof fail. With it, `x < m` plus `x + y = m` forces `y ≥ 1`, so the decrement is safe; the bad state `x=0,y=0` is excluded because it violates `x+y=m`. Then state the general rule the instructor gives: strengthening is SOUND (if you find a Ψ⟹Φ that's inductive, Φ really is invariant) but INCOMPLETE in the sense that finding Ψ is on you — there's no algorithm, though the strongest valid Ψ is always "the exact reachable set." This is the same shape as the counter's Φ, and the reason the next slides' creative step (and the AI's hit-or-miss help) matters.
+The payoff half of the worked example, again from the transcript. The added conjunct `x + y = m` is a *conserved quantity* (an "energy" the loop preserves) — and it's precisely the relationship whose absence let the proof fail. With it, `x < m` plus `x + y = m` forces `y ≥ 1`, so the decrement is safe; the bad state `x=0,y=0` is excluded because it violates `x+y=m`. Then state the general rule I give: strengthening is SOUND (if you find a Ψ⟹Φ that's inductive, Φ really is invariant) but INCOMPLETE in the sense that finding Ψ is on you — there's no algorithm, though the strongest valid Ψ is always "the exact reachable set." This is the same shape as the counter's Φ, and the reason the next slides' creative step (and the AI's hit-or-miss help) matters.
 :::
 
 ---
@@ -940,7 +940,7 @@ Tempting: split all the cases, then close them uniformly —
 So the shipped proof closes each leaf with the *right* tool — `simp` + `omega` on the counting leaves, `absurd … (by decide)` on the impossible-mode leaves — rather than one blanket tactic.
 
 ::: notes
-A deliberately honest slide. The `<;>` combinator collapses the *shared* work, but a single `simp_all <;> omega` does NOT finish the proof — omega even prints a counterexample on the off-mode leaves, because their goal is a constructor disequality (`on ≠ off`), not an arithmetic fact. That's exactly why the shipped counterInv_step in Counter.lean closes the impossible-mode leaves with `absurd … (by decide)` and the counting leaves with `omega`. Teaching point: match the closer to the goal's *kind* — arithmetic → omega, decidable equality → decide. This is also where an AI assistant bluffs: it'll happily propose a tidy one-liner the elaborator then rejects (ties to L3).
+A deliberately honest slide. The `<;>` combinator collapses the *shared* work, but a single `simp_all <;> omega` does NOT finish the proof — omega even prints a counterexample on the off-mode leaves, because their goal is a constructor disequality (`on ≠ off`), not an arithmetic fact. That's exactly why the shipped counterInv_step in Counter.lean closes the impossible-mode leaves with `absurd … (by decide)` and the counting leaves with `omega`. Teaching point: match the closer to the goal's *kind* — arithmetic → omega, decidable equality → decide. This is also where an AI assistant bluffs: it'll happily propose a tidy one-liner the elaborator (Lean's engine that turns your tactic script into a proof term) then rejects (ties to L3).
 :::
 
 ---
@@ -1013,10 +1013,10 @@ Once Φ is proved inductive, every property it implies is a one-liner: invariant
 
 ```lean
 #print axioms CounterTS_inv1_proved
--- 'CounterTS_inv1_proved' depends on axioms: [propext, Quot.sound]
+-- 'CounterTS_inv1_proved' depends on axioms: [propext, Quot.sound, Classical.choice]
 ```
 
-If `sorryAx` appears, the proof has a hole. (This is exactly what the Day-3 autograder checks.)
+Those three — `propext`, `Quot.sound`, `Classical.choice` — are the standard Lean axioms; seeing only them is the healthy result. If `sorryAx` appears, the proof has a hole. (This is exactly what the Day-3 autograder checks.)
 
 ::: notes
 Critical gotcha. A green build is NOT proof — Lean treats sorry as a warning so you can build work-in-progress. The real check is #print axioms: a finished proof depends only on Lean's standard axioms (propext, Quot.sound, sometimes Classical.choice). If sorryAx shows up, there is a hole. Our autograder runs exactly this check, because "lake build passed" would let a student submit a sorry-filled proof and get full marks.
@@ -1059,7 +1059,7 @@ $$\text{Inv}(x,y)\ \equiv\ \gcd(x, y) = \gcd(m, n)$$
 This is an **inductive** invariant: `gcd(x−y, y) = gcd(x, y)` (and symmetrically), so each step preserves it. When the loop ends (one variable hits 0), `gcd(x,0)=x` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
 
 ::: notes
-The instructor closes the inductive-invariants lecture on exactly this GCD example, so include it as a second, non-counter instance — and note it's the *invariant* (correctness) angle, complementary to the previous slide's *termination* (ranking-function) angle on the very same algorithm. The core lesson, in the transcript's words: even though x and y change every step, the running gcd stays fixed, and that conserved quantity IS the inductive invariant — it "captures the core logic of the program." This reinforces the strengthening mindset (find the maintained relationship) on a system students recognize as genuinely useful, and it pairs naturally with the termination slide: invariant ⇒ partial correctness, ranking function ⇒ termination, together ⇒ total correctness.
+I close the inductive-invariants lecture on exactly this GCD example, so include it as a second, non-counter instance — and note it's the *invariant* (correctness) angle, complementary to the previous slide's *termination* (ranking-function) angle on the very same algorithm. The core lesson, in the transcript's words: even though x and y change every step, the running gcd stays fixed, and that conserved quantity IS the inductive invariant — it "captures the core logic of the program." This reinforces the strengthening mindset (find the maintained relationship) on a system students recognize as genuinely useful, and it pairs naturally with the termination slide: invariant ⇒ partial correctness, ranking function ⇒ termination, together ⇒ total correctness.
 :::
 
 ---
@@ -1123,7 +1123,7 @@ The lecture draws the line we've been living on both sides of:
 - The deep asymmetry behind all of it: **finding a proof is hard; checking one is easy.**
 
 ::: notes
-This is the SMT-vs-ITP contrast the brief asks for, framed exactly as the instructor frames it across the Q&A and history transcripts. The table is the whole idea: an automated prover (SMT solver like Z3 under nuXmv) takes a formula and pushes a button, but is confined to decidable, mostly first-order fragments and may time out; an interactive prover takes a theorem AND your proof and checks it, at the price of your effort, but can express higher-order/dependent statements. The transcript's expressiveness point is the load-bearing one: things like CompCert's translation-correctness "can't necessarily be specified in first-order logic," which is *why* ITPs exist despite being harder. And the line that makes AI relevant — "finding proofs is hard, checking them is easy" — is the asymmetry the next slide builds the AI landscape on.
+This is the SMT-vs-ITP contrast the brief asks for, framed exactly as I frame it across the Q&A and history transcripts. The table is the whole idea: an automated prover (SMT solver like Z3 under nuXmv) takes a formula and pushes a button, but is confined to decidable, mostly first-order fragments and may time out; an interactive prover takes a theorem AND your proof and checks it, at the price of your effort, but can express higher-order/dependent statements. The transcript's expressiveness point is the load-bearing one: things like CompCert's translation-correctness "can't necessarily be specified in first-order logic," which is *why* ITPs exist despite being harder. And the line that makes AI relevant — "finding proofs is hard, checking them is easy" — is the asymmetry the next slide builds the AI landscape on.
 :::
 
 ---
@@ -1140,7 +1140,7 @@ Because checking is cheap, the field has thrown search and learning at the *hard
 The unifying bet: let AI *search* for the proof, let the *kernel* certify it. Hard-to-find, easy-to-check is the ideal shape for an AI + verifier loop.
 
 ::: notes
-The AI-proving landscape the brief requests, assembled from the transcript's own references (TPTP, Formalizing 100 Theorems, Minerva, MathPrompter/tool-use, Gowers' project, DARPA PROVERS — the instructor names all of these) plus the two flagship Lean systems the existing deck already cites. Organize it as a progression: symbolic ATP and benchmarks (pre-LLM), then LLMs aimed at math, then neural provers that specifically emit *Lean* and get kernel-checked, then the engineering push (PROVERS) toward verified software at scale. The thesis to land — and it's the course's whole premise — is that the proof-search/proof-check asymmetry makes formal math the *ideal* arena for AI: a domain where a fallible generator is made trustworthy by an infallible checker. This is "AI proposes, kernel disposes" at field scale.
+The AI-proving landscape the brief requests, assembled from the transcript's own references (TPTP, Formalizing 100 Theorems, Minerva, MathPrompter/tool-use, Gowers' project, DARPA PROVERS — I name all of these) plus the two flagship Lean systems the existing deck already cites. Organize it as a progression: symbolic ATP and benchmarks (pre-LLM), then LLMs aimed at math, then neural provers that specifically emit *Lean* and get kernel-checked, then the engineering push (PROVERS) toward verified software at scale. The thesis to land — and it's the course's whole premise — is that the proof-search/proof-check asymmetry makes formal math the *ideal* arena for AI: a domain where a fallible generator is made trustworthy by an infallible checker. This is "AI proposes, kernel disposes" at field scale.
 :::
 
 ---

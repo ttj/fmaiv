@@ -43,6 +43,8 @@ Three roughly-equal teaching blocks with two breaks. The first break is the long
 | 3 | Theorem proving | Lean 4, Claude Code | "Why is there no counterexample?" |
 | 4 | Program + frontier | CBMC, Cryptol, SAW | "Does the source match the spec?" |
 
+*A counterexample is one concrete behavior that violates the property; N is a step bound.*
+
 A single running example — a small "counter to 10" reactive system — appears in every day, in five different encodings (Day 4 has two).
 
 ::: notes
@@ -81,7 +83,7 @@ Fifty minutes. The arc: why this workshop exists at all (the asymmetry), what th
 - The bottleneck is no longer *production*. It is *validation*.
 - Formal methods is the branch of computer science designed to validate these artifacts mechanically.
 
-> Terence Tao has described large Lean formalization projects as a new mode of collaboration: contributors he has never met submit proof steps in a language he is still learning, and the proof assistant's kernel — not a human referee — arbitrates whether each step is correct. (Scientific American interview, 2024)
+Terence Tao has described large Lean formalization projects as a new mode of collaboration: contributors he has never met submit proof steps in a language he is still learning, and the proof assistant's kernel — not a human referee — arbitrates whether each step is correct (paraphrased; Scientific American, 2024).
 
 ::: notes
 This is the framing slide for the whole week. The story is: AI is doing the easy half of verification (proposing) much faster than humans can do the hard half (checking). Formal methods is the only known way to mechanize the checking. We're not here to compete with AI; we're here to build the substrate it needs to be trustworthy. This is a paraphrase of Tao's public remarks on the PFR/Equational Theories Lean projects (e.g. his 2024 Scientific American interview and blog posts), not a verbatim quotation.
@@ -92,11 +94,11 @@ This is the framing slide for the whole week. The story is: AI is doing the easy
 ## Why now? The economics of cheap generation
 
 - **Compute is flooding in.** Global AI investment now runs, as an order-of-magnitude framing, at something like NASA's *entire annual budget every one-to-three weeks*; Sutton's "bitter lesson" says the methods that win are the ones that ride more compute — so generation keeps getting cheaper and better.
-- **The flip side the hype skips:** for many concrete tasks a *small* or *neuro-symbolic* solution beats a frontier LLM — better accuracy, **1000×+ faster**, at a tiny fraction of the cost (NVIDIA, *Small Language Models are the Future of Agentic AI*, 2025; the instructor's neuro-symbolic automata reach ~100% where VLMs score ≤50%, in milliseconds vs tens of seconds, for ~$10 of compute).
+- **The flip side the hype skips:** for many concrete tasks a *small* or *neuro-symbolic* solution beats a frontier LLM — cheaper, faster, often more accurate (NVIDIA, *Small Language Models are the Future of Agentic AI*, arXiv 2506.02153). On **image-based string/arithmetic acceptance**, **our** neuro-symbolic finite/pushdown automata reached **70–100%** accuracy where GPT/Claude/Gemini-class VLMs scored **≤50%** (and ~0% on multi-operator arithmetic) — at roughly **1000× lower latency** and a few dollars of compute (Sasaki, Lopez & Johnson, *Neurosymbolic Finite and Pushdown Automata*, NeuS 2025).
 - **Both arrows point at verification.** Cheap generation buries us in artifacts to check — and the cost-effective, *small* artifacts are exactly the ones formal methods can still scale to.
 
 ::: notes
-The economic "why now," for a faculty audience. Two forces. First, raw money and compute: AI capital expenditure is at a scale where — as an order-of-magnitude framing the instructor uses — the industry spends on the order of NASA's whole yearly budget every few weeks, and Rich Sutton's *bitter lesson* (2019) predicts the compute-hungry methods keep winning, so the cost of *generating* code, proofs, and designs trends toward zero. Second, a counter-current the hype misses: you often shouldn't reach for a giant LLM at all — for narrow tasks, small or neuro-symbolic systems are cheaper, faster, and more accurate (NVIDIA's position paper, arXiv 2506.02153; the instructor's neuro-symbolic finite/pushdown automata beat GPT/Claude/Gemini-class VLMs on image-based reasoning by large margins at ~$10 of compute — Sasaki, Lopez, Johnson, NeuS 2025). Crucially for this course, smaller and simpler is also *more verifiable*: the state-space explosion that limits formal methods eases as models shrink. So whichever way the economics break, the binding constraint becomes assurance — which is this week.
+The economic "why now," for a faculty audience. Two forces. First, raw money and compute: AI capital expenditure is at a scale where — as an order-of-magnitude framing we use — the industry spends on the order of NASA's whole yearly budget every few weeks, and Rich Sutton's *bitter lesson* (2019) predicts the compute-hungry methods keep winning, so the cost of *generating* code, proofs, and designs trends toward zero. Second, a counter-current the hype misses: you often shouldn't reach for a giant LLM at all — for narrow tasks, small or neuro-symbolic systems are cheaper, faster, and more accurate (NVIDIA's position paper, arXiv 2506.02153; our neuro-symbolic finite/pushdown automata beat GPT/Claude/Gemini-class vision-language models (VLMs) on image-based reasoning by large margins at ~$10 of compute — Sasaki, Lopez, Johnson, NeuS 2025). Crucially for this course, smaller and simpler is also *more verifiable*: fewer neurons and less ReLU branching mean tighter, faster reachability. So whichever way the economics break, the binding constraint becomes assurance — which is this week.
 :::
 
 ---
@@ -127,8 +129,8 @@ The same AI that hits IMO gold also writes vulnerable code. The reason is the sa
 
 ## This season alone: AI crosses two thresholds
 
-- **Finding flaws at scale.** Anthropic's **Project Glasswing** (2026) turned a frontier model loose on critical software and surfaced **thousands of zero-day vulnerabilities** across every major OS and browser — including a **27-year-old** bug in OpenBSD and a **16-year-old** bug in FFmpeg that fuzzers had executed **five million times** and still missed.
-- **Proving new theorems.** In **May 2026** an **OpenAI** reasoning model autonomously **disproved Erdős's 1946 unit-distance conjecture** (a fixed polynomial improvement, later pinned to δ = 0.014 by a Princeton mathematician) — the first time AI has independently settled a central open problem in a subfield.
+- **Finding flaws at scale.** Anthropic's **Project Glasswing** (2026) turned a frontier model loose on critical software and surfaced **thousands of zero-day vulnerabilities** across every major OS and browser — including a **27-year-old** bug in OpenBSD and a **16-year-old** bug in FFmpeg that fuzzers had executed **five million times** and still missed. (anthropic.com/glasswing)
+- **Proving new theorems.** In **May 2026** an **OpenAI** reasoning model autonomously produced a proof that **refutes the long-conjectured near-linear bound** on Erdős's 1946 unit-distance problem — a fixed polynomial improvement (exponent δ later pinned to 0.014 by **Will Sawin**) — one of the first times AI has independently advanced a central open problem in a subfield. (openai.com)
 - **The lesson.** Testing ran that FFmpeg line five million times and learned nothing; *reasoning about the code* found the bug. When AI both writes and breaks software, **proof — not more testing — tells you which side you are on.**
 
 ::: notes
@@ -141,7 +143,7 @@ The "this is happening now" slide — concrete, datable, two-sided. Glasswing (A
 
 - **Generative AI** = *generating* stuff (text, code). **Agentic AI** = *generating + doing* — it plans, edits files, runs tools and tests, reads the errors, and iterates.
 - Tools: **Claude Code**, Cursor, GitHub Copilot, OpenAI Codex — inside your editor (VS Code), wired to your shell and, via **MCP** (Model Context Protocol), to external tools and data.
-- What that buys, from real recent use (the instructor's own, late 2025):
+- What that buys, from real recent use (our own, late 2025):
     - ~10,000 lines of **C# → Python** in ~3 hours; ~10k lines **MATLAB → Python**; new NNV benchmarks in ~1 hour.
     - Live lecture demos, Docker environments built during a Zoom interview, APIs learned on the fly.
 - **The pattern that makes it work — *oracles*:** agentic AI iterates wherever it can *check* itself — a parser, a simulation, a differential test against a known-good artifact, or a formal proof. Verification is the highest-confidence oracle.
@@ -149,7 +151,7 @@ The "this is happening now" slide — concrete, datable, two-sided. Glasswing (A
 > The *generation* half of engineering just got cheap. That is exactly why the *validation* half — this course — becomes the bottleneck.
 
 ::: notes
-Set the stage for a faculty audience. The distinction that lands: generative = it writes; agentic = it writes AND acts (runs your tests, fixes the error it sees, opens a PR). The stack is editor + shell + MCP (the emerging standard for agents to reach external tools/data). The productivity numbers are the instructor's own from late 2025 — translations, benchmarks, and demos in hours, not weeks. This isn't hype; the point is structural: when anyone can generate code/proofs/designs in seconds, the scarce, decisive skill becomes deciding whether the result is correct — verification.
+Set the stage for a faculty audience. The distinction that lands: generative = it writes; agentic = it writes AND acts (runs your tests, fixes the error it sees, opens a PR). The stack is editor + shell + MCP (the emerging standard for agents to reach external tools/data). The productivity numbers are our own from late 2025 — translations, benchmarks, and demos in hours, not weeks. This isn't hype; the point is structural: when anyone can generate code/proofs/designs in seconds, the scarce, decisive skill becomes deciding whether the result is correct — verification.
 :::
 
 ---
@@ -165,7 +167,7 @@ Karpathy named **"vibe coding"** (Feb 2025) — "give in to the vibes, forget th
 | Planning | none | design docs + specs |
 | Ownership | casual acceptance | **full human responsibility** |
 
-But AI-generated code is *often wrong*: Veracode's 2025 GenAI report found security flaws in **~45%** of AI-written samples; Apiiro reported AI assistants ship code **~4× faster but with ~10× the vulnerabilities** (2025); MIT Sloan documents the *hidden costs* — technical debt that destabilizes systems (2025). (Plus the ~51% vulnerable C and ~20% hallucinated packages from before.) **You own what the AI writes.**
+But AI-generated code is *often wrong*: Veracode's 2025 GenAI report found security flaws in **~45%** of AI-written samples; Apiiro reported AI assistants ship code **~4× faster but with ~10× the vulnerabilities** (2025); MIT Sloan documents the *hidden costs* — technical debt that destabilizes systems (2025) (industry/vendor reports). (Plus the ~51% vulnerable C and ~20% hallucinated packages from before.) **You own what the AI writes.**
 
 Dijkstra warned of exactly this in *On the Foolishness of "Natural Language Programming"* (EWD667, 1978): natural language is too ambiguous to be a safe programming medium. Vibe coding is that idea *automated*.
 
@@ -237,7 +239,7 @@ This is the deliverable. The workshop is short — four days — so we will cove
 A **verifier** takes a **model** (what the system *is*) and a **specification** (what *correct* means) and returns one of exactly two things: a **proof** that *every* behavior meets the spec, or a **counterexample** — one concrete behavior that breaks it. Every tool this week is an instance of this picture.
 
 ::: notes
-The mental model for the entire course, as a picture before the formalism (this is the model/spec/verifier/result flow from the instructor's own slides). Two inputs — the model (the system, as a transition system, formula, or program) and the specification (the property: an assertion, a temporal-logic formula, a theorem statement) — feed a verifier, which is whatever engine the day uses (Z3 on Day 1, nuXmv on Day 2, Lean on Day 3, CBMC/SAW on Day 4). The output is binary in spirit: either a proof/certificate that the property holds over *all* behaviors, or a counterexample that exhibits a single offending behavior. Stress the "all vs one" asymmetry — it's exactly what separates verification from testing, and it sets up the Dijkstra/Knuth quotes next. Keep returning to this picture; every later tool just fills in the three boxes differently.
+The mental model for the entire course, as a picture before the formalism (this is the model/spec/verifier/result flow from our own slides). Two inputs — the model (the system, as a transition system, formula, or program) and the specification (the property: an assertion, a temporal-logic formula, a theorem statement) — feed a verifier, which is whatever engine the day uses (Z3 on Day 1, nuXmv on Day 2, Lean on Day 3, CBMC/SAW on Day 4). The output is binary in spirit: either a proof/certificate that the property holds over *all* behaviors, or a counterexample that exhibits a single offending behavior. Stress the "all vs one" asymmetry — it's exactly what separates verification from testing, and it sets up the Dijkstra/Knuth quotes next. Keep returning to this picture; every later tool just fills in the three boxes differently.
 :::
 
 ---
@@ -615,14 +617,14 @@ For a propositional formula $\varphi$:
 |---|---|---|
 | **Satisfiability** | exists $v$ with $v \models \varphi$ | NP-complete (Cook 1971) |
 | **Validity** | every $v$ satisfies $\varphi$ | co-NP-complete |
-| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | co-NP-complete (check $\Gamma \cup \{\neg\varphi\}$ unsat) |
+| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | co-NP-complete (check $\Gamma \cup \{\neg\varphi\}$ unsat, for finite $\Gamma$) |
 
 Everything reduces to satisfiability:
 
 - $\varphi$ valid $\iff$ $\neg \varphi$ unsatisfiable.
 - $\Gamma \models \varphi \iff \Gamma \cup \{\neg \varphi\}$ unsatisfiable.
 
-($\iff$ means "exactly when / if and only if". *NP-complete* = answers are easy to **check** but, as far as anyone knows, hard to **find**; *co-NP-complete* is the mirror image, for "always true" questions.)
+($\iff$ means "exactly when / if and only if". *NP-complete* = verifiable in polynomial time given a witness; no known polynomial-time algorithm (a fast one would prove P = NP). *co-NP-complete* is the mirror image, for "always true" questions.)
 
 ::: notes
 This is the single most important slide in the propositional-logic block. Every FM tool reduces its question to satisfiability. When you want to check "is this property always true?" the tool asks "is the negation satisfiable?" If unsat, you've proved validity. This is the whole strategy of bounded model checking, of `:prove` in Cryptol, of `simp` closure checks in Lean — every time.
@@ -661,7 +663,7 @@ A proof system is judged by how these two line up:
 - **Complete**: $\Gamma \models \varphi \;\Rightarrow\; \Gamma \vdash \varphi$ — "everything true is derivable." Nothing true escapes the proof system.
 
 ::: notes
-This is the single most important conceptual distinction in all of logic, and it's the hinge the whole week turns on. $\models$ (double turnstile) is about models and meaning; $\vdash$ (single turnstile) is about derivations and rules. The instructor frames soundness as "you can't prove anything that's wrong" and completeness as "you can prove anything that's true." A solver/prover is trustworthy only if it's *sound* — when Z3 says `unsat` or Lean accepts a proof, soundness is exactly the guarantee that the verdict reflects truth, not a bug in the rules. Completeness is the nice-to-have that's often unavailable (first-order validity is only semi-decidable; richer logics lose completeness entirely — a Day-3 theme). Today's tools live on the semantic side; Day 3's Lean lives on the syntactic side, and its kernel is the thing enforcing soundness.
+This is the single most important conceptual distinction in all of logic, and it's the hinge the whole week turns on. $\models$ (double turnstile) is about models and meaning; $\vdash$ (single turnstile) is about derivations and rules. We frame soundness as "you can't prove anything that's wrong" and completeness as "you can prove anything that's true." A solver/prover is trustworthy only if it's *sound* — when Z3 says `unsat` or Lean accepts a proof, soundness is exactly the guarantee that the verdict reflects truth, not a bug in the rules. Completeness is the nice-to-have that's often unavailable (first-order validity is only semi-decidable; richer logics lose completeness entirely — a Day-3 theme). Today's tools live on the semantic side; Day 3's Lean lives on the syntactic side, and its kernel is the thing enforcing soundness.
 :::
 
 ---
@@ -720,7 +722,7 @@ Same atoms, opposite verdicts. The first lets $y$ depend on $x$; the second dema
 - **De Morgan for quantifiers** (negation toggles the quantifier): $\neg\forall x.\,\varphi \equiv \exists x.\,\neg\varphi$ and $\neg\exists x.\,\varphi \equiv \forall x.\,\neg\varphi$.
 
 ::: notes
-This is the FOL subtlety the instructor stresses with the Lyapunov-stability example: "for all $\epsilon>0$ there exists $\delta>0$ ..." means something completely different from "there exists $\delta>0$ for all $\epsilon>0$ ..." — in the first, $\delta$ may depend on $\epsilon$; swapping forces one $\delta$ to work uniformly. Engineers who have seen $\epsilon$–$\delta$ definitions in control theory or analysis already have the intuition; this slide just names it. Practical payoff for tool use: when you write a spec for Z3 or Lean, the quantifier order *is* the specification — getting it backwards is the classic way to "verify" the wrong property. The quantifier De Morgan laws are exactly what a solver uses to push a goal into the $\Gamma \cup \{\neg\varphi\}$ refutation form.
+This is the FOL subtlety we stress with the Lyapunov-stability example: "for all $\epsilon>0$ there exists $\delta>0$ ..." means something completely different from "there exists $\delta>0$ for all $\epsilon>0$ ..." — in the first, $\delta$ may depend on $\epsilon$; swapping forces one $\delta$ to work uniformly. Engineers who have seen $\epsilon$–$\delta$ definitions in control theory or analysis already have the intuition; this slide just names it. Practical payoff for tool use: when you write a spec for Z3 or Lean, the quantifier order *is* the specification — getting it backwards is the classic way to "verify" the wrong property. The quantifier De Morgan laws are exactly what a solver uses to push a goal into the $\Gamma \cup \{\neg\varphi\}$ refutation form.
 :::
 
 ---
@@ -735,7 +737,7 @@ This is the FOL subtlety the instructor stresses with the Lyapunov-stability exa
 | **BV** (bit-vectors) | fixed-width words | $x \;\&\; (x-1) = 0$ | yes |
 | **Arrays** | $A : I \to V$ | $\text{store}(a, i, v)[i] = v$ | yes |
 | **NIA** (nonlinear integer arithmetic) | $\mathbb{Z}$, nonlinear | $x \cdot y = z \wedge \dots$ | **undecidable** |
-| **NRA** (nonlinear real arithmetic) | $\mathbb{R}$, nonlinear | $x^2 + y^2 = 25$ | decidable (Tarski 1948); CAD (Collins 1975) is doubly-exponential |
+| **NRA** (nonlinear real arithmetic) | $\mathbb{R}$, nonlinear | $x^2 + y^2 = 25$ | decidable (Tarski 1951); CAD (Collins 1975) is doubly-exponential |
 
 *"Linear"* = never multiply two unknowns; *"nonlinear"* allows $x\cdot y$ or $x^2$. A *bit-vector* is an integer in a fixed number of bits (like a 32-bit machine word); $\&$ is bitwise-AND. For arrays, $\text{store}(a,i,v)$ is array $a$ with index $i$ set to $v$, and $a[i]$ reads index $i$. EUF treats each function as a black box — equal inputs give equal outputs, nothing more.
 
@@ -1150,7 +1152,7 @@ $$\varphi = (\neg a \vee b)\,(\,\neg b \vee c)\,(a \vee c)\,(d \vee \neg c)\,(e)
 | 6 | done | $(a\vee c)$ already true | **SAT**: $a{=}b{=}c{=}d{=}e{=}\top$ |
 
 ::: notes
-This is the deeper companion to the tiny-trace slide: it exercises *both* free rules plus one decision, exactly the components the instructor calls out in Week 8 ("early termination, pure literals, unit clauses"). Talk through the intuition the instructor gives for pure literals: if a variable only ever shows up positive, making it true can only *help* — it satisfies clauses and can never falsify one — so there's no risk in setting it without a decision. Unit propagation is the workhorse; on industrial instances the solver spends ~90% of its time here. Note we got all the way to SAT with a *single* decision (step 3) — the two free rules did the rest. That ratio (lots of propagation, few decisions) is why DPLL beats the 2^n truth table so badly in practice, even though no one can prove a good average-case bound (the instructor's honest "probably no one knows").
+This is the deeper companion to the tiny-trace slide: it exercises *both* free rules plus one decision, exactly the components we call out in Week 8 ("early termination, pure literals, unit clauses"). Talk through the intuition we give for pure literals: if a variable only ever shows up positive, making it true can only *help* — it satisfies clauses and can never falsify one — so there's no risk in setting it without a decision. Unit propagation is the workhorse; on industrial instances the solver spends ~90% of its time here. Note we got all the way to SAT with a *single* decision (step 3) — the two free rules did the rest. That ratio (lots of propagation, few decisions) is why DPLL beats the 2^n truth table so badly in practice, even though no one can prove a good average-case bound (our honest "probably no one knows").
 :::
 
 ---
@@ -1195,7 +1197,7 @@ Empty clause derived $\Rightarrow$ **UNSAT**. This is a checkable certificate: a
 *A resolution derivation: each node is a clause; the two parents resolve away one variable; reaching the empty clause $\square$ certifies UNSAT.*
 
 ::: notes
-Resolution is the instructor's "another way to implement a SAT solver" and, crucially, the source of UNSAT *certificates*. The teaching point: SAT answers are asymmetric. A `sat` answer comes with a model anyone can plug in and check; an `unsat` answer needs a *proof*, and resolution is that proof — a sequence of clauses ending in the empty clause. Modern CDCL solvers emit exactly this (in the DRAT proof format) so the result can be independently verified; this matters enormously in verification, where you must trust the "no counterexample" verdict. Tie it back: resolution is the same inference rule from the Week 3 propositional-logic section (from $a\vee b$ and $\neg b\vee c$ derive $a\vee c$) — here aimed at deriving falsehood to prove unsatisfiability. The empty clause is "the disjunction of nothing," which is false, so deriving it from the premises means the premises entail false, i.e. are contradictory.
+Resolution is our "another way to implement a SAT solver" and, crucially, the source of UNSAT *certificates*. The teaching point: SAT answers are asymmetric. A `sat` answer comes with a model anyone can plug in and check; an `unsat` answer needs a *proof*, and resolution is that proof — a sequence of clauses ending in the empty clause. Modern CDCL solvers emit exactly this (in the DRAT proof format) so the result can be independently verified; this matters enormously in verification, where you must trust the "no counterexample" verdict. Tie it back: resolution is the same inference rule from the Week 3 propositional-logic section (from $a\vee b$ and $\neg b\vee c$ derive $a\vee c$) — here aimed at deriving falsehood to prove unsatisfiability. The empty clause is "the disjunction of nothing," which is false, so deriving it from the premises means the premises entail false, i.e. are contradictory.
 :::
 
 ---
@@ -1314,7 +1316,7 @@ Now the SAT engine sees only $p_1 \wedge p_2 \wedge p_3$ and reasons Boolean-onl
 Loop until the SAT engine finds a theory-consistent model (**sat**) or runs out of assignments (**unsat**).
 
 ::: notes
-This is the loop the instructor describes in the "Adding the Theory Solvers" slide: theory atoms map to Boolean atoms, the SAT solver builds a partial assignment, the theory solver checks T-consistency and can report conflicts, propagate literals, or learn clauses. The linear-arithmetic conflict here is the instructor's own example ("a > 0, c > 0, a + c < 0 — theory conflict, backtrack"); I've renamed to x, y for the running counter's variable style. The key mental model: the SAT engine is colorblind — it only sees p1, p2, p3 and has no idea that p3 contradicts p1 ∧ p2. The theory solver supplies that missing knowledge as a *clause*, in the SAT engine's own language, and the two keep talking until they agree. That hand-off (theory lemma expressed as a Boolean clause) is the entire trick that lets one SAT engine drive any theory — LIA via simplex, EUF via congruence closure, bit-vectors via bit-blasting. It's why Z3 is modular.
+This is the loop we describe in the "Adding the Theory Solvers" slide: theory atoms map to Boolean atoms, the SAT solver builds a partial assignment, the theory solver checks T-consistency and can report conflicts, propagate literals, or learn clauses. The linear-arithmetic conflict here is our own example ("a > 0, c > 0, a + c < 0 — theory conflict, backtrack"); I've renamed to x, y for the running counter's variable style. The key mental model: the SAT engine is colorblind — it only sees p1, p2, p3 and has no idea that p3 contradicts p1 ∧ p2. The theory solver supplies that missing knowledge as a *clause*, in the SAT engine's own language, and the two keep talking until they agree. That hand-off (theory lemma expressed as a Boolean clause) is the entire trick that lets one SAT engine drive any theory — LIA via simplex, EUF via congruence closure, bit-vectors via bit-blasting. It's why Z3 is modular.
 :::
 
 ---
@@ -1345,7 +1347,7 @@ The SAT engine and the theory solver pass messages until they agree:
 When the theory solver finally says *consistent*, that Boolean model **plus** the theory witness is the SMT model.
 
 ::: notes
-The companion figure slide for the DPLL(T) loop, requested in the brief. Keep narration tight on delivery — the previous slide carries the worked numbers; this one is the picture to point at. Emphasize the three possible theory-solver responses (the instructor's T-conflict / T-propagate / T-learn) and that the loop is *exactly* the SAT loop from L3's DPLL slides with one extra participant. T-propagate is the optimization we're glossing: the theory solver can sometimes tell the SAT engine "given what you've committed to, this other literal is forced" before a full assignment, pruning the search early. Mention that this is live every time they run Z3 today — when z3_counter_bounded.py comes back sat/unsat, this loop ran underneath, with LIA as the theory.
+The companion figure slide for the DPLL(T) loop, requested in the brief. Keep narration tight on delivery — the previous slide carries the worked numbers; this one is the picture to point at. Emphasize the three possible theory-solver responses (our T-conflict / T-propagate / T-learn) and that the loop is *exactly* the SAT loop from L3's DPLL slides with one extra participant. T-propagate is the optimization we're glossing: the theory solver can sometimes tell the SAT engine "given what you've committed to, this other literal is forced" before a full assignment, pruning the search early. Mention that this is live every time they run Z3 today — when z3_counter_bounded.py comes back sat/unsat, this loop ran underneath, with LIA as the theory.
 :::
 
 ---
@@ -1412,7 +1414,7 @@ unsigned GCD(unsigned x, unsigned y) {   // requires y > 0
 **Goal:** find inputs that make the loop run *exactly twice*. We can't know the trip count by hand — so we ask Z3.
 
 ::: notes
-This is the instructor's Week-8 test-case-generation example, verbatim down to the GCD function. The framing: a `while(true)` loop whose iteration count depends on the inputs in a way that's painful to reason about by hand. Generating "an input that runs the loop exactly twice" (or ten times, or that hits a specific branch) is exactly what symbolic execution and tools like KLEE/CBMC do under the hood, and it's a different *use* of the same solver — synthesis of a witness rather than refutation. Tie it to the verification triple: here the "spec" is a path condition (loop runs twice), and the model Z3 returns is the test input. Next slide shows the encoding trick that makes the loop body into a flat formula.
+This is our Week-8 test-case-generation example, verbatim down to the GCD function. The framing: a `while(true)` loop whose iteration count depends on the inputs in a way that's painful to reason about by hand. Generating "an input that runs the loop exactly twice" (or ten times, or that hits a specific branch) is exactly what symbolic execution and tools like KLEE/CBMC do under the hood, and it's a different *use* of the same solver — synthesis of a witness rather than refutation. Tie it to the verification triple: here the "spec" is a path condition (loop runs twice), and the model Z3 returns is the test input. Next slide shows the encoding trick that makes the loop body into a flat formula.
 :::
 
 ---
@@ -1433,7 +1435,7 @@ $$
 `check-sat` → **sat**, with model $x_0 = 2,\; y_0 = 4$ (then $m_0=2,\ x_1=4,\ y_1=2,\ m_1=0$). So `GCD(2, 4)` runs the loop exactly twice. ($a \bmod b$ = remainder; the subscripts are *versions*, not array indices.)
 
 ::: notes
-SSA is the encoding backbone of every program-level verification tool we'll meet — and it returns explicitly in Day 4 with CBMC, which SSA-converts and unrolls C automatically. The instructor's note nails it: "conversion is to single static assignment (SSA) form prior to asserting." Spell out *why* it's needed: logic is timeless — `x = y; y = m` can't be two assignments to one `x`, so we mint x_0, x_1, ... and turn assignment (a command) into equality (a constraint). The two-iteration unrolling is structurally identical to the BMC unrolling we're about to do for the counter: same idea — replace state-over-time with subscripted copies and conjoin a transition per step. Worth saying out loud: this is the *same* solver, same SMT-LIB, just pointed at a path condition instead of a safety property. The model x0=2, y0=4 is the instructor's own answer.
+SSA is the encoding backbone of every program-level verification tool we'll meet — and it returns explicitly in Day 4 with CBMC, which SSA-converts and unrolls C automatically. Our note nails it: "conversion is to single static assignment (SSA) form prior to asserting." Spell out *why* it's needed: logic is timeless — `x = y; y = m` can't be two assignments to one `x`, so we mint x_0, x_1, ... and turn assignment (a command) into equality (a constraint). The two-iteration unrolling is structurally identical to the BMC unrolling we're about to do for the counter: same idea — replace state-over-time with subscripted copies and conjoin a transition per step. Worth saying out loud: this is the *same* solver, same SMT-LIB, just pointed at a path condition instead of a safety property. The model x0=2, y0=4 is our own answer.
 :::
 
 ---
@@ -1555,7 +1557,7 @@ $$\boxed{\;p \text{ holds on all paths of length} \le k \;\iff\; W(k) \text{ is 
 - **UNSAT** → no violation within $k$ steps (says **nothing** about step $k{+}1$).
 
 ::: notes
-This is the heart of the Week-8 "BMC as a SAT/SMT problem" slides, made explicit. The three conjuncts map one-to-one onto the instructor's encoding: initial-state constraint, the conjunction of transition relations joining step i to i+1, and the disjunction of ¬p over all steps. The boxed equivalence is the whole theory of BMC: "valid up to k iff the unrolling is unsatisfiable" — and it's just the $\Gamma \models \varphi \iff \Gamma \cup \{\neg\varphi\}$ unsat principle from L2, applied to a transition system. The big_or over ¬p is what makes this catch a violation at *any* step ≤ k, not just the last — matching the z3_counter_bounded.py code that ORs x[k]==forbidden over all k. Stress the asymmetry one more time: SAT hands you a trace you can replay; UNSAT is only a bounded guarantee. de Moura's Z3 runs the DPLL(T) loop on exactly this W(k).
+This is the heart of the Week-8 "BMC as a SAT/SMT problem" slides, made explicit. The three conjuncts map one-to-one onto our encoding: initial-state constraint, the conjunction of transition relations joining step i to i+1, and the disjunction of ¬p over all steps. The boxed equivalence is the whole theory of BMC: "valid up to k iff the unrolling is unsatisfiable" — and it's just the $\Gamma \models \varphi \iff \Gamma \cup \{\neg\varphi\}$ unsat principle from L2, applied to a transition system. The big_or over ¬p is what makes this catch a violation at *any* step ≤ k, not just the last — matching the z3_counter_bounded.py code that ORs x[k]==forbidden over all k. Stress the asymmetry one more time: SAT hands you a trace you can replay; UNSAT is only a bounded guarantee. de Moura's Z3 runs the DPLL(T) loop on exactly this W(k).
 :::
 
 ---
@@ -1609,13 +1611,13 @@ BMC is a bug-finder: UNSAT at depth $k$ only certifies "safe for $\le k$ steps."
 - **Completeness threshold (CT)** — a depth such that UNSAT up to $CT$ implies the property holds at *every* depth. If you check that far and still get UNSAT, you've actually proved it.
 - One sound (if loose) value of $CT$ is the **diameter**: the longest shortest-path between any two reachable states — once you've unrolled past it, every reachable state has already appeared.
 
-The catch (instructor's own caveat): **computing the exact $CT$ is as hard as model checking itself.** In practice we use an over-approximation, and often just run out of resources first.
+The catch (our own caveat): **computing the exact $CT$ is as hard as model checking itself.** In practice we use an over-approximation, and often just run out of resources first.
 
 - Good case: systems *without counters* (e.g. some hardware) have small diameters — BMC closes quickly.
 - Bad case: a counter to $N$ has diameter $\sim N$; deep bugs hide past any practical $k$.
 
 ::: notes
-This is the Week-8 "completeness threshold" and "complexity of BMC" material, kept gentle. The honest story: BMC is fundamentally a refutation engine, and turning it into a proof requires knowing you've gone deep enough — the CT. The instructor stresses that finding the exact CT is itself as hard as the model-checking problem you were trying to avoid, so real tools over-approximate (via graph structure / diameter). Connect to the running example: our counter literally counts, so its diameter grows with the bound — which is *exactly* why Day 1's bounded check can never prove "x ≤ 10 forever" no matter how large we make k, and why we need Day 2 (fixpoint/BDD reachability) or Day 3 (induction). This is the precise mechanism behind the "reachable vs reachable-in-≤N" Euler picture from L2. The complexity punchline the instructor gives — SAT-based BMC is worst-case doubly exponential because k can reach the diameter (exponential in state vars) and each SAT call is exponential — is optional depth if time allows.
+This is the Week-8 "completeness threshold" and "complexity of BMC" material, kept gentle. The honest story: BMC is fundamentally a refutation engine, and turning it into a proof requires knowing you've gone deep enough — the CT. We stress that finding the exact CT is itself as hard as the model-checking problem you were trying to avoid, so real tools over-approximate (via graph structure / diameter). Connect to the running example: our counter literally counts, so its diameter grows with the bound — which is *exactly* why Day 1's bounded check can never prove "x ≤ 10 forever" no matter how large we make k, and why we need Day 2 (fixpoint/BDD reachability) or Day 3 (induction). This is the precise mechanism behind the "reachable vs reachable-in-≤N" Euler picture from L2. The complexity punchline we give — SAT-based BMC is worst-case doubly exponential because k can reach the diameter (exponential in state vars) and each SAT call is exponential — is optional depth if time allows.
 :::
 
 ---
@@ -1639,7 +1641,7 @@ $$
 The model at $k=3$ is the trace $00 \to 01 \to 10 \to 11$ — the solver hands you the exact path to the bug.
 
 ::: notes
-This is the instructor's own two-bit-counter BMC example ("for k = 2, W(k) is unsatisfiable; for k = 3, W(k) is satisfiable"). It's the perfect closing example because it shows *both* verdicts on one tiny system: at depth 2 the bad state 11 simply isn't reachable yet (UNSAT, false comfort), and at depth 3 it appears and BMC produces the trace (SAT). That jump from UNSAT to SAT as k crosses the depth of the bug is the entire personality of bounded model checking in one table. Contrast with our counter-to-10, where the *good* property holds and BMC keeps saying UNSAT forever — here the property is genuinely violated, so deeper search finds it. The transition relation ℓ' = ℓ⊕r, r' = ¬r is worth checking by hand on delivery: from 10, r flips to 1 and ℓ becomes 1⊕0=1, giving 11 — the violating state. Then Day 2 will verify the *fixed* counter (or prove this one violates G¬(ℓ∧r)) without picking any k.
+This is our own two-bit-counter BMC example ("for k = 2, W(k) is unsatisfiable; for k = 3, W(k) is satisfiable"). It's the perfect closing example because it shows *both* verdicts on one tiny system: at depth 2 the bad state 11 simply isn't reachable yet (UNSAT, false comfort), and at depth 3 it appears and BMC produces the trace (SAT). That jump from UNSAT to SAT as k crosses the depth of the bug is the entire personality of bounded model checking in one table. Contrast with our counter-to-10, where the *good* property holds and BMC keeps saying UNSAT forever — here the property is genuinely violated, so deeper search finds it. The transition relation ℓ' = ℓ⊕r, r' = ¬r is worth checking by hand on delivery: from 10, r flips to 1 and ℓ becomes 1⊕0=1, giving 11 — the violating state. Then Day 2 will verify the *fixed* counter (or prove this one violates G¬(ℓ∧r)) without picking any k.
 :::
 
 ---

@@ -53,7 +53,7 @@ The slides say **nuXmv**; the course autograder runs **NuSMV 2.6.0**. They share
 
 | Capability | NuSMV 2.6.0 (what you run) | nuXmv (superset) |
 |---|---|---|
-| Symbolic (BDD) model checking | ✓ | ✓ |
+| Symbolic (BDDs, binary decision diagrams) model checking | ✓ | ✓ |
 | Bounded model checking (SAT) | ✓ | ✓ |
 | k-induction for invariants | ✓ | ✓ |
 | IC3 / PDR, infinite-state (SMT) | — | ✓ |
@@ -131,7 +131,7 @@ We pretend each reaction is **instantaneous**: the next state is computed before
 - Lets us model time as a sequence of discrete rounds — exactly what a model checker enumerates.
 
 ::: notes
-Worth a beat: the synchrony hypothesis is an abstraction, and like all abstractions it can be wrong (if the system is too slow to keep up with the environment). For the systems we model checkk it is the standard, sound idealization. It is why "one step of the transition relation" = "one round" cleanly.
+Worth a beat: the synchrony hypothesis is an abstraction, and like all abstractions it can be wrong (if the system is too slow to keep up with the environment). For the systems we model check it is the standard, sound idealization. It is why "one step of the transition relation" = "one round" cleanly.
 :::
 
 ---
@@ -165,7 +165,7 @@ MODULE main
 
 - `VAR` declares state variables **and** inputs.
 - A variable with **no** `init`/`next` clause is a free input — nuXmv lets the environment pick any value each round (this is our `press`).
-- `0..25` makes `x` finite, so the state space is finite. (Only 0–10 are *reachable*; the headroom lets the off-by-one demo reach `x = 11`.)
+- `0..25` makes `x` finite, so the state space is finite. The wide range is **headroom**: in the correct counter only `0–10` ever occur (12 states reachable from the initial state), and the spare range lets the off-by-one demo reach `x = 11` without overflowing the declared type.
 
 ::: notes
 The single most important SMV idiom for newcomers: a VAR with no assignment is an unconstrained input. That is how press becomes "nondeterministic each step" without any extra syntax. The bounded range on x (0..25) is what keeps the model finite — model checking needs a finite state space (or a symbolic decision procedure for the infinite case, which nuXmv also has, but our examples are finite).
@@ -318,7 +318,7 @@ These show the range of SMV modeling. The four original files (counter, traffic_
   <text x="115" y="182" text-anchor="middle" font-size="11.5" fill="#5b6168">▲ initial</text>
 </svg>
 
-Four phases cycle in order; the `timer` counts ticks within each phase. Exactly one direction is ever non-red, so the safety invariants — never two greens, never two yellows — hold by construction.
+Four phases cycle in order; the `timer` counts ticks within each phase. Exactly one direction is ever non-red, so the safety invariants — never two greens, never two yellows — are intended to hold; we confirm them with nuXmv.
 
 ::: notes
 The same SMV file (`traffic_light.smv`), drawn as the state machine it describes. The three `next(...)` case statements jointly walk this 4-cycle: green→yellow→red on the main side, interleaved with the side road. This is the picture students should sketch before writing any temporal property: once you can see the cycle, "never two greens" (`AG !(main=green & side=green)`) and "main always eventually green" (`AG AF main=green`) are obvious. Note both yellow phases are gold-tinted, both green phases green-tinted — color carries meaning here.
@@ -481,7 +481,7 @@ Notation on the next slides: `(ρ, n) ⊨ φ` reads "trace `ρ` at position `n` 
 Caption: the same run, drawn as a timeline — every LTL operator below is read off this picture.
 
 ::: notes
-Establish ONE concrete trace before walking the operators, so each operator slide refers to the same picture (the instructor does exactly this in the LTL-semantics video: "everything we define will be with respect to a trace"). The marking ●/○ for on/off lets students literally point. From the counter's structure this run is realistic: off, then a press flips it on (s1), it counts s1..s4, resets to off at s5, on again at s6. Position numbering starts at s0 = time 0 (the video's "if we omit n we mean time zero").
+Establish ONE concrete trace before walking the operators, so each operator slide refers to the same picture (we do exactly this in the LTL-semantics video: "everything we define will be with respect to a trace"). The marking ●/○ for on/off lets students literally point. From the counter's structure this run is realistic: off, then a press flips it on (s1), it counts s1..s4, resets to off at s5, on again at s6. Position numbering starts at s0 = time 0 (the video's "if we omit n we mean time zero").
 :::
 
 ---
@@ -652,7 +652,7 @@ These five cover most real specs. G F p ("infinitely often") and F G p ("eventua
 **Violating trace** looks like: `p` happens a *last* time and then never again — e.g. a run that gets stuck `mode = on` would falsify `G F (mode = off)`.
 
 ::: notes
-G F = "infinitely often" = Repeatedly (Alur's name, Week 9). The reading the instructor uses: "at whatever step we're talking about, there is always a p in the future." This is THE liveness/fairness shape (a fair scheduler runs each process infinitely often). The violating shape is a lasso whose cycle has no p — connect to the lasso slide. Both examples here are real shipped specs that pass, so students can run them.
+G F = "infinitely often" = Repeatedly (Alur's name, Week 9). The reading we use: "at whatever step we're talking about, there is always a p in the future." This is THE liveness/fairness shape (a fair scheduler runs each process infinitely often). The violating shape is a lasso whose cycle has no p — connect to the lasso slide. Both examples here are real shipped specs that pass, so students can run them.
 :::
 
 ---
@@ -682,7 +682,7 @@ F G = "eventually always" = Persistently. The duality (Week 9): Repeatedly p ≡
 **Violating trace**: a `p` with no later `q` — e.g. `process1` waits, but a cycle keeps letting `process2` in forever while `process1` never enters. That stuck cycle is the counterexample.
 
 ::: notes
-The response pattern — G(p → F q) — is the workhorse of real specs (Dwyer's specification patterns put "response" at the top by frequency). The instructor's phrasing: "if p has occurred then eventually q has occurred, and this should occur infinitely often." Tie the violation to the lasso AND to fairness: without fairness, the no-starvation property genuinely fails (the mutex file even warns about this in its comments), because an unfair run can starve process1 — exactly the cycle counterexample. This motivates the fairness slide later.
+The response pattern — G(p → F q) — is the workhorse of real specs (Dwyer's specification patterns put "response" at the top by frequency). Our phrasing: "if p has occurred then eventually q has occurred, and this should occur infinitely often." Tie the violation to the lasso AND to fairness: without fairness, the no-starvation property genuinely fails (the mutex file even warns about this in its comments), because an unfair run can starve process1 — exactly the cycle counterexample. This motivates the fairness slide later.
 :::
 
 ---
@@ -697,7 +697,7 @@ Splitting a temporal operator across a connective changes the meaning.
 On the trace `x = 0,1,0,1,0,1,\dots`: `F(x=0) & F(x=1)` holds, but `F(x=0 & x=1)` is impossible. The first is **strictly weaker**.
 
 ::: notes
-This is the instructor's own worked counterexample (Week 9, repeated twice in the videos and the robot-goals example): Eventually(p)&Eventually(q) does NOT distribute into Eventually(p&q). The 0,1,0,1 trace is exactly the disproof he gives. Useful because it generalizes: F distributes over ∨ but not ∧; G distributes over ∧ but not ∨. A frequent real bug — writing F a & F b when you meant the events to coincide.
+This is our own worked counterexample (Week 9, repeated twice in the videos and the robot-goals example): Eventually(p)&Eventually(q) does NOT distribute into Eventually(p&q). The 0,1,0,1 trace is exactly the disproof we give. Useful because it generalizes: F distributes over ∨ but not ∧; G distributes over ∧ but not ∨. A frequent real bug — writing F a & F b when you meant the events to coincide.
 :::
 
 ---
@@ -802,7 +802,7 @@ Plus `A[p U q]` / `E[p U q]`. Counter readings:
 - `EG (mode = on)` — **false**: every on-run is forced off at `x = 10`.
 
 ::: notes
-The 2×3 table is the whole of CTL's core (plus until). Walk the A/E split with the counter: EF(x=10) true but AF(x=10) false is the cleanest demonstration that the quantifier matters — same temporal operator F, opposite verdicts, because of the toggling path. EX/AX need the tree (one step = children of the current node). This mirrors the instructor's CTL "semantics through examples" videos. Note CTL syntax REQUIRES the pairing — you cannot write bare `F p` in CTLSPEC, every temporal op needs an A or E.
+The 2×3 table is the whole of CTL's core (plus until). Walk the A/E split with the counter: EF(x=10) true but AF(x=10) false is the cleanest demonstration that the quantifier matters — same temporal operator F, opposite verdicts, because of the toggling path. EX/AX need the tree (one step = children of the current node). This mirrors our CTL "semantics through examples" videos. Note CTL syntax REQUIRES the pairing — you cannot write bare `F p` in CTLSPEC, every temporal op needs an A or E.
 :::
 
 ---
@@ -818,7 +818,7 @@ The 2×3 table is the whole of CTL's core (plus until). Walk the A/E split with 
 This is the canonical property **CTL can express and LTL cannot** — the next slide says why.
 
 ::: notes
-AG EF is recoverability / the reset property — the instructor's headline example of "expressible in CTL, not LTL: from every state there is an execution back to the initial state." The nesting reads outside-in: AG = at all reachable states, EF = there exists a path reaching p. The "some path" is the crux — it is an existential over futures, which LTL (all-paths-only) structurally cannot state. Both shipped examples (counter return-home, mutex can-still-enter) pass, so they are runnable. Distinguish from AG AF p (every path returns — a much stronger, often-false claim).
+AG EF is recoverability / the reset property — our headline example of "expressible in CTL, not LTL: from every state there is an execution back to the initial state." The nesting reads outside-in: AG = at all reachable states, EF = there exists a path reaching p. The "some path" is the crux — it is an existential over futures, which LTL (all-paths-only) structurally cannot state. Both shipped examples (counter return-home, mutex can-still-enter) pass, so they are runnable. Distinguish from AG AF p (every path returns — a much stronger, often-false claim).
 :::
 
 ---
@@ -935,7 +935,7 @@ Real `counter.smv` spec `G F (mode = on & x = count_max)` ("infinitely often we'
 The cycle stays `off` forever (the environment simply never presses), so `(mode = on & x = 10)` *never* happens — the promised event is absent on an infinite run.
 
 ::: notes
-This is the instructor's ACTUAL nuXmv demo counterexample (Week 9 temporal-specs screencast), verbatim in shape: the lasso is "mode off, press false, x=0, then repeat." The point he makes: press is a free input, so a perfectly legal run never presses, the counter sits in off forever, and "infinitely often on&x=10" is falsified. The "Loop starts here" / repeated-state notation is exactly nuXmv's. This is the canonical liveness counterexample: not a finite path but an infinite run shown as stem+cycle. Connect to the lasso slide from earlier and to fairness (FAIRNESS mode != off rules out exactly this degenerate run — which is why the home-recurrence spec passes but this one fails).
+This is our ACTUAL nuXmv demo counterexample (Week 9 temporal-specs screencast), verbatim in shape: the lasso is "mode off, press false, x=0, then repeat." The point we make: press is a free input, so a perfectly legal run never presses, the counter sits in off forever, and "infinitely often on&x=10" is falsified. The "Loop starts here" / repeated-state notation is exactly nuXmv's. This is the canonical liveness counterexample: not a finite path but an infinite run shown as stem+cycle. Connect to the lasso slide from earlier and to fairness (FAIRNESS mode != off rules out exactly this degenerate run — which is why the home-recurrence spec passes but this one fails).
 :::
 
 ---
@@ -1005,13 +1005,15 @@ Straight from Week 7's "complexity of model checking" video. The headline beginn
 Make every variable finite and the problem becomes **decidable** — but not cheap:
 
 - `k` boolean variables ⇒ up to $2^k$ states. A verifier *can* search them all, so it terminates.
-- Invariant / reachability checking for finite-state systems is **PSPACE-complete** — at least as hard as, and widely believed strictly harder than, NP-complete SAT.
+- Invariant / reachability checking for finite-state systems is **PSPACE-complete**. Since PSPACE ⊇ NP, it is at least as hard as NP-complete SAT; whether that containment is *strict* (PSPACE ≠ NP) is a famous open question.
 - The practical face of that exponent is the **state-explosion problem**: state count blows up with variables, components, and interleavings.
 
 | Property logic | Model-checking complexity |
 |---|---|
 | **CTL** | $O(|S| \cdot |\varphi|)$ — linear in states × formula |
 | **LTL** | $O(|S| \cdot 2^{|\varphi|})$ — linear in states, exponential in *formula* size |
+
+*(As a decision problem, LTL model checking is PSPACE-complete in the formula; the bound shown is for the standard Büchi-automaton construction.)*
 
 ::: notes
 Week 7 again: finite-state invariant verification is in PSPACE (the video says "a bit harder than NP-complete problems such as SAT"), and the exponential blow-up in the state space IS state explosion — the central engineering challenge the whole symbolic/BDD machinery exists to fight. The CTL-vs-LTL table is the standard textbook result (Clarke/Baier-Katoen): CTL model checking is linear in both the model and the formula; LTL is linear in the model but exponential in the FORMULA length (because you build the Büchi automaton from the earlier LTL→Büchi slide, which can be of size 2^|φ|). Caveat worth stating: formulas are usually tiny, so LTL's formula-exponential is rarely the bottleneck — the STATE space is. This is also a reason tools historically favored CTL for raw speed, even though LTL is more used in practice.
@@ -1287,7 +1289,7 @@ The same function can be **tiny or exponential** depending on variable order.
 
 - Good order → linear-size BDD.
 - Bad order → exponential blow-up.
-- Finding the optimal order is itself **NP-hard** (believed to have no efficient general algorithm); tools use heuristics + dynamic reordering.
+- Finding the optimal order is itself **NP-complete** (Bollig & Wegener, 1996); tools use heuristics + dynamic reordering.
 
 Arithmetic (multipliers) has **no** good order — BDDs are bad at it. That's where SAT/SMT (Day 1, Day 4) wins.
 

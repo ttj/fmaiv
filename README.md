@@ -186,7 +186,7 @@ Background for the Day 4 frontier segment. The two books are the best self-study
 - **G. Katz, C. Barrett, D. Dill, K. Julian, and M. Kochenderfer.** *Reluplex: An Efficient SMT Solver for Verifying Deep Neural Networks.* CAV 2017. <https://arxiv.org/abs/1702.01135>
   - The origin point; proves exact ReLU robustness is NP-complete.
 - **H.-D. Tran et al.** *Star-Based Reachability Analysis of Deep Neural Networks* (FM 2019), *ImageStars* (CAV 2020), and **NNV 2.0** (CAV 2023). Tool: <https://github.com/verivital/nnv>
-  - The instructor's reachability-based verifier (star sets); the basis for Day 4's reachability framing.
+  - Our reachability-based verifier (star sets); the basis for Day 4's reachability framing.
 - **VNN-COMP** annual competition — reports for 2025 (<https://arxiv.org/abs/2512.19007>) and 2024 (<https://arxiv.org/abs/2412.19985>); hub <https://vnn-comp.github.io/>. α,β-CROWN (<https://github.com/Verified-Intelligence/alpha-beta-CROWN>) has won every year 2021–2025. Our **AAAI'26 VNN-COMP tutorial** (slides + Google Colab notebooks) is at <https://vnn-comp.github.io/#aaai2026>; the AAAI-2022 tutorial **neural-network-verification.com** is another strong hands-on companion.
 - **Frontier / next directions** — T. Johnson, *Is Neural Network Verification Useful and What Is Next?* (Allerton 2025, <https://hdl.handle.net/2142/130315>): the "verify ChatGPT" grand challenge, open small-LM targets (OLMo2-1B, SmolLM2-135M), and the shift toward NLP / guardrail / vision-language-action models. Neuro-symbolic verification (NN verification composed with model checking) via **BehaVerify**: <https://github.com/verivital/behaverify>.
 

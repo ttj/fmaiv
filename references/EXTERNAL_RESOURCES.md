@@ -17,7 +17,7 @@ Annotations use a *they do / we do* convention: what the other resource emphasiz
 - **Formal Verification of Deep Neural Networks: Theory and Practice** — Huan Zhang, Kaidi Xu, Shiqi Wang, Cho-Jui Hsieh. AAAI 2022 tutorial (updated as UIUC ECE598HZ, 2024). <https://neural-network-verification.com/>
   - 3-part slide deck + Colab demos using `auto_LiRPA` and the VNN-COMP-winning α,β-CROWN; bound propagation (CROWN), branch-and-bound complete verification, certified defense. *They do:* deep, hands-on NN verification with current SOTA tooling. *We do:* connect NN verification to the broader SAT/SMT/MC/TP stack and the AI-coding thesis; they treat it standalone. **This is the strongest true "conference tutorial with public slides + code" in the field and the closest analogue to our Day 4 NN segment.**
 - **VNN-COMP / AAAI'26 lab on neural-network verification** (ours — Johnson et al.). <https://vnn-comp.github.io/#aaai2026>
-  - The instructor's own AAAI-2026 hands-on tutorial/lab: slides + Google Colab notebooks for benchmark proposers, verification-tool participants, and the broader AI community; ties directly to Day 4's NN-verification segment and the VNN-COMP material. The primary "extra materials" pointer for participants who want hands-on NN verification.
+  - Our own AAAI-2026 hands-on tutorial/lab: slides + Google Colab notebooks for benchmark proposers, verification-tool participants, and the broader AI community; ties directly to Day 4's NN-verification segment and the VNN-COMP material. The primary "extra materials" pointer for participants who want hands-on NN verification.
 - **Satisfiability Modulo Theories: A Beginner's Tutorial** — Barrett, Tinelli, Barbosa, Niemetz, Preiner, Reynolds, Zohar. *Distinguished Tutorial*, FM 2024 (Milan). <https://link.springer.com/chapter/10.1007/978-3-031-71177-0_31> (open mirror: <https://par.nsf.gov/servlets/purl/10584608>)
   - SMT foundations, theory catalog, models and proofs, exercises in **both cvc5 and Z3**. *They do:* rigorous theory catalog + careful proofs/models. *We do:* situate Z3 in a 4-day arc (Day 1) and thread it forward to model checking and SAW.
 - **An Overview of SMT and Its Applications** — Cesare Tinelli. ETAPS 2019 invited talk. <https://homepage.cs.uiowa.edu/~tinelli/talks/ETAPS-19.pdf>
@@ -89,7 +89,7 @@ Fact-checked spine of the field; this is the source list behind Day 4's "Neural-
 - Zhang, Wang, Xu, et al. *General Cutting Planes for Bound-Propagation-Based Neural Network Verification* (**GCP-CROWN**). NeurIPS 2022.
 - Tool + library: α,β-CROWN <https://github.com/Verified-Intelligence/alpha-beta-CROWN>; `auto_LiRPA`.
 
-**Family (b): reachability / abstract domains** (incl. the instructor's NNV)
+**Family (b): reachability / abstract domains** (incl. our NNV)
 - Gehr, Mirman, Drachsler-Cohen, Tsankov, Chaudhuri, Vechev. *AI2: Safety and Robustness Certification of Neural Networks with Abstract Interpretation.* IEEE S&P 2018 — the abstract-interpretation breakthrough.
 - Singh, Gehr, Mirman, Püschel, Vechev. *Fast and Effective Robustness Certification* (**DeepZ**). NeurIPS 2018.
 - Singh, Gehr, Püschel, Vechev. *An Abstract Domain for Certifying Neural Networks* (**DeepPoly**). POPL 2019. (Both ship in the ETH **ERAN** toolkit.)
@@ -168,7 +168,7 @@ Source list behind Day 1's three agentic-coding slides and the "verification is 
 **Economics / small models (Day 1 economics slide)**
 - R. Sutton, *The Bitter Lesson* (2019) — methods that ride more compute win; underwrites "generation keeps getting cheaper." <http://www.incompleteideas.net/IncIdeas/BitterLesson.html>
 - Belcak, Heinrich, Fu, Dong, Muralidharan, Lin, Molchanov (NVIDIA + Georgia Tech), *Small Language Models are the Future of Agentic AI* (arXiv 2506.02153, June 2025) — SLMs (<10B) are often 10–30× cheaper per token and "good enough" for most agent nodes. <https://research.nvidia.com/labs/lpr/slm-agents/>
-- Sasaki, Lopez, Johnson, *Neurosymbolic Finite and Pushdown Automata: Improved Multimodal Reasoning versus VLMs* (NeuS 2025) — neuro-symbolic automata beat GPT/Claude/Gemini-class VLMs on image-based string/arithmetic reasoning by large margins, ~1000× faster, for ~$10 of compute. (The "AI capex ≈ NASA's annual budget every few weeks" line is the instructor's order-of-magnitude framing from these talks.)
+- Sasaki, Lopez, Johnson, *Neurosymbolic Finite and Pushdown Automata: Improved Multimodal Reasoning versus VLMs* (NeuS 2025) — neuro-symbolic automata beat GPT/Claude/Gemini-class VLMs on image-based string/arithmetic reasoning by large margins, ~1000× faster, for ~$10 of compute. (The "AI capex ≈ NASA's annual budget every few weeks" line is our order-of-magnitude framing from these talks.)
 
 **The thesis.** When generation (of code, proofs, designs) becomes cheap and ubiquitous, the scarce and decisive activity becomes *establishing that the result is correct* — i.e., verification. That is the reason this course exists, stated in the language of the agentic-coding moment.
 
@@ -202,8 +202,8 @@ Recorded for citation completeness. "Used" = cited above or in slides/README; "e
 - AI/FM/math: <https://cacm.acm.org/research/formal-reasoning-meets-llms-toward-ai-for-mathematics-and-verification/> · <https://dl.acm.org/doi/10.1145/3750038> · <https://pldi25.sigplan.org/details/pldi-2025-papers/98/> · <https://lftcm2023.github.io/tutorial/> · <https://amosturchet.github.io/lftcm26/>
 - Spring-2026 milestones & economics: <https://www.anthropic.com/glasswing> · <https://www.npr.org/2026/04/11/nx-s1-5778508/anthropic-project-glasswing-ai-cybersecurity-mythos-preview> · <https://openai.com/index/model-disproves-discrete-geometry-conjecture/> · <https://research.nvidia.com/labs/lpr/slm-agents/> (arXiv 2506.02153) · <http://www.incompleteideas.net/IncIdeas/BitterLesson.html> · MIT Sloan <https://doi.org/10.63383/hadW7619> · Apiiro <https://apiiro.com/blog/4x-velocity-10x-vulnerabilities-ai-coding-assistants-are-shipping-more-risks/> · AWS Automated Reasoning <https://aws.amazon.com/blogs/aws/minimize-ai-hallucinations-and-deliver-up-to-99-verification-accuracy-with-automated-reasoning-checks-now-available/>
 
-### Primary sources: instructor talks (Dropbox/Research/talks)
-Consulted directly for the Day 1 motivation and Day 4 frontier; these are the authoritative source for the instructor's framing:
+### Primary sources: our talks (Dropbox/Research/talks)
+Consulted directly for the Day 1 motivation and Day 4 frontier; these are the authoritative source for our framing:
 - **Liverpool** (CS seminar, 2025-12-12) — *NN Verification for Formally Verifying Neuro-Symbolic AI*: economics/cost of neuro-symbolic vs. LLM, the news-article risk slides (MIT Sloan, Apiiro, AWS Automated Reasoning, VentureBeat), NNV / NNV 2.0, neuro-symbolic automata and behavior trees, VNN-COMP.
 - **Dagstuhl** (2025-09-24), **RMIT** (2026-04-08), **Shonan** (2026-03-10) — *Let's Verify ChatGPT* / *Agentic Engineering is Coming*: the "program synthesis is solved, engineering synthesis is next" thesis, the *oracles* pattern, the verify-ChatGPT grand challenge and open-SLM targets, and the AI-capex/Sutton economic framing.
 
