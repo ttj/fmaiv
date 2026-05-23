@@ -862,6 +862,22 @@ VNN-COMP is the honest answer to "can we verify neural networks yet?" Six runs t
 
 ---
 
+## The frontier: from images to language & autonomy
+
+The instructor's grand challenge — *"Let's verify ChatGPT"*: what would we even verify, and how? (Johnson, *Is Neural Network Verification Useful and What Is Next?*, Allerton 2025.)
+
+- **Today's reach:** VNN-COMP tools verify nets up to ~**100M parameters** — but the field has overwhelmingly targeted **image classification**.
+- **The needed shift:** to **NLP** (sentiment, hate-speech, and **guardrail** models) and **vision-language-action (VLA)** robot policies — new architectures, new specs.
+- **A realistic near-term target:** fully **open small language models** — Ai2's **OLMo2-1B**, HuggingFace's **SmolLM2-135M** — already near the scalability envelope, and the industry push to shrink models for cheap inference only helps.
+- **Beyond one network:** **neuro-symbolic** systems — neuro-symbolic behavior trees (**BehaVerify**) and neuro-symbolic automata — compose NN verification with classical model checking; **NNV 2.0** now also covers CNNs, neural ODEs, RNNs, and binary nets.
+- **Both directions:** foundation models *for* verification (draft specs, models, act as oracles) **and** verification *of* foundation models.
+
+::: notes
+The honest "what's next," straight from the instructor's recent talks (Liverpool, Dagstuhl, RMIT/Shonan) and the Allerton 2025 position paper. The provocation "Let's verify ChatGPT" is deliberately too hard — its value is exposing what's missing: specification languages and verification methods for transformer architectures on NLP tasks. Concretely, VNN-COMP tools now scale to ~100M-parameter networks but almost entirely for ℓ∞ robustness of image classifiers; the community needs to move to NLP (sentiment, hate-speech, and the guardrail models that gate agentic systems) and to vision-language-action policies in robotics, where layer types and specs differ. The pragmatic target is *fully open* small language models — Ai2's OLMo2-1B (open code/data/weights) or HuggingFace's SmolLM2-135M — which sit about at today's scalability frontier, with the bonus that industry's drive toward smaller, cheaper-inference models pulls realistic systems *into* range (the recurring theme: smaller is more verifiable). Beyond single networks, the instructor's group composes NN verification with classical model checking for neuro-symbolic systems — behavior trees that call neural networks (BehaVerify; Serbinowska et al.) and neuro-symbolic finite/pushdown automata (Sasaki, Lopez, Johnson, NeuS 2025) — and NNV 2.0 (Lopez et al., CAV 2023) extends reachability to CNNs, neural ODEs, RNNs, and binary networks. Finally the relationship runs both ways: foundation models can *assist* verification (generating specs and models, serving as oracles) and are themselves *targets* for verification.
+:::
+
+---
+
 ## Neural-network verification: the literature
 
 Fact-checked entry points — the spine of the field:
@@ -1031,6 +1047,7 @@ The survey paragraph makes students connect the frontier to their own work — t
 - **Galois** — Cryptol & SAW docs/tutorials; **AWS Provable Security** blog.
 - **VNN-COMP** — <https://vnn-comp.github.io/>; **α,β-CROWN**; **NNV** (verivital).
 - **NN-verification reading** — Katz et al. *Reluplex* (CAV 2017); Tran et al. *NNV / star sets* (FM 2019; ImageStar CAV 2020; NNV 2.0 CAV 2023); Albarghouthi, *Introduction to NN Verification* (free); Liu et al. survey (FnT Optimization 2021).
+- **Frontier / next directions** — Johnson, *Is Neural Network Verification Useful and What Is Next?* (Allerton 2025, [hdl 2142/130315](https://hdl.handle.net/2142/130315)); Serbinowska et al. *BehaVerify* / neuro-symbolic behavior trees ([verivital/behaverify](https://github.com/verivital/behaverify)); Belcak et al. *Small Language Models are the Future of Agentic AI* (arXiv 2506.02153).
 - **AWS Cedar** (Lean spec); **seL4**, **CompCert** (verified systems).
 
 Full list + competitions table: repo [README.md](../../README.md#background-references).

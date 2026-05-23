@@ -180,6 +180,7 @@ Background for the Day 4 frontier segment. The two books are the best self-study
 - **H.-D. Tran et al.** *Star-Based Reachability Analysis of Deep Neural Networks* (FM 2019), *ImageStars* (CAV 2020), and **NNV 2.0** (CAV 2023). Tool: <https://github.com/verivital/nnv>
   - The instructor's reachability-based verifier (star sets); the basis for Day 4's reachability framing.
 - **VNN-COMP** annual competition — reports for 2025 (<https://arxiv.org/abs/2512.19007>) and 2024 (<https://arxiv.org/abs/2412.19985>); hub <https://vnn-comp.github.io/>. α,β-CROWN (<https://github.com/Verified-Intelligence/alpha-beta-CROWN>) has won every year 2021–2025. The AAAI-2022 tutorial **neural-network-verification.com** is the best hands-on companion.
+- **Frontier / next directions** — T. Johnson, *Is Neural Network Verification Useful and What Is Next?* (Allerton 2025, <https://hdl.handle.net/2142/130315>): the "verify ChatGPT" grand challenge, open small-LM targets (OLMo2-1B, SmolLM2-135M), and the shift toward NLP / guardrail / vision-language-action models. Neuro-symbolic verification (NN verification composed with model checking) via **BehaVerify**: <https://github.com/verivital/behaverify>.
 
 ### Agentic coding and AI-for-verification
 
@@ -189,7 +190,10 @@ Background for the Day 1 thesis that cheap code generation makes verification th
   - 51% of 112,000 GPT-generated C programs contained at least one vulnerability (found via the ESBMC bounded model checker) — the strongest peer-reviewed evidence that AI code needs verification.
 - **J. Spracklen et al.** *We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code-Generating LLMs.* USENIX Security 2025.
   - ~20% of LLM-recommended packages were hallucinated — the basis for the "slopsquatting" supply-chain attack.
-- **AWS Provable Security** (Byron Cook's group) — formal methods as a CI signal at production scale (s2n-TLS via SAW, s2n-bignum via HOL Light, Cedar specified in Lean). Blog and open repos under <https://github.com/awslabs>.
+- **AWS Provable Security** (Byron Cook's group) — formal methods as a CI signal at production scale (s2n-TLS via SAW, s2n-bignum via HOL Light, Cedar specified in Lean). Blog and open repos under <https://github.com/awslabs>. AWS Bedrock's *Automated Reasoning checks* now apply this to LLM outputs (up to 99% verification accuracy): <https://aws.amazon.com/blogs/aws/minimize-ai-hallucinations-and-deliver-up-to-99-verification-accuracy-with-automated-reasoning-checks-now-available/>.
+- **Anthropic, Project Glasswing** (2026) — a frontier model found *thousands* of zero-day vulnerabilities in critical software (including a 16-year-old FFmpeg bug that fuzzing had executed ~5M times and missed) — a vivid demonstration that testing shows the presence, not the absence, of bugs. <https://www.anthropic.com/glasswing>
+- **OpenAI, Erdős unit-distance conjecture** (May 2026) — the first AI to autonomously settle a central open math problem; pairs with the thesis that AI now both creates and breaks at the frontier, so machine-checkable assurance is the binding constraint. <https://openai.com/index/model-disproves-discrete-geometry-conjecture/>
+- **P. Belcak et al. (NVIDIA), *Small Language Models are the Future of Agentic AI*** (arXiv 2506.02153, 2025) — the economic case that small, cheaper, and (for us) more *verifiable* models suit most agent tasks. <https://research.nvidia.com/labs/lpr/slm-agents/>
 
 ### Textbooks and reference works
 

@@ -102,6 +102,8 @@ Fact-checked spine of the field; this is the source list behind Day 4's "Neural-
 
 **Frontier (transformers / LLMs)**
 - Shi, Zhang, Chang, Huang, Hsieh. *Robustness Verification for Transformers.* ICLR 2020. <https://arxiv.org/abs/2002.06622> — the standing formal anchor; as of 2026 there is no mature, *sound* formal verifier for full-scale LLMs.
+- Johnson. *Is Neural Network Verification Useful and What Is Next?* Allerton 2025. <https://hdl.handle.net/2142/130315> — position paper; the "Let's verify ChatGPT" grand challenge, open-SLM targets (OLMo2-1B, SmolLM2-135M), and the shift to NLP/guardrails/VLAs.
+- **Neuro-symbolic verification** — Serbinowska & Johnson, *BehaVerify* (SEFM 2022); *Formalizing Stateful Behavior Trees* (FMAS 2024, best paper); *Neuro-Symbolic Behavior Trees and Their Verification* (NeuS 2025); Sasaki, Lopez, Johnson, *Neurosymbolic Finite and Pushdown Automata* (NeuS 2025). Tool: <https://github.com/verivital/behaverify>. Composes NN verification with classical model checking.
 
 **Competition & standards**
 - VNN-COMP reports: 2025 (6th, at SAIV/CAV) <https://arxiv.org/abs/2512.19007>; 2024 (5th) <https://arxiv.org/abs/2412.19985>. Hub: <https://vnn-comp.github.io/>.
@@ -140,7 +142,9 @@ Source list behind Day 1's three agentic-coding slides and the "verification is 
 - Spracklen, et al. *We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code-Generating LLMs.* USENIX Security 2025 — ~**19.7%** of recommended packages were hallucinated; basis for the "slopsquatting" supply-chain attack. *(Peer-reviewed.)*
 - **Veracode** 2025 GenAI Code Security report — security flaws in ~**45%** of AI-written samples. *(Vendor report.)*
 - **Sonar** 2026 developer survey — ~**42%** of committed code is AI-written; **96%** of developers don't fully trust it; only **48%** always verify ("verification debt"). *(Vendor report.)*
-- **MIT Sloan Management Review** — reports ~**4×** defect rate for AI-assisted code. *(Practitioner report.)*
+- **Apiiro.** *4× Velocity, 10× Vulnerabilities: AI Coding Assistants Are Shipping More Risks* (Sept 4 2025). <https://apiiro.com/blog/4x-velocity-10x-vulnerabilities-ai-coding-assistants-are-shipping-more-risks/> *(Vendor research; the source for the "4×/10×" figures on the Day 1 vibe slide.)*
+- **MIT Sloan Management Review.** Anderson, Parker & Tan, *The Hidden Costs of Coding With Generative AI* (Aug 18 2025). <https://doi.org/10.63383/hadW7619> — productivity gains vs. technical debt that destabilizes systems. *(Practitioner research.)*
+- **AWS** (Amazon Bedrock). *Minimize AI hallucinations and deliver up to 99% verification accuracy with Automated Reasoning checks* (Aug 6 2025). <https://aws.amazon.com/blogs/aws/minimize-ai-hallucinations-and-deliver-up-to-99-verification-accuracy-with-automated-reasoning-checks-now-available/> — formal methods applied directly to LLM outputs in production.
 
 **Framing & the "vibe coding → engineering" arc**
 - Andrej **Karpathy** — coined "vibe coding," Feb 2 2025 ("give in to the vibes… forget that the code even exists"). "Vibe coding" was Collins Dictionary's Word of the Year 2025.
@@ -154,6 +158,15 @@ Source list behind Day 1's three agentic-coding slides and the "verification is 
 - **DARPA PROVERS** program — formal methods at scale for defense software.
 - Terence **Tao**. *Machine-Assisted Proof.* Notices of the AMS, January 2025 — a Fields medalist on AI/proof-assistant collaboration.
 - AlphaProof / AlphaGeometry (DeepMind, IMO 2024 silver-medal level); DeepSeek-Prover — LLMs drafting Lean/formal proofs with a kernel as arbiter.
+
+**Spring 2026 milestones (Day 1 "this season" slide)**
+- **Anthropic — Project Glasswing** (2026). A frontier model ("Claude Mythos") used for *defensive* security surfaced **thousands of zero-day vulnerabilities** across every major OS and browser — incl. a 27-year-old OpenBSD bug and a 16-year-old FFmpeg bug that fuzzing had executed ~5M times and missed. <https://www.anthropic.com/glasswing> · NPR (Apr 11 2026). Pedagogical point: testing shows the *presence*, not the *absence*, of bugs (Dijkstra).
+- **OpenAI — Erdős unit-distance conjecture** (May 20 2026). A general-purpose reasoning model autonomously *disproved* the 1946 conjecture (a fixed polynomial improvement; Will Sawin later pinned δ = 0.014) — the first AI-settled central open problem in a subfield. <https://openai.com/index/model-disproves-discrete-geometry-conjecture/> · TechCrunch, Scientific American (May 2026).
+
+**Economics / small models (Day 1 economics slide)**
+- R. Sutton, *The Bitter Lesson* (2019) — methods that ride more compute win; underwrites "generation keeps getting cheaper." <http://www.incompleteideas.net/IncIdeas/BitterLesson.html>
+- Belcak, Heinrich, Fu, Dong, Muralidharan, Lin, Molchanov (NVIDIA + Georgia Tech), *Small Language Models are the Future of Agentic AI* (arXiv 2506.02153, June 2025) — SLMs (<10B) are often 10–30× cheaper per token and "good enough" for most agent nodes. <https://research.nvidia.com/labs/lpr/slm-agents/>
+- Sasaki, Lopez, Johnson, *Neurosymbolic Finite and Pushdown Automata: Improved Multimodal Reasoning versus VLMs* (NeuS 2025) — neuro-symbolic automata beat GPT/Claude/Gemini-class VLMs on image-based string/arithmetic reasoning by large margins, ~1000× faster, for ~$10 of compute. (The "AI capex ≈ NASA's annual budget every few weeks" line is the instructor's order-of-magnitude framing from these talks.)
 
 **The thesis.** When generation (of code, proofs, designs) becomes cheap and ubiquitous, the scarce and decisive activity becomes *establishing that the result is correct* — i.e., verification. That is the reason this course exists, stated in the language of the agentic-coding moment.
 
@@ -185,6 +198,12 @@ Recorded for citation completeness. "Used" = cited above or in slides/README; "e
 - NN verification: <https://neural-network-verification.com/> (+ practice.html) · <https://github.com/Verified-Intelligence/alpha-beta-CROWN> · <https://arxiv.org/abs/2512.19007> (VNN-COMP 2025) · <https://arxiv.org/abs/2412.19985> (VNN-COMP 2024) · <https://vnn-comp.github.io/>
 - SMT tutorial: <https://link.springer.com/chapter/10.1007/978-3-031-71177-0_31> · <https://par.nsf.gov/servlets/purl/10584608> · <https://homepage.cs.uiowa.edu/~tinelli/talks/ETAPS-19.pdf>
 - AI/FM/math: <https://cacm.acm.org/research/formal-reasoning-meets-llms-toward-ai-for-mathematics-and-verification/> · <https://dl.acm.org/doi/10.1145/3750038> · <https://pldi25.sigplan.org/details/pldi-2025-papers/98/> · <https://lftcm2023.github.io/tutorial/> · <https://amosturchet.github.io/lftcm26/>
+- Spring-2026 milestones & economics: <https://www.anthropic.com/glasswing> · <https://www.npr.org/2026/04/11/nx-s1-5778508/anthropic-project-glasswing-ai-cybersecurity-mythos-preview> · <https://openai.com/index/model-disproves-discrete-geometry-conjecture/> · <https://research.nvidia.com/labs/lpr/slm-agents/> (arXiv 2506.02153) · <http://www.incompleteideas.net/IncIdeas/BitterLesson.html> · MIT Sloan <https://doi.org/10.63383/hadW7619> · Apiiro <https://apiiro.com/blog/4x-velocity-10x-vulnerabilities-ai-coding-assistants-are-shipping-more-risks/> · AWS Automated Reasoning <https://aws.amazon.com/blogs/aws/minimize-ai-hallucinations-and-deliver-up-to-99-verification-accuracy-with-automated-reasoning-checks-now-available/>
+
+### Primary sources: instructor talks (Dropbox/Research/talks)
+Consulted directly for the Day 1 motivation and Day 4 frontier; these are the authoritative source for the instructor's framing:
+- **Liverpool** (CS seminar, 2025-12-12) — *NN Verification for Formally Verifying Neuro-Symbolic AI*: economics/cost of neuro-symbolic vs. LLM, the news-article risk slides (MIT Sloan, Apiiro, AWS Automated Reasoning, VentureBeat), NNV / NNV 2.0, neuro-symbolic automata and behavior trees, VNN-COMP.
+- **Dagstuhl** (2025-09-24), **RMIT** (2026-04-08), **Shonan** (2026-03-10) — *Let's Verify ChatGPT* / *Agentic Engineering is Coming*: the "program synthesis is solved, engineering synthesis is next" thesis, the *oracles* pattern, the verify-ChatGPT grand challenge and open-SLM targets, and the AI-capex/Sutton economic framing.
 
 ### Examined but discarded
 - `fm.csl.sri.com/SSFT24/` and `/SSFT25/` — **404** (path guesses; use the ssft-sri.github.io hub).
