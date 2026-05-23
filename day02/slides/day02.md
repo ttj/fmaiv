@@ -611,7 +611,7 @@ This is the conceptual keystone for the whole liveness story (Week 10) and answe
 
 ## How the check works: LTL → Büchi → emptiness
 
-The lasso is the *what*; here is the *how* — the classic explicit-state algorithm:
+The lasso is the *what*; here is the *how* — the classic algorithm (SPIN's **explicit-state** engine; nuXmv reaches the same verdict *symbolically*, next block):
 
 1. **Negate & translate.** Build a **Büchi automaton** for **¬φ** — it accepts exactly the *bad* runs (those violating φ).
 2. **System as automaton.** View the model `K` as an automaton whose language is all its executions.
@@ -1014,7 +1014,7 @@ Make every variable finite and the problem becomes **decidable** — but not che
 | **LTL** | $O(|S| \cdot 2^{|\varphi|})$ — linear in states, exponential in *formula* size |
 
 ::: notes
-Week 7 again: finite-state invariant verification is in PSPACE (the video says "a bit harder than NP-complete problems such as SAT"), and the exponential blow-up in the state space IS state explosion — the central engineering challenge the whole symbolic/BDD machinery exists to fight. The CTL-vs-LTL table is the standard textbook result (Clarke/Baier-Katoen): CTL model checking is linear in both the model and the formula; LTL is linear in the model but exponential in the FORMULA length (because you build a Büchi automaton of size 2^|φ|). Caveat worth stating: formulas are usually tiny, so LTL's formula-exponential is rarely the bottleneck — the STATE space is. This is also a reason tools historically favored CTL for raw speed, even though LTL is more used in practice.
+Week 7 again: finite-state invariant verification is in PSPACE (the video says "a bit harder than NP-complete problems such as SAT"), and the exponential blow-up in the state space IS state explosion — the central engineering challenge the whole symbolic/BDD machinery exists to fight. The CTL-vs-LTL table is the standard textbook result (Clarke/Baier-Katoen): CTL model checking is linear in both the model and the formula; LTL is linear in the model but exponential in the FORMULA length (because you build the Büchi automaton from the earlier LTL→Büchi slide, which can be of size 2^|φ|). Caveat worth stating: formulas are usually tiny, so LTL's formula-exponential is rarely the bottleneck — the STATE space is. This is also a reason tools historically favored CTL for raw speed, even though LTL is more used in practice.
 :::
 
 ---
@@ -1305,7 +1305,7 @@ Day 1's idea, now in context:
 - Ask: is there a length-`k` path to a bad state?
 - **SAT** → bug found (a real counterexample). **UNSAT** → no bug *of length ≤ k*.
 
-To make BMC **complete**: add *k-induction* (if a property holds for the first `k` steps, and "`k` good steps ⇒ the next is good," it holds forever) or compute a *completeness threshold* (the state graph's diameter — its longest shortest-path).
+To make BMC **complete**, add *k-induction* or compute a *completeness threshold* (the state graph's diameter) — both unpacked in the next two slides.
 
 ::: notes
 Tie back to Day 1. BMC is unbeatable at finding shallow bugs fast and gives a concrete counterexample. Its weakness is completeness — UNSAT at depth k says nothing about depth k+1. The fixes (k-induction, interpolation, IC3/PDR) turn BMC into a complete method; nuXmv implements several. For this course the message is: BMC refutes cheaply, symbolic/BDD proves exhaustively, and modern tools blend them.

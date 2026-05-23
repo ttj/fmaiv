@@ -167,7 +167,7 @@ Karpathy named **"vibe coding"** (Feb 2025) — "give in to the vibes, forget th
 
 But AI-generated code is *often wrong*: Veracode's 2025 GenAI report found security flaws in **~45%** of AI-written samples; Apiiro reported AI assistants ship code **~4× faster but with ~10× the vulnerabilities** (2025); MIT Sloan documents the *hidden costs* — technical debt that destabilizes systems (2025). (Plus the ~51% vulnerable C and ~20% hallucinated packages from before.) **You own what the AI writes.**
 
-Dijkstra saw the hazard coming: *On the Foolishness of "Natural Language Programming"* (EWD667, 1978) argued natural language is too ambiguous to be a safe programming medium. Vibe coding is that idea *automated* — which is exactly why the right-hand column's discipline matters.
+Dijkstra warned of exactly this in *On the Foolishness of "Natural Language Programming"* (EWD667, 1978): natural language is too ambiguous to be a safe programming medium. Vibe coding is that idea *automated*.
 
 > Generation is cheap; **correctness is the bottleneck**. That makes **verification the essential activity** — the subject of the next four days.
 
@@ -272,7 +272,7 @@ Memorize this triple. It is the single most useful organizing principle in the f
 Testing **samples** behaviors; verification reasons about **all** of them. That gap is the whole reason this field exists — and exactly what the FFmpeg bug (run five million times by fuzzers, still missed) showed.
 
 ::: notes
-The two quotes that frame the week, requested as content rather than buried in notes. Dijkstra's line (from *Notes on Structured Programming*, 1970 — also EWD249) is the field's founding aphorism: a test exercises one input; passing tells you nothing about the inputs you didn't try. Knuth's line (1977, from a note on the TeX/"Notes on the van Emde Boas construction" correspondence) is the witty complement — proof and testing are different activities, and even a proof rests on assumptions, so good engineers do both. The synthesis for this audience: testing samples the behavior space; verification quantifies over all of it (the "all vs one" asymmetry from the previous picture). Tie it straight back to Glasswing's FFmpeg bug — five million fuzzing executions of the affected line, and the flaw still hid, because testing cannot demonstrate absence. That is the gap formal methods fills.
+The two quotes that frame the week, requested as content rather than buried in notes. Dijkstra's line (from *Notes on Structured Programming*, 1970 — also EWD249) is the field's founding aphorism: a test exercises one input; passing tells you nothing about the inputs you didn't try. Knuth's line (1977, in a memo to Peter van Emde Boas) is the witty complement — proof and testing are different activities, and even a proof rests on assumptions, so good engineers do both. The synthesis for this audience: testing samples the behavior space; verification quantifies over all of it (the "all vs one" asymmetry from the previous picture). Tie it straight back to Glasswing's FFmpeg bug — five million fuzzing executions of the affected line, and the flaw still hid, because testing cannot demonstrate absence. That is the gap formal methods fills.
 :::
 
 ---

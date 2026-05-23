@@ -237,7 +237,7 @@ example : ∃ n : Nat, n + 1 = 4 :=
 These compile with **no Mathlib** — the connectives are core Lean.
 
 ::: notes
-Make the dictionary concrete with four-line term-mode proofs, so students see that "a proof is a term" is literal, not metaphor. The first is the classic `p → q → p` (constant function) — the simplest non-trivial proof in all of logic, and it's just `fun hp => fun _ => hp`. The ∧ proof is the anonymous constructor `⟨hp, hq⟩` they'll see packaging `counterInv_inductive`. The ∃ proof `⟨3, rfl⟩` is the witness-plus-evidence shape. Emphasize: these are term mode (no `by`), to reinforce that tactic mode is just a convenient way to *generate* terms like these. All core Lean — reassure the Mathlib-free audience.
+Make the dictionary concrete with four-line term-mode proofs, so students see that "a proof is a term" is literal, not metaphor. The first is the **identity** (`fun hp => hp`) — the proof of `p → p` literally *is* `id`. The second is the classic `p → q → p` (constant function), `fun hp => fun _ => hp`. The ∧ proof is the anonymous constructor `⟨hp, hq⟩` they'll see packaging `counterInv_inductive`. The ∃ proof `⟨3, rfl⟩` is the witness-plus-evidence shape. Emphasize: these are term mode (no `by`), to reinforce that tactic mode is just a convenient way to *generate* terms like these. All core Lean — reassure the Mathlib-free audience.
 :::
 
 ---
