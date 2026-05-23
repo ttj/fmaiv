@@ -417,10 +417,14 @@ Concrete specs on the running system. The first is the safety invariant we have 
 3. The system eventually settles in `mode = on` forever.
 4. From every state, some path reaches `x = 10`.
 
-**Choices:** A. `AG (x ≤ 10)` · B. `AG EF (mode = off)` · C. `F G (mode = on)` · D. `AG EF (x = 10)`
+**Choices** (not in order):  A. `F G (mode = on)` · B. `AG EF (x = 10)` · C. `AG (x ≤ 10)` · D. `AG EF (mode = off)`
+
+::: {.fragment}
+**Answers:** 1 → C,  2 → D,  3 → A,  4 → B.
+:::
 
 ::: notes
-Ask the class. 1→A, 2→B, 3→C, 4→D. The discriminating skill is recognizing AG EF (recoverability, CTL) vs F G (stabilization, LTL). After the vote, run each through nuXmv and show the verdicts: A, B, D are true; C is false (counter always leaves on).
+Ask the class first; reveal the answer fragment after discussion. Matching: 1→C, 2→D, 3→A, 4→B (the choices are deliberately shuffled, so the mapping isn't just "in order"). The discriminating skill is recognizing AG EF (recoverability, CTL) vs F G (stabilization, LTL). Then run each formula through nuXmv for its verdict: B, C, D are true; A (`F G (mode = on)`) is false — the counter always leaves the on mode.
 :::
 
 ---

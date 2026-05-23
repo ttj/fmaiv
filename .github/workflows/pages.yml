@@ -57,6 +57,20 @@ jobs:
               -H reveal-custom.css -A reveal-fit.html
           done
 
+      - name: Render slide PDFs (decktape)
+        run: |
+          set -euo pipefail
+          export PUPPETEER_SKIP_DOWNLOAD=1
+          npm install -g decktape
+          CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium-browser || command -v chromium)"
+          echo "using chrome: $CHROME"
+          for d in day01 day02 day03 day04; do
+            [ -f "_site/$d.html" ] || continue
+            decktape --chrome-path "$CHROME" \
+              --chrome-arg=--no-sandbox --chrome-arg=--disable-dev-shm-usage \
+              --size 1280x720 reveal "_site/$d.html" "_site/$d.pdf"
+          done
+
       - name: Build index page
         run: |
           cat > _site/index.html <<'HTML'
@@ -80,12 +94,12 @@ jobs:
           </head>
           <body>
             <h1>FMAIV — Formal Methods &amp; AI-Assisted Verification</h1>
-            <p class="sub">Slide decks (RevealJS). Use arrow keys to navigate, <b>S</b> for speaker notes, <b>F</b> for fullscreen, <b>Esc</b> for the slide grid.</p>
+            <p class="sub">Slide decks (RevealJS). Use arrow keys to navigate, <b>S</b> for speaker notes, <b>F</b> for fullscreen, <b>Esc</b> for the slide grid. A <b>PDF</b> of each deck is linked for following along or printing.</p>
             <ul>
-              <li><a href="day01.html">Day 1 — Foundations: logic, transition systems, SAT, SMT</a></li>
-              <li><a href="day02.html">Day 2 — Model checking with nuXmv</a></li>
-              <li><a href="day03.html">Day 3 — Theorem proving with Lean 4 (and AI)</a></li>
-              <li><a href="day04.html">Day 4 — Program &amp; high-assurance verification + frontier</a></li>
+              <li><a href="day01.html">Day 1 — Foundations: logic, transition systems, SAT, SMT</a> &middot; <a href="day01.pdf">PDF</a></li>
+              <li><a href="day02.html">Day 2 — Model checking with nuXmv</a> &middot; <a href="day02.pdf">PDF</a></li>
+              <li><a href="day03.html">Day 3 — Theorem proving with Lean 4 (and AI)</a> &middot; <a href="day03.pdf">PDF</a></li>
+              <li><a href="day04.html">Day 4 — Program &amp; high-assurance verification + frontier</a> &middot; <a href="day04.pdf">PDF</a></li>
             </ul>
             <p class="tip">Source: <a href="https://github.com/ttj/fmaiv">github.com/ttj/fmaiv</a></p>
           </body>

@@ -254,23 +254,45 @@ The motivation for the spec-vs-implementation split. In crypto especially, you h
 
 ---
 
-## Cryptol in one slide
+## Reading Cryptol: everything is sized
 
-A functional language for **bit-precise** specs:
+A functional language where **every type carries a size** — that bit-exactness is why it's the language of choice for crypto and hardware specs.
 
-```cryptol
-popcount_simple : [8] -> [4]            // 8-bit input → 4-bit count
-popcount_simple x = sum [0 # [b] | b <- x]
+| Type | Meaning |
+|---|---|
+| `Bit` | a single bit (a Boolean) |
+| `[8]` | an 8-bit word — a sequence of 8 bits (bit-vectors are just `[n]`) |
+| `[n]T` | a sequence of `n` values of type `T` — so `[8]` *is* `[8]Bit` |
+| `[4][8]` | 4 bytes (a sequence of four 8-bit words) |
+| `(A, B)` · `A -> B` | a tuple · a function |
 
-property popcount_kernighan_eq x =
-    popcount_simple x == popcount_kernighan x
-```
-
-- `[8]` = an 8-bit word; `[n]T` = a sequence.
-- `property` states something to prove for **all** inputs.
+Sizes are part of the type and checked at compile time: `[8] + [8]` is fine, `[8] + [4]` is a type error.
 
 ::: notes
-Cryptol basics via popcount (counting set bits). [8] is a bit-vector type; everything is sized and bit-exact, which is what you need for crypto/hardware. popcount_simple sums the bits; popcount_kernighan uses Brian Kernighan's clear-lowest-bit trick. A `property` is a claim over all inputs — and Cryptol can discharge it directly with SMT, no proof script.
+The one thing to internalize before reading any Cryptol: types are sized. `[8]` is an 8-bit word; the general form is `[n]T` ("n things of type T"), and a bit-vector `[8]` is literally `[8]Bit`. That's what makes Cryptol bit-exact and a great fit for crypto/hardware where widths matter. Everything else is ordinary functional programming — functions, tuples, sequences.
+:::
+
+---
+
+## Cryptol by example: a shift cipher
+
+```cryptol
+type N = 16                           // message length, in bytes ([N][8] = N bytes)
+encrypt : [8] -> [N][8] -> [N][8]     // key byte -> 16 bytes -> 16 bytes
+encrypt k msg = [ c + k | c <- msg ]  // add the key to every byte (+ is mod 256)
+
+decrypt : [8] -> [N][8] -> [N][8]
+decrypt k ct  = [ c - k | c <- ct ]
+
+property roundtrip k msg = decrypt k (encrypt k msg) == msg
+```
+
+- `[ f c | c <- msg ]` is a **comprehension**: apply `f` to each element `c` of `msg`.
+- `+` / `-` on `[8]` are arithmetic **mod 256** — the width lives in the type.
+- a `property` is a claim to check for **all** inputs.   *(this is `examples/caesar.cry`)*
+
+::: notes
+A complete, readable Cryptol program. `[N][8]` is "N bytes" — there is the `[n]T` shape with T = `[8]`. The comprehension `[ c + k | c <- msg ]` maps over the message, adding the key byte to each (mod 256, because the element type is 8 bits). `decrypt` subtracts. The property says decrypt undoes encrypt for every key and message — which we prove next. No implementation tricks: this IS the spec.
 :::
 
 ---
@@ -278,16 +300,19 @@ Cryptol basics via popcount (counting set bits). [8] is a bit-vector type; every
 ## `:prove` and `:sat`
 
 ```text
-popcount> :prove popcount_kernighan_eq
+caesar> :prove roundtrip
 Q.E.D.
-popcount> :sat \(x:[8]) -> popcount_simple x != popcount_kernighan x
+caesar> :sat \k msg -> decrypt k (encrypt k msg) != msg
 no satisfying assignment
 ```
 
-`:prove p` ↔ "`p` holds for all inputs"; `:sat (¬p)` ↔ "no counterexample." Same SMT engine as Day 1, under the hood (Z3 / What4).
+- `:prove p` — "`p` holds for **all** inputs" (here: every key × every 16-byte message).
+- `:sat (¬p)` — "find a counterexample"; *no satisfying assignment* = none exists.
+
+Same SMT engine as Day 1 (Z3 / What4): `:prove p` is exactly "`¬p` is unsatisfiable" — the validity ↔ unsat-of-negation equivalence, now over fixed-width bit vectors.
 
 ::: notes
-:prove checks a property over all inputs by handing it to an SMT solver; Q.E.D. means proved exhaustively (here, over all 256 8-bit inputs, but the same works for much larger spaces). :sat of the negation is the dual — "find a counterexample" — and "no satisfying assignment" is the same result. This is the validity ↔ unsat-of-negation equivalence from Day 1, now in Cryptol. No inductive argument needed for finite-width bit vectors.
+:prove hands the property to an SMT solver and checks it over the entire input space — every key and every 16-byte message, astronomically large but still decidable because everything is finite-width. Q.E.D. = proved exhaustively. :sat of the negation is the dual "find a counterexample"; no satisfying assignment means none exists. Same validity = unsat-of-negation idea from Day 1, now in Cryptol — no inductive argument needed for fixed-width bit vectors.
 :::
 
 ---
@@ -319,6 +344,8 @@ The counter, one last time. Cryptol lets us express *both* prior styles: bounded
 ---
 
 ## SAW: tying Cryptol to a C implementation
+
+The SAW example is **popcount** (count the set bits in a word): a clean Cryptol spec plus an optimized C implementation. SAW proves they compute the same function.
 
 ```bash
 clang -c -emit-llvm -O0 -o popcount.bc popcount.c   # C → LLVM bitcode

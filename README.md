@@ -2,6 +2,20 @@
 
 Course materials and software setup for a short course on formal methods and AI-assisted verification. The course threads *transition systems* as a unifying behavioral model from logic and SAT/SMT through model checking, theorem proving, and program verification.
 
+## Slides
+
+Published online (RevealJS — arrow keys to navigate, **S** speaker notes, **F** fullscreen, **Esc** for the slide grid):
+
+- **All decks:** <https://ttj.github.io/fmaiv/>
+- Day 1 — [Foundations: logic, transition systems, SAT, SMT](https://ttj.github.io/fmaiv/day01.html)
+- Day 2 — [Model checking with nuXmv](https://ttj.github.io/fmaiv/day02.html)
+- Day 3 — [Theorem proving with Lean 4 (and AI)](https://ttj.github.io/fmaiv/day03.html)
+- Day 4 — [Program & high-assurance verification + the frontier](https://ttj.github.io/fmaiv/day04.html)
+
+**PDF** (to follow along or print): [Day 1](https://ttj.github.io/fmaiv/day01.pdf) · [Day 2](https://ttj.github.io/fmaiv/day02.pdf) · [Day 3](https://ttj.github.io/fmaiv/day03.pdf) · [Day 4](https://ttj.github.io/fmaiv/day04.pdf)
+
+Markdown source is under `dayNN/slides/dayNN.md`.
+
 ## Course plan
 
 | Day | Theme | Major content |
@@ -124,6 +138,12 @@ Light reading to ground the course material. None of these are required reading;
 
 - **J. Lewis and B. Martin.** *Cryptol: High Assurance, Retargetable Crypto Development and Validation.* In *IEEE Military Communications Conference (MILCOM 2003)*, vol. 2, pp. 820–825, 2003. <https://doi.org/10.1109/MILCOM.2003.1290218>
   - The original Cryptol paper from Galois and the NSA, introducing it as a DSL for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
+
+- **smvis** — interactive SMV / nuXmv model visualizer (state graphs and BDDs). <https://github.com/verivital/smvis>
+  - Used on Day 2 as a hosted browser fallback for nuXmv and to visualize the example models; the Day 2 `.smv` examples are drawn from its example set.
+
+- **leansmv** — SMV-to-Lean translator and library for proving inductive invariants of transition systems in Lean 4. <https://github.com/ttj/leansmv>
+  - The Day 3 `CounterDemo` Lean material derives from this project.
 
 ### AI-assisted verification and formalized mathematics
 

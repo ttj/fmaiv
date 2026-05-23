@@ -132,6 +132,8 @@ example : 2 + 2 = 4 := by rfl                  -- anonymous; `by` enters tactic 
 
 Definitions and theorems are the **same kind of thing**: named terms with a type.
 
+- `rfl` = **reflexivity**: proves an equation that holds *by computation* — both sides reduce to the same value (here `double 0` → `0` and `2 + 2` → `4`).
+
 ::: notes
 def, theorem, and example share machinery — all are (optionally named) terms of a stated type. The `by` keyword enters *tactic mode*: instead of writing the proof term directly, you build it with tactics. Most real proofs use tactics because writing the raw term by hand is impractical. double_zero := rfl is a rare case simple enough to write directly.
 :::
@@ -148,6 +150,8 @@ example (p q : Prop) (hp : p) (hpq : p → q) : q := by
 ```
 
 The InfoView shows the current goal after each tactic, until "no goals."
+
+- Editor setup: install the **Lean 4 VS Code extension** (`leanprover.lean4`) for this live InfoView, and keep **Claude Code** open in the same window (integrated terminal or a side panel) — goal state and AI partner side by side.
 
 ::: notes
 Tactics are programs that manipulate the proof state (hypotheses + goal). You watch the goal shrink in the InfoView as you apply tactics, until nothing remains. This interactive, stateful experience is what makes Lean usable — you are never staring at a blank page; you are transforming a concrete goal. This is also exactly the surface an AI assistant operates on: it reads the goal and proposes the next tactic.
