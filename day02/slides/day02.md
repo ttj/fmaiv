@@ -580,6 +580,87 @@ This is the heart of symbolic model checking (Week 6/7). Instead of visiting sta
 
 ---
 
+## The symbolic transition relation
+
+A model checker never lists states — it computes with **formulas over the variables**.
+
+- **Initial states** → a formula $\varphi_I$. For the counter: $\varphi_I \equiv (\text{mode} = \text{off}) \wedge (x = 0)$.
+- **Transitions** → a formula $\varphi_T$ over the variables **and their primed (next-state) copies** ($x'$ = value of $x$ *after* the step).
+
+The counter's increment edge is one disjunct of $\varphi_T$:
+$$(\text{mode}=\text{on}) \wedge \neg p \wedge (x < 10)\ \wedge\ (\text{mode}'=\text{on}) \wedge (x' = x + 1)$$
+
+If $T$ has $k$ variables, a *set of states* is a formula over $k$ variables and the *transition relation* is a formula over $2k$ variables. Variables a step doesn't touch need an explicit $y' = y$ (a **frame condition**).
+
+::: notes
+The symbolic representation from Week 6 — the spine of symbolic model checking: represent both state sets and the transition relation as logical formulas, then do reachability by manipulating formulas. Primed variables are the standard "next state" convention (nuXmv's `next(x)`, TLA+'s `x'`, Lean's two-state relation). The frame condition (`y' = y` for untouched variables) is the classic gotcha: in code an untouched variable just stays; in a relation you must *say so*, or the solver may change it. This `φ_T` is exactly the symbolic state machine from Day 1, written as one big formula over (s, s').
+:::
+
+---
+
+## Computing successors: the image Post(A)
+
+Given a region $A$ (a set of states), its **image** is the set of one-step successors:
+$$\text{Post}(A) = \{\, t \mid \exists s \in A,\ (s, t) \in \varphi_T \,\}$$
+
+Three mechanical steps — the heart of symbolic search:
+
+1. **Conjoin**: $A(\mathbf{s}) \wedge \varphi_T(\mathbf{s}, \mathbf{s}')$ — all transitions starting in $A$.
+2. **Project**: $\exists \mathbf{s}.\ (A \wedge \varphi_T)$ — quantify away the *current*-state variables, keeping only reachable next-states $\mathbf{s}'$.
+3. **Rename** $\mathbf{s}' \to \mathbf{s}$ — so the result is again a region over the ordinary variables.
+
+$$\text{Post}(A) = \text{Rename}\big(\,\exists \mathbf{s}.\ (A \wedge \varphi_T),\ \ \mathbf{s}' \to \mathbf{s}\,\big)$$
+
+::: notes
+This is THE core operation of symbolic model checking, straight from Week 6. The reachable-set fixpoint and invariant checking are all built on Post. Intuition for the three steps: intersect the start region with the transition relation (all (s,s') transitions leaving A), existentially project away the old state (leaving a predicate on s' meaning "some predecessor in A reaches me"), then rename primes off so you can iterate. Step 2 — existential quantifier elimination — is the computational workhorse; the next two slides drill into it.
+:::
+
+---
+
+## Worked image computation (with Z3)
+
+One real variable; transition $\varphi_T : x' = 2x + 1$; region $A : 0 \le x \le 10$. Compute $\text{Post}(A)$:
+
+1. **Conjoin**: $(0 \le x \le 10) \wedge (x' = 2x + 1)$
+2. **Project out $x$**: $\exists x.\ (0 \le x \le 10) \wedge (x' = 2x + 1)$ — simplifies to $1 \le x' \le 21$
+3. **Rename** $x' \to x$: $\;1 \le x \le 21$ — exactly the image of $[0,10]$ under $x \mapsto 2x+1$. ✓
+
+```smt2
+(declare-fun xP () Real)
+(assert (exists ((x Real)) (and (<= 0 x) (<= x 10) (= xP (+ (* 2 x) 1)))))
+(apply qe)          ; quantifier elimination  →  (and (>= xP 1) (<= xP 21))
+```
+
+::: notes
+Image computation made concrete, with Z3 doing the quantifier elimination (Week 6). `(apply qe)` is Z3's QE tactic: it turns the existentially-quantified formula into an equivalent quantifier-free one over x' alone. Linear real/integer arithmetic admits quantifier elimination, which is *why* symbolic reachability over LRA/LIA is mechanizable. Check by hand: x ∈ [0,10] ⇒ 2x+1 ∈ [1,21]; the solver did the same reasoning symbolically, for the whole interval at once instead of point by point.
+:::
+
+---
+
+## Projection is existential quantifier elimination
+
+"Project out $x$" = "$\exists x$" = drop $x$ but keep what it still forces on the rest.
+
+- **Booleans** (BDD-friendly): $\exists x.\ \varphi \;=\; \varphi[x \mapsto 0]\ \vee\ \varphi[x \mapsto 1]$ — substitute both values, OR the results.
+- **Linear arithmetic**: Fourier–Motzkin elimination, or Z3's `qe` (as above).
+
+A symbolic model checker needs just **six region operations**:
+
+| Op | Set meaning | On formulas |
+|---|---|---|
+| `Conj(A,B)` | $A \cap B$ | $A \wedge B$ |
+| `Disj(A,B)` | $A \cup B$ | $A \vee B$ |
+| `Diff(A,B)` | $A \setminus B$ | $A \wedge \neg B$ |
+| `IsEmpty(A)` | $A = \varnothing$? | a **SAT** test (unsat = empty) |
+| `Exists(A,X)` | project out $X$ | quantifier elimination |
+| `Rename(A,X,Y)` | rename vars | substitution |
+
+::: notes
+The Boolean cofactor identity ∃x.φ = φ[x→0] ∨ φ[x→1] is exactly how BDDs do existential projection — cheap, because substituting a constant and OR-ing are linear-time BDD operations. For arithmetic you need real QE (Fourier–Motzkin for linear; CAD for nonlinear reals). These six operations are the *entire* interface a symbolic model checker needs: implement them on ROBDDs (Booleans) or polyhedra (reals) and the reachability algorithm is unchanged. `IsEmpty` being a SAT test is why "is the bad set reachable?" reduces to satisfiability — the direct line back to Day 1.
+:::
+
+---
+
 ## The fixpoint, on the counter
 
 Run the reachable-set iteration by hand — it lands on the **same 12 states** as Day 1's BFS:
@@ -592,6 +673,38 @@ Now $R_{12} \cap \{x > 10\} = \varnothing$ — the safety invariant holds, and *
 
 ::: notes
 This makes "sets as formulas" concrete and ties straight back to Day 1's hand-BFS. Each $R_k$ is the characteristic function of a set of states, stored as a BDD; `Image` and `∪` are BDD operations; the fixpoint test $R_{12} = R_{11}$ is a constant-time BDD pointer comparison thanks to canonicity. The counter is tiny so the sets are small, but the same loop runs on systems with $10^{100}$ states — as long as the BDDs compress.
+:::
+
+---
+
+## The frontier: symbolic BFS
+
+Don't re-expand the whole set each step — push only the **frontier** (the newly-found states):
+
+```text
+Reach := Init;   New := Init               # New = the frontier
+while New ≠ ∅:
+    if New ∩ Bad ≠ ∅:  return REACHABLE     # property violated → counterexample
+    New   := Post(New) \ Reach              # successors not seen before
+    Reach := Reach ∪ New
+return UNREACHABLE                          # fixpoint: nothing new ⇒ invariant holds
+```
+
+<svg viewBox="0 0 600 330" style="display:block;margin:0.2em auto;max-width:52%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <rect x="30" y="46" width="540" height="250" rx="18" fill="#fcf5e6" stroke="#B49248" stroke-width="2.5" stroke-dasharray="7 4"/>
+  <rect x="98" y="86" width="404" height="170" rx="14" fill="#cfe6f7" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="170" y="120" width="260" height="102" rx="12" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="242" y="150" width="116" height="42" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="300" y="68" text-anchor="middle" font-size="13.5" fill="#8a6d2f">reach₃ = frontier (New)</text>
+  <text x="300" y="106" text-anchor="middle" font-size="13.5" fill="#146a96">reach₂</text>
+  <text x="300" y="139" text-anchor="middle" font-size="13" fill="#146a96">reach₁</text>
+  <text x="300" y="176" text-anchor="middle" font-size="12.5" fill="#1c1c1c">reach₀ = Init</text>
+</svg>
+
+Each ring is one BFS layer `reachᵢ`; the dashed gold band is the frontier `New` that `Post` pushes outward. It stops after the reachable graph's **diameter** (for the counter, 11 steps — then `New = ∅`).
+
+::: notes
+This is the symbolic BFS from Week 6 — what nuXmv actually runs. The efficiency: only the *frontier* (New) is expanded each iteration, via Diff(Post(New), Reach), not the whole Reach set. Two ways it stops: (1) the frontier meets Bad → the property is violated and the path through the layers is your counterexample; (2) the frontier goes empty → fixpoint reached, invariant holds. Termination is governed by the diameter (longest shortest-path); for the counter that's 11. Each region (Reach, New, Bad, Post output) is a formula/BDD, so the whole loop is formula manipulation — no state ever enumerated.
 :::
 
 ---
@@ -645,6 +758,69 @@ Build and reduce BDDs yourself in the browser: [bit.ly/fmaiv_smvis](https://bit.
 
 ::: notes
 This is the picture behind the previous slide's Shannon expansion: the root splits on `a`, the solid (a=1) branch is `f|a=1 = b`, the dashed (a=0) branch is `f|a=0 = c`. Trace an input: a=0, c=1 → follow dashed from a to c, solid from c to 1 → output 1. The two crossing edges in the middle are the two ways to reach the shared terminals — that sharing is the whole point of "reduced" BDDs and is why canonicity holds. Variable order here is a, then b/c; the next slide shows why that choice can make or break the size.
+:::
+
+---
+
+## Building and reducing a BDD
+
+Start from the Shannon-expansion **decision tree** for $f = x \vee y$, then apply two rules until none apply:
+
+<svg viewBox="0 0 820 285" style="display:block;margin:0.2em auto;max-width:80%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="bddr-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <!-- panel A: decision tree -->
+  <line x1="196" y1="60" x2="158" y2="113" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
+  <line x1="224" y1="60" x2="267" y2="113" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
+  <line x1="140" y1="148" x2="119" y2="206" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
+  <line x1="160" y1="148" x2="172" y2="206" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
+  <line x1="266" y1="148" x2="256" y2="206" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
+  <line x1="284" y1="148" x2="315" y2="206" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
+  <ellipse cx="210" cy="44" rx="22" ry="20" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="210" y="50" text-anchor="middle" font-size="16" fill="#1c1c1c">x</text>
+  <ellipse cx="150" cy="130" rx="20" ry="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="150" y="135" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <ellipse cx="275" cy="130" rx="20" ry="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="275" y="135" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <rect x="98" y="208" width="26" height="30" rx="4" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="111" y="229" text-anchor="middle" font-size="14" fill="#5b6168">0</text>
+  <rect x="163" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
+  <text x="176" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <rect x="242" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
+  <text x="255" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <rect x="307" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
+  <text x="320" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <text x="210" y="266" text-anchor="middle" font-size="13" fill="#5b6168">decision tree</text>
+  <!-- reduce arrow -->
+  <line x1="392" y1="130" x2="498" y2="130" stroke="#5b6168" stroke-width="2" marker-end="url(#bddr-ah)"/>
+  <text x="445" y="118" text-anchor="middle" font-size="13" fill="#146a96">reduce</text>
+  <text x="445" y="150" text-anchor="middle" font-size="11" fill="#5b6168">Rules 1 &amp; 2</text>
+  <!-- panel B: ROBDD -->
+  <line x1="666" y1="60" x2="650" y2="116" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
+  <line x1="697" y1="58" x2="745" y2="202" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
+  <line x1="633" y1="151" x2="617" y2="204" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
+  <line x1="660" y1="149" x2="742" y2="204" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
+  <ellipse cx="680" cy="44" rx="22" ry="20" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="680" y="50" text-anchor="middle" font-size="16" fill="#1c1c1c">x</text>
+  <ellipse cx="645" cy="133" rx="20" ry="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="645" y="138" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <rect x="599" y="206" width="26" height="30" rx="4" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="612" y="227" text-anchor="middle" font-size="14" fill="#5b6168">0</text>
+  <rect x="739" y="206" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
+  <text x="752" y="227" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <text x="680" y="266" text-anchor="middle" font-size="13" fill="#5b6168">ROBDD (canonical)</text>
+</svg>
+
+- **Rule 1 — merge** isomorphic subgraphs (identical nodes/leaves become one): the three `1`-leaves collapse to one.
+- **Rule 2 — eliminate** any node whose two children are identical (a redundant test): the `y` on the `x = 1` branch disappears — `x = 1` already forces `1`.
+
+The result is **canonical** for a fixed order, so equality is pointer-equality and `IsEmpty`/validity are just "is it the `0` / `1` terminal?" Build them yourself: [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis).
+
+::: notes
+The construction/reduction process from Week 7, on f = x ∨ y. Build the binary decision tree by Shannon-expanding on x then y. Then Rule 2 removes the y-test on the x=1 branch (x=1 forces 1 regardless of y, so both children are equal); Rule 1 merges the now-duplicate 1-leaves (and any isomorphic subgraphs). What remains is the reduced, ordered BDD. The order in which the reductions are applied doesn't matter — the ROBDD is unique for a given function and variable ordering (canonicity), the property that makes the fixpoint test R_{k+1} = R_k a cheap pointer comparison. Solid edge = variable is 1, dashed = 0.
 :::
 
 ---
