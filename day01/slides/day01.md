@@ -960,6 +960,48 @@ DPLL(T) is the architectural pattern of every modern SMT solver (Z3, CVC5, Yices
 
 ---
 
+## Inside a theory solver: equality + uninterpreted functions
+
+How does the **EUF** theory solver decide a conjunction of equalities? **Congruence closure**:
+
+1. Put each term in its own class; **merge** classes joined by an `=`.
+2. **Congruence rule**: if $x_1 = y_1, \dots, x_n = y_n$ then $f(x_1,\dots) = f(y_1,\dots)$ — merge those too.
+3. A disequality $u \ne v$ with $u, v$ in the **same** class $\Rightarrow$ **UNSAT**.
+
+Decide $\;a=b,\ b=c,\ d=e,\ b=s,\ d=t,\ f(a, g(d)) \ne f(b, g(e))$:
+
+<svg viewBox="0 0 780 300" style="display:block;margin:0.2em auto;max-width:82%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="euf-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="625" y1="88" x2="625" y2="130" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
+  <text x="700" y="114" text-anchor="middle" font-size="11.5" fill="#146a96">congruence: d = e</text>
+  <line x1="160" y1="88" x2="320" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
+  <line x1="560" y1="178" x2="450" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
+  <text x="300" y="200" text-anchor="middle" font-size="11.5" fill="#146a96">congruence: a = b, g(d) = g(e)</text>
+  <rect x="50" y="44" width="200" height="44" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="150" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ a, b, c, s }</text>
+  <text x="150" y="34" text-anchor="middle" font-size="11" fill="#5b6168">a=b, b=c, b=s</text>
+  <rect x="540" y="44" width="170" height="44" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="625" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ d, e, t }</text>
+  <text x="625" y="34" text-anchor="middle" font-size="11" fill="#5b6168">d=e, d=t</text>
+  <rect x="540" y="134" width="170" height="44" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="625" y="161" text-anchor="middle" font-size="15" fill="#1c1c1c">{ g(d), g(e) }</text>
+  <rect x="225" y="228" width="310" height="44" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="380" y="255" text-anchor="middle" font-size="14.5" fill="#1c1c1c">{ f(a,g(d)), f(b,g(e)) }</text>
+  <text x="690" y="255" text-anchor="middle" font-size="14" fill="#922b21" font-weight="bold">⇒ UNSAT</text>
+</svg>
+
+The asserted $f(a,g(d)) \ne f(b,g(e))$ lands *inside* the gold class — contradiction.
+
+::: notes
+The EUF (equality + uninterpreted functions) decision procedure from Week 8 — congruence closure, the theory solver Z3 plugs into DPLL(T) for QF_UF. Walk it: the equalities merge {a,b,c,s} and {d,e,t}. The congruence rule fires twice: d=e ⇒ g(d)=g(e); then a=b together with g(d)=g(e) ⇒ f(a,g(d))=f(b,g(e)). But the input asserts f(a,g(d)) ≠ f(b,g(e)) — a disequality inside one class — so the conjunction is unsatisfiable. "Uninterpreted" means we know nothing about f and g except that equal inputs give equal outputs (congruence); that one axiom suffices to refute. This is how SMT reasons about opaque functions/APIs without modeling their internals — and it's the theory solver half of the DPLL(T) loop from the previous slide.
+:::
+
+---
+
 ## SMT-LIB: the standard input language
 
 ```smt2
