@@ -11,6 +11,12 @@
   "containerUser": "root",
   "remoteUser": "root",
 
+  // SSH server so `gh codespace ssh` and CLI automation can reach the container
+  // (the base grading image ships no sshd). Layers on top of the image.
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+
   // Add a Jupyter kernel + JupyterLab on top of the grading image. Ubuntu 24.04
   // is PEP 668 "externally managed", hence --break-system-packages.
   "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel",
