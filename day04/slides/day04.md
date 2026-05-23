@@ -107,6 +107,90 @@ The pipeline. The key realization for students: CBMC is not magic, it is automat
 
 ---
 
+## The pipeline, stage by stage
+
+<svg viewBox="0 0 960 162" style="display:block;margin:0.3em auto;max-width:96%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="cbmc-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="160" y1="76" x2="188" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
+  <line x1="340" y1="76" x2="368" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
+  <line x1="520" y1="76" x2="548" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
+  <line x1="700" y1="76" x2="728" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
+  <rect x="10" y="48" width="150" height="56" rx="10" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
+  <text x="85" y="81" text-anchor="middle" font-size="15" fill="#1c1c1c">C source</text>
+  <rect x="190" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="265" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">goto-program</text>
+  <text x="265" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">uniform control flow</text>
+  <rect x="370" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="445" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">unwound ×k</text>
+  <text x="445" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">loops unrolled</text>
+  <rect x="550" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="625" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">SSA + bit-blast</text>
+  <text x="625" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">bit-precise eqns</text>
+  <rect x="730" y="48" width="150" height="56" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="805" y="81" text-anchor="middle" font-size="13.5" fill="#1c1c1c">SAT / SMT solver</text>
+  <text x="805" y="128" text-anchor="middle" font-size="12.5" fill="#922b21">SAT ⇒ bug + trace</text>
+  <text x="805" y="148" text-anchor="middle" font-size="12.5" fill="#1e6b32">UNSAT ⇒ safe to depth k</text>
+</svg>
+*Caption: each CBMC stage lowers the program one level closer to a Boolean/bit-vector formula a solver can decide.*
+
+| Stage | What it does |
+|---|---|
+| **goto-program** | rewrite all control flow (`if`, `for`, `while`, `?:`) into one uniform form: guarded `goto`s. Now there are no loops "shapes," just jumps. |
+| **unwind** | replace each loop by `k` copies of its body (Day-1's bound, applied to code). |
+| **SSA** | rename every variable so it is **assigned once** (`x`, then `x_1`, `x_2`, …). A program becomes a list of equations. |
+| **bit-blast** | model each `int` as 32 individual bits; `+`, `&`, `<<` become Boolean circuits — *bit-precise*. |
+| **solve** | hand the formula to SAT/SMT (Z3/MiniSat). SAT = a bug + trace; UNSAT = safe to depth `k`. |
+
+::: notes
+Open the black box one notch further than the previous slide. The two stages worth lingering on for a no-background audience: SSA ("static single assignment") — reassigning a variable becomes a new named version, so the whole program turns into a system of equations with no mutation, which is exactly what a solver wants; and bit-blasting — every machine integer becomes 32 actual Boolean variables and every arithmetic operator becomes a logic circuit, so overflow and bit-tricks are modeled exactly rather than abstracted. This is why CBMC catches the Ariane/Pentium-class bugs that interval tools miss. The goto-program step is just "make all control flow uniform so the rest of the pipeline has one thing to handle." Students don't need to reproduce this — they need to know the verdict is exact at the bit level, not an approximation.
+:::
+
+---
+
+## The safety formula CBMC builds
+
+For a loop unrolled to depth $k$, CBMC asks the solver one question:
+
+$$\underbrace{I(s_0)}_{\text{start state}} \ \wedge\ \underbrace{\bigwedge_{i=0}^{k-1} T(s_i, s_{i+1})}_{k\ \text{steps of the program}} \ \wedge\ \underbrace{\bigvee_{i=0}^{k}\, \neg P(s_i)}_{\text{some step breaks } P}$$
+
+<svg viewBox="0 0 640 150" style="display:block;margin:0.3em auto;max-width:80%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="bmc-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="12" y1="58" x2="40" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
+  <text x="24" y="48" text-anchor="middle" font-size="12" fill="#5b6168">I</text>
+  <line x1="130" y1="58" x2="176" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
+  <text x="153" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <line x1="266" y1="58" x2="312" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
+  <text x="289" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <line x1="458" y1="58" x2="504" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
+  <text x="481" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <rect x="42" y="36" width="88" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="86" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₀</text>
+  <rect x="178" y="36" width="88" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="222" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₁</text>
+  <rect x="314" y="36" width="88" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="358" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₂</text>
+  <text x="432" y="64" text-anchor="middle" font-size="22" fill="#5b6168">⋯</text>
+  <rect x="506" y="36" width="88" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+  <text x="550" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s_k</text>
+  <text x="86" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
+  <text x="222" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
+  <text x="358" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
+  <text x="550" y="100" text-anchor="middle" font-size="11.5" fill="#922b21">¬P ✓ (bug)</text>
+</svg>
+*Caption: bounded model checking unrolls the transition relation $k$ times and asks whether the property can fail at any step.*
+
+- $I$ = the **initial** condition; $T$ = "execute one statement"; $P$ = the **property** (your `assert`, plus the built-in checks).
+- **SAT** (a solution exists) ⇒ there is a real run reaching a bad state — the counterexample.
+- **UNSAT** (no solution) ⇒ no run of length ≤ $k$ violates $P$ — **safe to depth $k$**.
+
+This is *exactly* the Day-1 bounded-model-checking encoding — only $T$ is now extracted from C source automatically.
+
+::: notes
+This is the single most important slide for tying Day 4 back to Day 1. The encoding is identical to the bounded reachability query students wrote by hand on Day 1: assert the initial state, conjoin k copies of the transition relation, and conjoin the negation of the property at every step. If the solver finds a satisfying assignment, that assignment IS a concrete buggy execution (it pins down every input and every intermediate value). If it proves UNSAT, no execution up to length k can break the property. The only thing that changed from Day 1 is that you no longer write T by hand — CBMC reads it off the C. Glossing: "conjunction" (∧) = "all of these are true at once"; "disjunction" (∨) = "at least one of these is true." The disjunction over ¬P is "the property fails at SOME step."
+:::
+
+---
+
 ## Loop unwinding
 
 ```bash
@@ -191,6 +275,90 @@ CBMC prints the **exact** state sequence — and the precise `press` inputs — 
 
 ::: notes
 Same value as the nuXmv counterexample: a concrete, replayable trace, but now annotated with C source lines and variable values. You can see prev_x = 9 then s.x = 10 at the violating step. CBMC checks every assertion in the program and labels them (main.assertion.1, etc.); the trace pinpoints which one and how. This is the debugging payoff — not "a test failed" but "here is the exact execution that breaks it."
+:::
+
+---
+
+## Reading a trace step by step
+
+A CBMC trace is a **list of state updates** in execution order. Read it like a debugger replay:
+
+```text
+State 12 file counter_check.c line 49     s = { .mode = OFF, .x = 0 }   ← initial
+State 18 file counter_check.c line 52     press = TRUE                  ← input chosen
+State 24 file counter.c      line 41      s.x = 1                       ← step 1
+   ⋮   (CBMC chooses press, x climbs 1,2,…,9)
+State 71 file counter_check.c line 52     press = FALSE
+State 77 file counter.c      line 41      s.x = 10                      ← step 10
+Violated property: counter_check.c line 57   s.x < 10
+```
+
+- Each `State …` line is one assignment; the **inputs** (`press = …`) are the part you replay.
+- The last block names the **violated property** and its source line — the smoking gun.
+- Replaying just the `press` values in a debugger reproduces the bug deterministically.
+
+::: notes
+This is the "how to actually use the output" slide. Emphasize three reading habits. First, a CBMC trace is not prose — it is a chronological list of variable assignments, exactly what you would see single-stepping in gdb, so read top to bottom. Second, only a few lines are inputs (the nondet choices, here `press`); everything else is a consequence CBMC computed. To reproduce the bug you only need the inputs. Third, the final "Violated property" line is the one that matters — it tells you which assertion and which source line, so you jump straight there. The payoff over testing: a test tells you "it failed sometimes"; this tells you the precise, minimal, replayable input sequence that triggers it. Note CBMC reports the SHORTEST trace it can within the bound, so the counterexample is usually minimal and readable.
+:::
+
+---
+
+## Worked example: `array_max` + its counterexample
+
+```c
+int array_max(const int *a, int n) {
+    int m = a[0];
+    for (int i = 1; i < n; ++i)
+        if (a[i] > m) m = a[i];
+    return m;
+}
+```
+
+Harness: fill `a[0..4]` with `nondet_int()`, then assert the **full spec** of "maximum":
+`m >= a[i]` for all `i` **and** `m` equals some `a[i]`.
+
+```text
+cbmc array_max.c array_max_check.c --unwind 6 --unwinding-assertions
+→ VERIFICATION SUCCESSFUL
+```
+
+Now inject a bug — change the loop to `i < n - 1` (skips the last element):
+
+```text
+[main.assertion.1] line 37 assertion m >= a[i]: FAILURE
+  a[0]=0  a[1]=0  a[2]=0  a[3]=0  a[4]=1     ← last element is the biggest…
+  m = 0                                       ← …but the loop never looked at it
+Violated property: m >= a[i]
+```
+
+CBMC hands you the *smallest* array that exposes the off-by-one. *(this is `examples/array_max*.c`)*
+
+::: notes
+A second, self-contained worked example so students see the loop-and-array case, not just the state-machine counter. Two teaching points. (1) A good harness asserts the FULL specification, not a weak shadow of it: "maximum" means both an upper bound AND realized by some element — the upper-bound half alone is satisfied by INT_MAX, which is why we assert both. This mirrors the spec-completeness theme from Days 1-3. (2) The injected `i < n - 1` bug is the classic off-by-one, and CBMC's counterexample is beautifully minimal: all zeros except the last element, which the broken loop never inspects. That minimality is the debugging gift — there is no noise to wade through. Run the clean version first (SUCCESSFUL), then break it live; the contrast is the lesson.
+:::
+
+---
+
+## Worked example: the binary-search overflow
+
+The famous JDK bug (2006): the **midpoint** of a binary search.
+
+```c
+int mid = (lo + hi) / 2;        // BUG: lo + hi can overflow int
+int mid = lo + (hi - lo) / 2;   // SAFE: never overflows
+```
+
+- For large indices, `lo + hi` exceeds `INT_MAX` and **wraps to negative** — then `a[mid]` is an out-of-bounds read.
+- CBMC's default overflow + bounds checks catch this *without any assertion you write*:
+
+```text
+[binsearch.overflow.1] arithmetic overflow on signed + in lo + hi: FAILURE
+```
+
+The overflow-safe form verifies clean. Same class of bug as **Ariane 5** (Day 1) — a conversion/arithmetic overflow that testing missed for years.
+
+::: notes
+This is the marquee example for "why bit-precise matters." The binary-search midpoint bug lived in the Java standard library — and Programming Pearls — for years because it only triggers on arrays larger than about a billion elements, which no unit test exercised. CBMC catches it as a built-in signed-overflow check, no user assertion needed, because it models the 32-bit int exactly and knows lo+hi can wrap. The overflow-safe rewrite lo + (hi-lo)/2 computes the same midpoint but never exceeds the range. Tie it to Ariane 5 from Day 1 (a 64-bit float converted to a 16-bit int overflowed) — same family of defect, same reason testing missed it, same reason a bit-precise tool finds it instantly. The example files are binsearch.c / binsearch_check.c if you want to run it live.
 :::
 
 ---
@@ -390,6 +558,87 @@ SAW is the bridge from spec to real code. You compile the C to LLVM bitcode, and
 
 ---
 
+## How SAW works: symbolic execution
+
+<svg viewBox="0 0 720 224" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="saw-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <rect x="28" y="32" width="246" height="66" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="151" y="58" text-anchor="middle" font-size="14" fill="#1c1c1c">C implementation</text>
+  <text x="151" y="78" text-anchor="middle" font-size="10.5" fill="#5b6168">clang → LLVM bitcode → symbolic exec</text>
+  <rect x="446" y="32" width="246" height="66" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="569" y="58" text-anchor="middle" font-size="14" fill="#1c1c1c">Cryptol spec</text>
+  <text x="569" y="78" text-anchor="middle" font-size="10.5" fill="#5b6168">executable bit-level spec</text>
+  <line x1="151" y1="98" x2="320" y2="136" stroke="#5b6168" stroke-width="1.8" marker-end="url(#saw-ah)"/>
+  <line x1="569" y1="98" x2="400" y2="136" stroke="#5b6168" stroke-width="1.8" marker-end="url(#saw-ah)"/>
+  <text x="360" y="120" text-anchor="middle" font-size="10.5" fill="#5b6168">each → a formula of the input bits</text>
+  <rect x="282" y="136" width="156" height="46" rx="10" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
+  <text x="360" y="164" text-anchor="middle" font-size="14" fill="#1c1c1c">=?   SMT solver</text>
+  <text x="250" y="208" text-anchor="middle" font-size="12.5" fill="#1e6b32">✓ equal on all inputs</text>
+  <text x="478" y="208" text-anchor="middle" font-size="12.5" fill="#922b21">✗ counterexample</text>
+</svg>
+*Caption: SAW turns both the compiled C and the Cryptol spec into formulas over the same symbolic input, then asks the solver if they are equal for every input.*
+
+1. **Compile** C to **LLVM bitcode** (`clang -emit-llvm`) — the same intermediate form the compiler optimizes; SAW reads *that*, not the text.
+2. **Run the function on a symbolic input** — a variable standing for *all* bytes at once, not one number. SAW threads it through the code and gets the output **as a formula** of the input bits.
+3. **Compare to the spec.** The Cryptol spec is already a formula. SAW asks the solver: *"are these two formulas equal for every input?"*
+4. **UNSAT of the difference ⇒ equivalent.** Same validity = unsat-of-negation logic as Days 1-3.
+
+::: notes
+This is the SAW mechanics slide — the one the brief asks to deepen most. The crucial idea for a no-background audience is "symbolic execution": instead of running the function on the number 42, you run it on a symbol x that represents every possible input simultaneously, and you carry along the formula that describes what comes out. Because the C is finite-width and (after unrolling) loop-free, that output is a finite formula over the input bits. The Cryptol spec is a formula too. So "the implementation matches the spec" becomes "two formulas are equal on all inputs," which is exactly an SMT validity check — and validity is unsat-of-the-negation, the same move from Day 1. Note SAW reads LLVM bitcode, the compiler's own optimized intermediate representation, which is why it verifies the real thing the compiler produces, not a re-typed copy. clang is the C front-end of LLVM.
+:::
+
+---
+
+## A `.saw` script, annotated
+
+```text
+import "popcount.cry";                       // bring in the Cryptol spec
+m <- llvm_load_module "popcount.bc";         // load the compiled C
+
+llvm_verify m "popcount_loop" [] false (do {
+    x <- llvm_fresh_var "x" (llvm_int 8);    // a SYMBOLIC 8-bit input (all bytes at once)
+    llvm_execute_func [llvm_term x];         // call the C function on it
+    llvm_return (llvm_term {{ popcount_simple x }});  // claim: result == Cryptol spec
+}) z3;                                        // discharge with the z3 solver
+```
+
+- `llvm_fresh_var` = "an input standing for **every** value" (CBMC's `nondet_*`, in SAW).
+- `{{ … }}` switches into **Cryptol** — `popcount_simple x` is the reference answer.
+- The script reads as a contract: *given* this symbolic input, *after* calling the function, the **return equals the spec**. *(this is `examples/popcount.saw`)*
+
+::: notes
+Walk the skeleton line by line — it is short and every line maps to a concept they already have. `llvm_load_module` reads the bitcode you built. The body of `llvm_verify` is a little three-part contract: declare the symbolic inputs (`llvm_fresh_var`, which is literally SAW's version of CBMC's nondet input), say "now call the function" (`llvm_execute_func`), and state the postcondition (`llvm_return …` — the result must equal the Cryptol spec evaluated on the same input). The `{{ }}` brackets are just "drop into Cryptol here." The trailing `z3` picks the solver. The shape — preconditions, execute, postcondition — is the same Hoare-style contract pattern that shows up everywhere in verification, including the Frama-C ACSL specs from the static-analysis lecture. Students don't memorize the API; they recognize the contract structure.
+:::
+
+---
+
+## The popcount example shape
+
+Spec and implementation of the *same* function — "count the 1-bits":
+
+```cryptol
+popcount_simple : [8] -> [4]              // Cryptol SPEC: sum the bits
+popcount_simple x = sum [0 # [b] | b <- x]
+```
+
+```c
+uint8_t popcount_loop(uint8_t x) {        // C IMPLEMENTATION
+    uint8_t count = 0;
+    for (int i = 0; i < 8; ++i)
+        count += (x >> i) & 1U;           // tally bit i
+    return count;
+}
+```
+
+- One width mismatch to bridge: C returns `[8]`, the spec returns `[4]`. The script pads with four zero bits — `(zero : [4]) # popcount_simple x` — so the types line up.
+- SAW proves these are the **same function on all 256 inputs**: *Proof succeeded! popcount_loop*.
+
+::: notes
+Show the two sides side by side so "spec vs implementation" stops being abstract. The Cryptol is the textbook definition (sum the bits); the C is the standard bit-shifting loop. They are obviously "meant to" compute the same thing, and SAW proves they actually do, for every one of the 256 byte inputs. The one wrinkle worth naming is the width bridge: the C function's return type is a full byte ([8]) while the spec produces a 4-bit count ([4], enough since the answer is at most 8), so the script concatenates four zero bits in front of the spec result to match — otherwise SAW reports a type mismatch, not a math error. This is the realistic flavor of SAW work: the logic is easy, and the effort is in lining up types/widths/memory between the C ABI and the clean spec.
+:::
+
+---
+
 ## Where SAW shines — and where it struggles
 
 - **Shines**: crypto (AES, SHA, P-256), parsers, format validators, fixed-shape loops.
@@ -444,14 +693,155 @@ Neural-network verification flips the script: now the *AI itself* is the artifac
 
 ---
 
-## α,β-CROWN and NNV
+## A network is just a function
 
-- **α,β-CROWN** — *branch-and-bound* (split the input region into cases, bound each) with linear bounds on activations; multi-year **VNN-COMP** winner.
-- **NNV** (Vanderbilt/verivital) — set-based reachability with *star sets* (a compact representation of a whole set of inputs/states), including cyber-physical systems.
-- **UNSAT certifies robustness**: no input in `R` flips the class.
+For verification, strip away the training story. A trained feed-forward / convolutional net is a **fixed mathematical function** $f: \mathbb{R}^n \to \mathbb{R}^m$:
+
+$$f(x) = W_L\,\sigma(\cdots \sigma(W_1 x + b_1)\cdots) + b_L$$
+
+- $W_i$ = a **weight matrix**, $b_i$ = a **bias vector** — just numbers fixed at training time.
+- Each layer = **matrix multiply, add bias, apply $\sigma$** (the *activation*). Repeat for $L$ layers.
+- $\sigma$ is usually **ReLU**: $\sigma(z) = \max(0, z)$ — "pass positives through, zero out negatives."
+- For digit recognition: $n = 256$ pixels in, $m = 10$ class scores out; the answer is the **argmax** (the highest-scoring class).
+
+So verifying a network = reasoning about a (big, non-linear) function — the same object we have reasoned about all week.
 
 ::: notes
-The two leading approaches. α,β-CROWN computes linear lower/upper bounds on the network output and branches when bounds are too loose — it has won VNN-COMP (the annual neural-net verification competition) for years. NNV (our group) uses reachability: propagate a set (a "star set") through the layers and check the output set stays in the safe region — and extends to closed-loop cyber-physical systems (network + plant). Same UNSAT-certifies-safety logic as everything else this week.
+The bridge slide, straight from the instructor's neural-networks overview. The single liberating idea for a no-background audience: once a network is trained, the weights and biases are frozen constants, so the network is nothing but a fixed function — a long alternation of "multiply by a matrix, add a vector, apply a simple nonlinearity." No learning, no probabilities, no magic at verification time. The matrix-multiply-add-bias part is linear and easy; the only thing that makes f non-linear is the activation σ, and the workhorse activation ReLU is about as simple as a nonlinearity gets: zero for negatives, identity for positives. The output is a vector of class scores and the prediction is the argmax. Glossing argmax = "which entry is biggest." Everything that follows is "reason about this function over a set of inputs," which is exactly reachability/image-of-a-set from earlier in the week.
+:::
+
+---
+
+## The robustness property, precisely
+
+Given a correctly-classified input $x_0$ (say, an image of a **2**), demand:
+
+$$\forall x.\ \; \|x - x_0\|_\infty \le \varepsilon \;\Rightarrow\; \arg\max f(x) = \arg\max f(x_0)$$
+
+- $\|x - x_0\|_\infty \le \varepsilon$ = the **ℓ∞ ball**: every pixel may move by at most $\varepsilon$ (brightness nudged up/down a little).
+- The claim: **every** such nudged image still classifies as a **2** — no small perturbation flips the label.
+- An $x$ that *does* flip it is an **adversarial example** — the counterexample of NN verification.
+
+This is a $\forall$-over-a-region property — Day 1's "no bad input exists," now over a continuous box of images.
+
+::: notes
+This is the property the whole subfield is built on; get it crisp. ℓ∞ ("ell-infinity") ball just means "each coordinate independently can wiggle by up to epsilon" — for images, every pixel can get a little brighter or darker, independently. Local robustness says: across that entire box of nearby images (infinitely many of them), the network's top class never changes. The dual object is the adversarial example — a specific in-the-box image that the network misclassifies, famously a stop sign with a few stickers read as a speed-limit sign, or a panda+noise read as a gibbon. That adversarial example is exactly the counterexample, the analog of CBMC's failing trace. And structurally this is the same shape as every property this week: "for all inputs in a set, the output stays good," i.e., no bad input exists. The new wrinkle is that the set is a continuous region, not a finite enumeration.
+:::
+
+---
+
+## Why this is hard: ReLU explodes the cases
+
+Each ReLU neuron is **piecewise-linear** — two linear pieces with a kink at 0:
+
+<svg viewBox="0 0 740 210" style="display:block;margin:0.3em auto;max-width:84%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="relu-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <text x="170" y="30" text-anchor="middle" font-size="13" fill="#1c1c1c">ReLU(z) = max(0, z)</text>
+  <line x1="55" y1="165" x2="295" y2="165" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
+  <line x1="135" y1="180" x2="135" y2="52" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
+  <polyline points="60,165 135,165 250,78" fill="none" stroke="#2b9fd4" stroke-width="2.6"/>
+  <text x="300" y="170" text-anchor="middle" font-size="12" fill="#5b6168">z</text>
+  <text x="170" y="200" text-anchor="middle" font-size="11.5" fill="#5b6168">two linear pieces, one kink</text>
+  <rect x="392" y="74" width="70" height="70" rx="6" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="427" y="162" text-anchor="middle" font-size="11" fill="#5b6168">input region</text>
+  <line x1="470" y1="108" x2="528" y2="108" stroke="#5b6168" stroke-width="1.8" marker-end="url(#relu-ah)"/>
+  <text x="499" y="98" text-anchor="middle" font-size="10.5" fill="#146a96">k ReLUs</text>
+  <polygon points="620,60 633,88 664,92 641,113 647,143 620,128 593,143 599,113 576,92 607,88" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+  <text x="620" y="170" text-anchor="middle" font-size="11.5" fill="#922b21">≤ 2ᵏ linear pieces</text>
+  <text x="620" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">(non-convex)</text>
+</svg>
+*Caption: each ReLU splits the input region into an "active" and "inactive" half; with $k$ neurons that is up to $2^k$ linear regions.*
+
+- Per neuron, the input region splits into **active** ($z>0$) and **inactive** ($z\le0$) parts.
+- With $k$ ReLU neurons, that is up to $2^k$ **linear regions** — exponential blow-up.
+- The safe set is therefore **non-convex** (not a simple box/ball) and **non-linear** overall.
+- Exact ReLU verification is **NP-complete** (Katz et al., *Reluplex*, CAV 2017) — provably as hard as SAT.
+
+::: notes
+This is the "why we can't just solve it directly" slide, and it comes straight from the instructor's NNV lecture. The mechanism: a ReLU is two straight-line pieces joined at a kink, so for a region of inputs some will land on the "on" side (z>0, pass through) and some on the "off" side (z≤0, zeroed). Each neuron thus cuts the region in two, and k neurons can cut it into 2^k pieces — that exponential is the whole difficulty. Within any one piece the network is linear and trivial; the pain is that there are exponentially many pieces and the union is a jagged, non-convex shape. The instructor states the worst case explicitly (2^k polytopes). And the hardness is not folklore: exact robustness checking for ReLU nets was proven NP-complete by Katz et al. in the Reluplex paper, putting it in the same complexity class as the SAT problem from Day 1. So every practical tool either branches cleverly or over-approximates — the next two slides.
+:::
+
+---
+
+## Two solver families
+
+| | **(a) Bound propagation + branch-and-bound** | **(b) Set-based reachability** |
+|---|---|---|
+| Idea | compute **linear lower/upper bounds** on outputs; **split** cases when too loose | propagate a **set** through every layer; check the **output set** |
+| ReLU handling | relax each ReLU to a linear envelope, tighten by branching | split the set at each kink; track exact/over-approx regions |
+| Representative | **α,β-CROWN** (VNN-COMP winner) | **NNV** (Vanderbilt) with **star sets** |
+| Verdict | bounds exclude bad outputs ⇒ robust | output set avoids the bad region ⇒ robust |
+
+Both certify robustness the same way: **UNSAT** ⇒ no in-region input reaches a bad output.
+
+::: notes
+The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and the instructor's own approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The punchline unifying them with the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
+:::
+
+---
+
+## Reachability: push a set through the net
+
+NNV's recipe (the instructor's group) — verification *as* reachability:
+
+$$\text{inputs } R \;\xrightarrow{\ \text{layer 1}\ }\; \cdot \;\xrightarrow{\ \text{layer 2}\ }\; \cdots \;\xrightarrow{\ \text{layer } L\ }\; \text{output set } f(R)$$
+
+- **Affine layers are easy:** an affine map of a polytope is again a polytope (scale/rotate/translate a shape, get a shape). This handles every matrix-multiply + bias.
+- **ReLU layers split:** the set may break into a **union of polytopes** (the $2^k$ blow-up) — the hard part.
+- **Check at the end:** does $f(R)$ intersect the **unsafe** region (a different class scores higher)? **Empty intersection ⇒ robust.**
+
+The transition relation is *the network itself* — Day 1's reachability, with layers as steps.
+
+::: notes
+This is the instructor's verbatim framing — "our transition function is just the one defined by the layers of the neural network" — so lean into the continuity with model checking. You start with the input set R (the ℓ∞ ball), and you propagate it forward one layer at a time, exactly like computing reachable states one step at a time in Day-1/Day-2 model checking. The affine half of each layer is genuinely easy thanks to a clean theorem the instructor cites: an affine transformation of a polytope is another polytope, so matrix-multiply-plus-bias just maps one shape to another. The ReLU half is where sets fragment into unions of polytopes (the exponential again). At the output you have the full reachable set of class-score vectors; robustness holds iff that set never enters the region where some wrong class outscores the true class — an emptiness check, the same UNSAT-certifies-safety pattern as all week. This is sound: it computes ALL outputs, not samples.
+:::
+
+---
+
+## Star sets: making it scale
+
+The blow-up is real — so the *representation* of the set is everything. NNV uses **star sets**.
+
+- A **star set** compactly encodes a polytope as a **center + basis vectors + a predicate** (linear constraints) — "this shape = these directions, subject to these inequalities."
+- Closed under exactly the two operations NN verification needs: **affine maps** (for layers) and **intersection with a half-space** (for the safety check).
+- vs. **zonotopes / interval / abstract-domain** representations: stars carry **far less over-approximation** — the instructor reports **10×–10,000× speedups** with **less conservatism** than DeepZ / DeepPoly / ReluVal.
+- Less over-approximation = fewer **spurious** "maybe unsafe" verdicts (the false-positive problem from static analysis, again).
+
+<svg viewBox="0 0 520 290" style="display:block;margin:0.3em auto;max-width:50%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <polygon points="370,120 300,212 160,212 90,120 160,28 300,28" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.8"/>
+  <polygon points="330,120 286,184 174,184 130,120 174,56 286,56" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <polygon points="230,80 286,118 264,176 196,176 174,118" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="230" y="128" text-anchor="middle" font-size="12.5" fill="#1c1c1c">star set</text>
+  <rect x="40" y="244" width="16" height="16" rx="3" fill="#faf7f0" stroke="#B49248" stroke-width="1.6"/>
+  <text x="64" y="257" font-size="12" fill="#1c1c1c">star set — tightest (least conservative)</text>
+  <rect x="40" y="266" width="16" height="16" rx="3" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="1.6"/>
+  <text x="64" y="279" font-size="12" fill="#1c1c1c">abstract domain — looser</text>
+  <rect x="300" y="244" width="16" height="16" rx="3" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="324" y="257" font-size="12" fill="#1c1c1c">zonotope — loosest</text>
+</svg>
+*Caption: for the same true output set, looser representations (zonotopes) over-approximate badly; star sets stay tight.*
+
+::: notes
+This connects the frontier back to two earlier threads: data structures (BDDs/LDDs) and the over-approximation/false-positive tension from abstract interpretation. The deep point the instructor makes is that the bottleneck is not the algorithm but the geometry — how you represent the set of states you propagate. A star set is a tuple (center, basis vectors, predicate) that represents a polytope efficiently and, critically, is closed under the only two operations the pipeline performs: affine maps (every layer) and intersection with a half-space (the final safety check). The competitive advantage over zonotopes and abstract domains is tightness: the instructor's results show 10× to 10,000× speedups AND less conservatism, because a tighter set means fewer cases where the over-approximation spuriously touches the unsafe region. That "spurious unsafe" is precisely the false-positive failure mode from the abstract-interpretation lecture — same phenomenon, new domain. Stars originated in hybrid-systems reachability, reused here because a network is just another transition system.
+:::
+
+---
+
+## NN verification in the wild
+
+Real networks the instructor's group has verified — beyond toy MLPs:
+
+| System | Network | Property verified |
+|---|---|---|
+| **ACAS Xu** | 45 nets, 6×50 neurons each | collision-avoidance advisories stay correct in safe regions |
+| **VGG16/19** | 16–19 layers, ~140M params, 1000 classes | image-classification **robust** to bounded perturbation (≈10 min, 1 core) |
+| **CARLA / perception** | conv nets on driving images | classification stable under ℓ∞ image noise |
+| **Closed-loop CPS** | net **+** plant dynamics (ACC, cruise control) | the *controlled system* stays safe over time |
+
+The frontier reach: from a 300-neuron advisory net to a 140-million-parameter image classifier, and from a bare network to a **network-in-the-loop** control system.
+
+::: notes
+This is the "it's not just toys" slide, drawn directly from the instructor's NNV case studies. ACAS Xu — 45 small networks giving aircraft collision-avoidance advisories — is the field's standard benchmark, small but safety-critical and with crisp specs. At the other extreme, VGG16/19 are real ImageNet classifiers with ~140 million parameters and 1000 output classes, verified robust to a bounded perturbation of a specific image in about ten minutes on a single core using ImageStars (the image extension of star sets) — a genuinely large-scale result. CARLA is the driving simulator used for perception robustness. And the closed-loop CPS row is the part unique to this group: they verify the network together with the physical plant it controls (adaptive cruise control), so the property is about the whole controlled system's safety over time, not just one forward pass — that is the hybrid-systems heritage of star sets paying off. The takeaway: the reach now spans five orders of magnitude in network size.
 :::
 
 ---
