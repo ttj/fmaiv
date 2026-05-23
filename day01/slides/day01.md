@@ -113,6 +113,59 @@ The same AI that hits IMO gold also writes vulnerable code. The reason is the sa
 
 ---
 
+## Coding has changed: generative → agentic
+
+- **Generative AI** = *generating* stuff (text, code). **Agentic AI** = *generating + doing* — it plans, edits files, runs tools and tests, reads the errors, and iterates.
+- Tools: **Claude Code**, Cursor, GitHub Copilot, OpenAI Codex — inside your editor (VS Code), wired to your shell and, via **MCP** (Model Context Protocol), to external tools and data.
+- What that buys, from real recent use (the instructor's own, late 2025):
+    - ~10,000 lines of **C# → Python** in ~3 hours; ~10k lines **MATLAB → Python**; new NNV benchmarks in ~1 hour.
+    - Live lecture demos, Docker environments built during a Zoom interview, APIs learned on the fly.
+
+> The *generation* half of engineering just got cheap. That is exactly why the *validation* half — this course — becomes the bottleneck.
+
+::: notes
+Set the stage for a faculty audience. The distinction that lands: generative = it writes; agentic = it writes AND acts (runs your tests, fixes the error it sees, opens a PR). The stack is editor + shell + MCP (the emerging standard for agents to reach external tools/data). The productivity numbers are the instructor's own from late 2025 — translations, benchmarks, and demos in hours, not weeks. This isn't hype; the point is structural: when anyone can generate code/proofs/designs in seconds, the scarce, decisive skill becomes deciding whether the result is correct — verification.
+:::
+
+---
+
+## Vibe coding → vibe engineering
+
+Karpathy named **"vibe coding"** (Feb 2025) — "give in to the vibes, forget the code exists." A year on: **"agentic engineering"** — orchestrate agents while *acting as oversight*.
+
+| | Vibe coding | Agentic engineering |
+|---|---|---|
+| Code review | skipped | rigorous (like PR review) |
+| Testing | minimal / absent | comprehensive suites |
+| Planning | none | design docs + specs |
+| Ownership | casual acceptance | **full human responsibility** |
+
+But AI-generated code is *often wrong*: the Veracode 2025 GenAI report found security flaws in **~45%** of AI-written samples; MIT Sloan reports a **4× defect rate** (and recall ~51% vulnerable C, ~20% hallucinated packages). **You own what the AI writes.**
+
+> Generation is cheap; **correctness is the bottleneck**. That makes **verification the essential activity** — the subject of the next four days.
+
+::: notes
+The thesis slide of the workshop, in the agentic-coding frame. Vibe coding (Karpathy, Feb 2025; Collins Word of the Year 2025) = accept the output, don't read it — fine for a throwaway script, dangerous for anything that matters. "Agentic engineering" keeps the AI's speed but re-imposes discipline: review, tests, specs, ownership. The failure numbers (Veracode ~45%, MIT Sloan 4×, plus FormAI ~51% and slopsquatting from the previous slide) are why. For an FM course the moral is exact: when code is free to produce, the bottleneck moves to *establishing it is correct*. Spec-driven tooling (e.g., GitHub Spec-Kit) is the emerging bridge between the two columns.
+:::
+
+---
+
+## How this course was built — and why that's the point
+
+This very deck is an agentic-engineering artifact:
+
+- **Pulled** the source CS 6315 material from the LMS — 14 weeks of slides **and** lecture-video transcripts.
+- **Analyzed and repurposed** it into this 4-day arc with an AI agent; **added** new material (the AI × FM framing, the figures you're seeing, the neural-network frontier).
+- **Verified everything**: every Z3 query runs, every Lean proof builds with no `sorry`, every SMV / CBMC / Cryptol example checks — the agent *proposed*, the tools *disposed*.
+
+That last step is the whole difference between vibe coding and engineering — and it's the muscle the next four days build.
+
+::: notes
+A short meta-slide that resonates with faculty: the course you're taking was assembled with the very workflow it teaches. Content was extracted from the CMS (Brightspace) — slides plus auto-generated lecture transcripts — restructured by an agent, with new framing, figures, and NN-frontier material added. Crucially nothing was trusted blindly: examples were executed and proofs machine-checked (Lean `#print axioms`, Z3 sat/unsat, CBMC verdicts), and the facts were audited. That is agentic engineering, not vibe coding — and it's the honest answer to "can I trust AI-generated teaching material?": only if you verify it.
+:::
+
+---
+
 ## What this workshop teaches you to do
 
 You should leave the course able to:
@@ -316,6 +369,28 @@ No single tool dominates — match the question to the method.
 
 ::: notes
 A practical decision aid that also previews the week. The point: these tools are complementary, not competing. Bounded methods find bugs fast; model checking proves finite systems exhaustively; theorem proving handles the infinite/parametric/mathematical; source-level tools tie it to real code. A working verification engineer reaches for different ones depending on the question — which is exactly the menu we'll work through over four days.
+:::
+
+---
+
+## The wider landscape: what this week samples
+
+This week goes deep on four engines — SAT/SMT, model checking, theorem proving, source-level proof. They sit inside a much larger toolbox you should know exists:
+
+| Approach | Question it answers | Representative tools | Here? |
+|---|---|---|---|
+| **Static analysis** | "Any bug-shaped patterns, cheaply, at scale?" | Coverity, Clang SA, Infer, CodeQL | mentioned |
+| **Abstract interpretation** | "A *sound* over-approximation of all runs?" | Astrée, IKOS, MOPSA | Day 4 kin |
+| **Testing & fuzzing** | "Concrete inputs that break it?" | OSS-Fuzz, AFL++, KLEE, QuickCheck | contrast |
+| **Runtime verification** | "Is *this* execution violating the spec, live?" | RV monitors, temporal-logic checkers | mentioned |
+| **Model-based design** | "Generate code from a model that was checked" | Simulink/Stateflow, SCADE/Lustre | mentioned |
+| **Deductive verification** | "Full functional correctness of real code" | Frama-C, Dafny, Why3, Viper | Day 3–4 kin |
+| **Type & refinement systems** | "Correctness the compiler enforces for free" | Rust, LiquidHaskell, F\* | Day 3 kin |
+
+> The axis underneath them all: **automation ↕ expressiveness**. Testing and static analysis are push-button but shallow; theorem proving is arbitrarily expressive but laborious. Choosing the lightest tool that still answers your question *is* the engineering judgment this week trains.
+
+::: notes
+A faculty audience will want the map, not just the four pins we drop on it. Each row is a real, deployed sub-field; we sample four and gesture at the rest. Anchors for the curious (all checkable): **Static analysis** — Bessey et al., "A Few Billion Lines of Code Later," CACM 2010 (the Coverity field report); Meta's Infer (separation logic), GitHub CodeQL, the Clang Static Analyzer. **Abstract interpretation** — the founding paper is Cousot & Cousot, POPL 1977; its flagship is Astrée, which proves the absence of run-time errors in Airbus A340/A380 fly-by-wire C. **Testing/fuzzing** — symbolic execution: KLEE (Cadar, Dunbar, Engler, OSDI 2008); whitebox fuzzing: SAGE (Godefroid et al., Microsoft); property-based testing: QuickCheck (Claessen & Hughes, ICFP 2000); continuous fuzzing at scale: Google OSS-Fuzz, AFL++. **Runtime verification** — Bartocci et al. (eds.), *Lectures on Runtime Verification*, Springer 2018. **Model-based design** — Simulink/Stateflow (MathWorks) and SCADE (built on the synchronous language Lustre, Halbwachs et al.); certified under DO-178C with its formal-methods (DO-333) and model-based (DO-331) supplements. **Deductive verification** — Frama-C/ACSL, Why3, Dafny (Leino), Viper (ETH). **Refinement/types** — LiquidHaskell, F\*, and Rust's ownership types as lightweight static guarantees. **Translation validation** — Pnueli, Siegel & Singerman, TACAS 1998. The agentic tie-in: the cheap, automatic end of this spectrum (static analysis, fuzzing) is the realistic first line of defense on AI-generated code, and is itself increasingly AI-augmented — but only the heavier engines give you a *proof*, which is why the bottleneck-shift argument lands on this course.
 :::
 
 ---

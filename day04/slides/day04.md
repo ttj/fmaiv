@@ -848,15 +848,32 @@ This is the "it's not just toys" slide, drawn directly from the instructor's NNV
 
 ## VNN-COMP: the state of the art
 
-The annual competition tracks what's in routine reach:
+Like SAT-/SMT-COMP, **VNN-COMP** is the field's annual scoreboard — 6 editions through 2025 (the latest run under the SAIV symposium, co-located with CAV), tools standardized on **ONNX** (the network) + **VNN-LIB** (the spec).
 
-- **In reach now**: ReLU MLPs, CNNs, ResNets, small transformers; ℓ_∞ robustness, reachability.
-- **Still hard**: large transformers/LLMs, recurrent nets, high-dimensional inputs, non-ℓ_∞ specs.
+- **In routine reach**: ReLU MLPs, CNNs, ResNets, small transformers; ℓ∞ robustness, reachability.
+- **Winner 2021–2025 — five straight years**: **α,β-CROWN**, i.e. GPU-accelerated linear bound propagation + branch-and-bound — the configuration the strongest tools have converged on.
+- **Still open**: large transformers / LLMs, recurrent nets, high-dimensional inputs, non-ℓ∞ specs.
 
-(See VNN-COMP results; benchmarks at <https://vnn-comp.github.io/>.)
+(Results & benchmarks: <https://vnn-comp.github.io/>; 2025 summary: arXiv 2512.19007.)
 
 ::: notes
-VNN-COMP (like SAT-COMP/SMT-COMP) is the honest scoreboard. Feed-forward ReLU networks up to ResNet scale are now routinely verifiable for ℓ_∞ robustness; the frontier — large transformers, LLMs, realistic perturbation models — is still open. This is the cleanest way to answer "can we verify neural networks yet?": yes for these classes, not yet for those. Good survey-discussion fodder for the assignment.
+VNN-COMP is the honest answer to "can we verify neural networks yet?" Six runs through 2025 (the 2025 edition was the 6th, held under the SAIV symposium co-located with CAV, with 8 teams over 16 regular + 9 extended benchmarks). Two standards make the scoreboard meaningful: ONNX for the network and VNN-LIB for the property, so every tool reads identical inputs — exactly the SMT-LIB idea from Day 1, transplanted to networks. The headline: α,β-CROWN has won every year 2021–2025, and the reports' own framing is that the best-performing tools have converged on GPU-enabled linear bound propagation with branch-and-bound — family (a) from two slides ago. Feed-forward ReLU nets up to ResNet scale are now routinely verifiable for ℓ∞ robustness; the open frontier is large transformers/LLMs, recurrent nets, and realistic (non-ℓ∞) perturbations. The honest 2026 status for a faculty audience: there is no mature, *sound* formal verifier for full-scale LLMs — the standing formal anchor for transformer verification is still Shi et al., ICLR 2020. Good survey-discussion fodder for the assignment. (Sources: VNN-COMP 2025 summary, arXiv 2512.19007; 2024, arXiv 2412.19985.)
+:::
+
+---
+
+## Neural-network verification: the literature
+
+Fact-checked entry points — the spine of the field:
+
+- **Hardness & first solver** — Katz et al., *Reluplex*, CAV 2017 (exact ReLU robustness is NP-complete); modern successor **Marabou 2.0**, Wu et al., CAV 2024.
+- **Family (a): bound propagation + B&B** — *CROWN* (Zhang et al., NeurIPS 2018) → *α-CROWN* (Xu et al., ICLR 2021) → *β-CROWN* (Wang et al., NeurIPS 2021) → *GCP-CROWN* (Zhang et al., NeurIPS 2022).
+- **Family (b): reachability / abstract domains** — *AI2* (Gehr et al., IEEE S&P 2018); *DeepZ* (NeurIPS 2018) & *DeepPoly* (Singh et al., POPL 2019); **NNV star sets** (Tran et al., FM 2019), *ImageStar* (CAV 2020), *NNV 2.0* (Lopez et al., CAV 2023); *Verisig* for NN-controlled hybrid systems (Ivanov et al., HSCC 2019).
+- **Books / surveys** — Albarghouthi, *Introduction to Neural Network Verification* (free at verifieddeeplearning.com); Liu et al., *Algorithms for Verifying Deep Neural Networks*, Found. & Trends in Optimization, 2021.
+- **Frontier** — Shi et al., *Robustness Verification for Transformers*, ICLR 2020 — the formal anchor; full LLMs remain out of sound-verification reach.
+
+::: notes
+The "where to read next" slide the participants asked for, every entry checked against its venue. The two families mirror the earlier taxonomy: (a) the optimization / bound-propagation lineage that culminates in α,β-CROWN, and (b) the reachability / abstract-interpretation lineage that includes the instructor's own NNV (star sets, ImageStar) plus the ETH ERAN line (DeepZ/DeepPoly), itself descended from the abstract-interpretation breakthrough AI2. Reluplex is the origin point — the SMT-style solver that also proved NP-completeness — and Marabou is its modern successor. For self-study the two books are the best on-ramps: Albarghouthi's is free online and gentle; the Liu et al. survey is the comprehensive technical reference. Verisig is the bridge to the closed-loop CPS row earlier — verifying a hybrid system whose controller is a neural network. The transformer/LLM line is deliberately short because the science is: one solid formal result (Shi et al. 2020) and an otherwise open frontier — the honest thing to tell a faculty audience.
 :::
 
 ---
@@ -964,6 +981,23 @@ The deliverables promised on Day 1, now realized. This is the checklist students
 
 ---
 
+## Where to go next — beyond this week
+
+A 4-day intensive *samples*; here's the rest of the map, with courses that go deep (annotated list in the repo README):
+
+- **Deductive verification & separation logic** — contracts + loop invariants: **Dafny, Verus** (verifies *Rust* — squarely on the AI-code thesis), **Frama-C, Why3, Viper**. (CMU 15-414, ETH Program Verification.)
+- **Program synthesis** — the dual of verification: **SyGuS, Rosette**. If generation is cheap, *synthesize-then-verify* is the natural pairing. (Berkeley 219C, OPLSS.)
+- **Verified-stack tradition (Coq/Rocq, Isabelle)** — **CompCert** (C compiler), **seL4** (microkernel): the largest machine-checked artifacts. (DeepSpec, MIT FRAP.)
+- **Probabilistic & hybrid model checking** — **PRISM**; nuXmv's infinite-state/IC3 and hybrid modes. (Oxford CAV.)
+- **Protocol verification** — **Tamarin, ProVerif** for crypto *protocols* (vs. SAW's implementation proofs). (SRI SSFT.)
+- **Evaluating AI + FM** — the scoreboards: **miniF2F** (proofs), **VNN-COMP** (NN), **SV-COMP** (C). The highest-value skill for the agentic era.
+
+::: notes
+The honest scoping slide for a faculty audience — "what would a longer course add, and where do I send a strong student?" Each bullet names a topic plus a representative course from the curated list in the README (Berkeley EECS 219C, CMU 15-414, ETH Program Verification, Oxford CAV, the SRI SSFT and Marktoberdorf summer schools, MIT FRAP / DeepSpec). The picks extend this week's thesis rather than just enumerate: deductive verification — especially Verus on Rust — is where verifying *AI-generated code* is heading; program synthesis is the literal dual of "generation is cheap"; the Coq/Rocq verified stack is why we framed Lean as one choice among proof assistants; and the evaluation/benchmarking bullet is the one place a 2026 summer school (Marktoberdorf's agentic-AI-evaluation track) is arguably ahead of this course's own thesis — so we flag it as the highest-leverage next step. The full annotated list of similar courses, summer schools, tool tutorials, and surveys — with what each does that we don't — lives in the repo README and references/EXTERNAL_RESOURCES.md.
+:::
+
+---
+
 ## In-session exercise
 
 Pick a track (see [`assignments/day04.md`](../assignments/day04.md)):
@@ -996,6 +1030,7 @@ The survey paragraph makes students connect the frontier to their own work — t
 - **Lewis, Martin.** *Cryptol: High Assurance, Retargetable Crypto Development*, MILCOM 2003.
 - **Galois** — Cryptol & SAW docs/tutorials; **AWS Provable Security** blog.
 - **VNN-COMP** — <https://vnn-comp.github.io/>; **α,β-CROWN**; **NNV** (verivital).
+- **NN-verification reading** — Katz et al. *Reluplex* (CAV 2017); Tran et al. *NNV / star sets* (FM 2019; ImageStar CAV 2020; NNV 2.0 CAV 2023); Albarghouthi, *Introduction to NN Verification* (free); Liu et al. survey (FnT Optimization 2021).
 - **AWS Cedar** (Lean spec); **seL4**, **CompCert** (verified systems).
 
 Full list + competitions table: repo [README.md](../../README.md#background-references).

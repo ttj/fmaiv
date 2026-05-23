@@ -119,7 +119,7 @@ If any of these fail, please open an issue against this repository or reach out 
 
 ## Background references
 
-Light reading to ground the course material. None of these are required reading; they are pointers to the canonical references for the tools and ideas covered.
+Light reading to ground the course material. None of these are required reading; they are pointers to the canonical references for the tools and ideas covered. For the **full, annotated set** of similar courses, tutorials, summer schools, and the neural-network / agentic-coding literature — plus a provenance record of everything consulted while building this course — see [`references/EXTERNAL_RESOURCES.md`](references/EXTERNAL_RESOURCES.md).
 
 ### Foundations
 
@@ -162,6 +162,35 @@ Light reading to ground the course material. None of these are required reading;
 - **G. Gonthier.** *Formal Proof — The Four-Color Theorem.* Notices of the American Mathematical Society, 55(11): 1382–1393, December 2008. <https://www.ams.org/notices/200811/tx081101382p.pdf>
   - The classic AMS Notices writeup of a fully machine-checked landmark theorem; reads as a historical predecessor to the Lean / AI-assisted formalizations of today.
 
+- **K. Yang, G. Poesia, J. He, W. Li, K. Lauter, S. Chaudhuri, and D. Song.** *Formal Reasoning Meets LLMs: Toward AI for Mathematics and Verification.* Communications of the ACM, 2025. <https://doi.org/10.1145/3750038>
+  - The roadmap survey behind this course's cross-cutting thesis — how LLMs and formal reasoning combine, with a trusted checker arbitrating.
+- **T. Tao.** *Machine-Assisted Proof.* Notices of the American Mathematical Society, 72(1), January 2025. <https://www.ams.org/notices/202501/rnoti-p6.pdf>
+  - A Fields medalist's perspective on AI- and proof-assistant-assisted mathematics; pairs with the Day 1 framing and Day 3.
+
+### Neural-network verification
+
+Background for the Day 4 frontier segment. The two books are the best self-study on-ramps; the papers anchor the two solver families.
+
+- **A. Albarghouthi.** *Introduction to Neural Network Verification.* 2021. Free online: <https://verifieddeeplearning.com>
+  - The gentle, self-contained on-ramp; assumes no prior verification background.
+- **C. Liu, T. Arnon, C. Lazarus, C. Strong, C. Barrett, and M. J. Kochenderfer.** *Algorithms for Verifying Deep Neural Networks.* Foundations and Trends in Optimization, 4(3–4), 2021. <https://arxiv.org/abs/1903.06758>
+  - The comprehensive technical survey of the algorithms.
+- **G. Katz, C. Barrett, D. Dill, K. Julian, and M. Kochenderfer.** *Reluplex: An Efficient SMT Solver for Verifying Deep Neural Networks.* CAV 2017. <https://arxiv.org/abs/1702.01135>
+  - The origin point; proves exact ReLU robustness is NP-complete.
+- **H.-D. Tran et al.** *Star-Based Reachability Analysis of Deep Neural Networks* (FM 2019), *ImageStars* (CAV 2020), and **NNV 2.0** (CAV 2023). Tool: <https://github.com/verivital/nnv>
+  - The instructor's reachability-based verifier (star sets); the basis for Day 4's reachability framing.
+- **VNN-COMP** annual competition — reports for 2025 (<https://arxiv.org/abs/2512.19007>) and 2024 (<https://arxiv.org/abs/2412.19985>); hub <https://vnn-comp.github.io/>. α,β-CROWN (<https://github.com/Verified-Intelligence/alpha-beta-CROWN>) has won every year 2021–2025. The AAAI-2022 tutorial **neural-network-verification.com** is the best hands-on companion.
+
+### Agentic coding and AI-for-verification
+
+Background for the Day 1 thesis that cheap code generation makes verification the essential activity. (Several statistics below are from vendor/industry reports rather than peer-reviewed studies — see [`references/EXTERNAL_RESOURCES.md`](references/EXTERNAL_RESOURCES.md) Part 4 for the caveats; the peer-reviewed anchors are FormAI and the slopsquatting paper.)
+
+- **N. Tihanyi et al.** *The FormAI Dataset: Generative AI in Software Security through the Lens of Formal Verification.* PROMISE 2023. <https://arxiv.org/abs/2307.02192>
+  - 51% of 112,000 GPT-generated C programs contained at least one vulnerability (found via the ESBMC bounded model checker) — the strongest peer-reviewed evidence that AI code needs verification.
+- **J. Spracklen et al.** *We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code-Generating LLMs.* USENIX Security 2025.
+  - ~20% of LLM-recommended packages were hallucinated — the basis for the "slopsquatting" supply-chain attack.
+- **AWS Provable Security** (Byron Cook's group) — formal methods as a CI signal at production scale (s2n-TLS via SAW, s2n-bignum via HOL Light, Cedar specified in Lean). Blog and open repos under <https://github.com/awslabs>.
+
 ### Textbooks and reference works
 
 A small selection from the CS 6315 (Vanderbilt) syllabus. None are required reading for the four-day course — they are the long-form references behind the topics we touch.
@@ -201,6 +230,32 @@ Several verification subfields run annual competitions on shared benchmarks. The
 | Static / dynamic analysis (industrial) | Meta Infer, Polyspace, Simulink Design Verifier, VS IntelliTest | <https://fbinfer.com/> · <https://www.mathworks.com/products/polyspace.html> · <https://www.mathworks.com/products/simulink-design-verifier.html> · <https://learn.microsoft.com/en-us/visualstudio/test/intellitest-manual/> |
 
 If you are looking for a Day-4-style mini-project of your own, picking one benchmark suite above and running 2–3 of its tools on the smallest case is a standard pattern.
+
+## Similar courses & further reading
+
+Where to go deeper after this intensive. These are the closest analogues we found while building the course; each goes further than four days allow on some axis. The **full annotated list** — with a *they-do / we-do* comparison for each, plus tool tutorials and a provenance record of everything consulted — is in [`references/EXTERNAL_RESOURCES.md`](references/EXTERNAL_RESOURCES.md).
+
+**Summer / winter schools** (the closest siblings overall)
+
+- **SRI Summer School on Formal Techniques (SSFT)** — <https://ssft-sri.github.io/> — SMT, PVS theorem proving, model checking, symbolic execution; 2026 adds Verus and crypto-protocol verification. The nearest match in spirit.
+- **Marktoberdorf Summer School** — <https://sites.google.com/view/marktoberdorf2026/talks> — the most thesis-aligned: de Moura on "Lean 4 for Program Verification in the Age of AI," Mitchell on evaluating agentic AI, plus deductive/probabilistic/CHC tracks.
+- **Oregon PL Summer School (OPLSS)** — <https://www.cs.uoregon.edu/research/summerschool/> — types, logic, abstract interpretation, solver-aided programming (Rosette), refinement types; recordings on YouTube.
+- **SAT/SMT/AR Summer School** — <https://sat-smt-ar-school.gitlab.io/www/> — solver internals (CDCL, theory combination), hands-on, no prior expertise needed.
+
+**University courses with public slides**
+
+- **CMU 15-414, "Bug Catching: Automated Program Verification (and Testing)"** — <https://www.cs.cmu.edu/~15414/> — the canonical undergrad analogue (Why3 deductive verification now; the Fall-2018 edition has full LTL/CTL/BMC/BDD model-checking notes mapping onto our Day 2).
+- **UC Berkeley EECS 219C, "Computer-Aided Verification"** — <https://people.eecs.berkeley.edu/~sseshia/219c/> — SAT/SMT/BDD/model-checking plus syntax-guided synthesis and UCLID5.
+- **Oxford, "Computer-Aided Formal Verification"** — <https://www.cs.ox.ac.uk/teaching/courses/2025-2026/computeraidedverification/> — temporal logic, symbolic/bounded MC, interpolation, plus probabilistic model checking.
+- **Stanford CS357 / CS256** (Barrett) — <https://web.stanford.edu/class/cs357/> — SAT/SMT theory with a build-your-own theory solver; CS256 covers reactive systems.
+- **MIT 6.822 FRAP** (Chlipala) — <https://adam.chlipala.net/frap/> — operational semantics, model checking, abstract interpretation, program logics, all machine-checked in Coq.
+- **ETH Zürich, "Program Verification"** (Müller) — <https://www.pm.inf.ethz.ch/education/courses/program-verification.html> — Hoare/separation logic and automated deductive verification via Viper.
+
+**Conference tutorials & surveys**
+
+- **Formal Verification of Deep Neural Networks** (AAAI 2022 tutorial) — <https://neural-network-verification.com/> — the best hands-on companion to our Day 4 NN segment (α,β-CROWN, `auto_LiRPA`, Colab demos).
+- **SMT: A Beginner's Tutorial** (Distinguished Tutorial, FM 2024) — <https://link.springer.com/chapter/10.1007/978-3-031-71177-0_31> — SMT foundations with cvc5 and Z3 exercises.
+- **Formal Reasoning Meets LLMs** (CACM 2025) — <https://doi.org/10.1145/3750038> — the survey behind our AI×FM thesis.
 
 ## Course materials
 
