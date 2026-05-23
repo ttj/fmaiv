@@ -39,7 +39,7 @@ Honest framing of where model checking stops. Enumerating a finite reachable set
 | Block | Topic |
 |---|---|
 | L1 | Why theorem proving; what Lean 4 is; the current moment |
-| L2 | Lean by example: tactics, Mathlib, the counter, inductive invariants |
+| L2 | Lean by example: tactics, library search, the counter, inductive invariants |
 | L3 | AI in the proof loop; Lean's industrial role |
 
 Running example: the same counter, now a Lean `TransitionSystem`.
@@ -90,7 +90,7 @@ The defining feature is the trusted kernel: a small, auditable core that checks 
 
 ## A very short history
 
-Automath (1967) → LCF (1970s, "tactics") → HOL, Coq, Isabelle, Agda → **Lean** (2013, Lean 4 in 2021).
+Automath (1967) → LCF (1970s, "tactics") → HOL, Coq, Isabelle, Agda → **Lean** (2013; the Lean 4 rewrite began ~2021, first stable release 2023).
 
 The field converged on **dependent type theory**: a single language where
 
@@ -112,10 +112,28 @@ Don't dwell, but place Lean in lineage. LCF introduced tactics (programs that bu
 #check (rfl : 5 = 5)    -- rfl is a *term* (proof) of that type
 ```
 
+Read `e : T` as "`e` has type `T`". `Nat` = the naturals 0,1,2,…; `Type` = the type of ordinary data types; `Prop` = the type of propositions (things provable); `#check` just prints a term's type.
+
 To prove `P` is to **construct a term of type `P`**. The kernel type-checks the term.
 
 ::: notes
 This is the conceptual core. A proposition like 5 = 5 is a type; a proof of it is a term inhabiting that type (here, rfl, reflexivity). "Proving a theorem" and "writing a well-typed program" are the same activity (Curry-Howard). The kernel's job is ordinary type-checking. Mathematicians find this strange at first and then load-bearing: it is why a Lean proof is checkable by a tiny program.
+:::
+
+---
+
+## What the kernel actually checks
+
+Everything reduces to **type-checking one term**:
+
+- Tactics, `simp`, `omega`, library lemmas, even an AI — all only *produce* a candidate proof **term**.
+- The **kernel** re-checks that term against the theorem's type, from scratch, with a small fixed set of rules.
+- It is tiny, rarely changed, and the **only** thing you must trust.
+
+So a 2-million-line library and an LLM are *equally untrusted*: whatever they emit, the kernel re-derives it.
+
+::: notes
+The deck repeats "the kernel checks every step" but never says how — this says how (grounded in TPiL). The kernel does one job: type-check the final proof term (β/δ/ι-reduction up to definitional equality). Tactics and automation are elaborate term *generators*; none is trusted. This is the architectural reason AI-assisted proof is safe: a hallucinated step yields a term the kernel rejects. It's also why proofs can be checked in parallel and why "trust" is concentrated in a few thousand lines, not millions. (The one exception is `native_decide`, which also trusts the compiler — flag it when it appears.)
 :::
 
 ---
@@ -140,16 +158,41 @@ def, theorem, and example share machinery — all are (optionally named) terms o
 
 ---
 
+## `rfl` computes; `induction` reasons
+
+`rfl` succeeds when both sides reduce to the *same* value — **definitional equality**:
+
+```lean
+example : 2 + 2 = 4 := by rfl            -- both sides compute to 4
+example (n : Nat) : n + 0 = n := by rfl  -- ✓  (+ recurses on its 2nd argument)
+```
+
+But `0 + n = n` is **not** `rfl` — `n` is a variable on the recursing side, so it needs **induction**:
+
+```lean
+theorem zero_add (n : Nat) : 0 + n = n := by
+  induction n with
+  | zero      => rfl                      -- base:  0 + 0 = 0
+  | succ k ih => simp [Nat.add_succ, ih]  -- step:  ih : 0 + k = k  ⊢  0 + (k+1) = k+1
+```
+
+::: notes
+The single most illuminating contrast for a beginner, straight from Theorem Proving in Lean 4. `rfl` is not magic equality — it succeeds exactly when Lean can *compute* both sides to the same normal form (definitional equality). `n + 0 = n` holds by `rfl` because Nat addition recurses on its *second* argument, so `n + 0` reduces to `n`. But `0 + n = n` does NOT compute (the variable `n` is on the recursing side), so it needs induction: prove it at 0, then assume it at k (the induction hypothesis `ih`) and push to k+1. Same-looking statements, different proofs — this is "how Lean works" in one slide, and it's why the counter's step proof is an induction, not an `rfl`.
+:::
+
+---
+
 ## Tactics: building the proof term
 
-`by` opens a tactic block; each tactic transforms the **goal**.
+`by` opens a tactic block; each tactic transforms the **goal state** — the hypotheses, a turnstile `⊢`, and the target to prove.
 
 ```lean
 example (p q : Prop) (hp : p) (hpq : p → q) : q := by
-  exact hpq hp        -- close the goal with a term
+  -- goal state:   hp : p,  hpq : p → q   ⊢   q
+  exact hpq hp        -- applies hpq to hp — this is modus ponens; "no goals"
 ```
 
-The InfoView shows the current goal after each tactic, until "no goals."
+The InfoView (Lean's live panel) shows this state after each tactic, until "no goals." Read `⊢ q` as "we still must prove `q`"; applying a proof of `p → q` to a proof of `p` *is* function application.
 
 - Editor setup: install the **Lean 4 VS Code extension** (`leanprover.lean4`) for this live InfoView, and keep **Claude Code** open in the same window (integrated terminal or a side panel) — goal state and AI partner side by side.
 
@@ -248,18 +291,42 @@ These eight close the vast majority of goals you will meet today. omega is the s
 
 ---
 
-## Finding lemmas in Mathlib
+## More tactics you'll meet in the files
+
+The example files use a few beyond the workhorse set — terse meanings:
+
+| Tactic | What it does |
+|---|---|
+| `induction h with \| …` | prove a goal by cases on how `h` was built; the recursive case gets an **induction hypothesis** |
+| `rw [h]` | rewrite the goal left-to-right using an equation `h : a = b` |
+| `subst h` | use `h : a = b` to replace `a` by `b` everywhere |
+| `refine ⟨?_, ?_⟩` | like `exact`, but leave holes `?_` to fill as new goals |
+| `obtain ⟨a, b⟩ := h` | destructure an `∧` / `∃` / structure into named pieces |
+| `decide` | close a *decidable* goal by computing the answer (e.g. `off ≠ on`) |
+| `native_decide` | `decide` compiled to native code — faster, but adds a compiler-trust axiom |
+| `absurd h hn` | derive anything from contradictory `h : P` and `hn : ¬P` |
+| `t <;> s` | run tactic `s` on **every** subgoal that `t` produced |
+
+::: notes
+These are the tactics a student meets the moment they open Counter.lean / TransitionSystem.lean / Gcd.lean, so each gets a one-line gloss (the instructor's explicit request). induction is the engine — it's how inductive_invariant_holds is proved. refine/obtain/⟨⟩ (de)construct conjunctions and existentials. decide/native_decide compute decidable facts; native_decide is the one tactic that *enlarges* the trusted base (it trusts the compiler), so mention that caveat. `<;>` is the "do the same thing to all cases" combinator that collapses the four counter branches into one line.
+:::
+
+---
+
+## Finding lemmas (library search)
 
 ```lean
 example (a b : Nat) : a + b = b + a := by exact?   -- suggests Nat.add_comm
 ```
 
-- `exact?` / `apply?` — search Mathlib for a lemma matching the goal.
-- `loogle` — search by type pattern.
+- `exact?` / `apply?` — **core Lean** tactics; they search every *imported* declaration for a lemma that closes/advances the goal.
 - **Naming convention**: `Nat.add_comm`, `List.length_append` — namespace + what it says.
+- `#loogle` / the Loogle website search by *type pattern* (a separate tool, not a tactic).
+
+Our `CounterDemo` project is **Mathlib-free**, so `exact?` searches Lean's *core* library (where `Nat.add_comm` lives). Big math projects add **Mathlib** (~2M lines) for everything else.
 
 ::: notes
-The practical skill for a 2M-line library: you do not memorize lemmas, you search. exact?/apply? read the current goal and propose library lemmas that close it. The naming convention is the other half — once you internalize "namespace.subject_property," you can guess a lemma name and confirm with autocomplete. This is also where AI assistants shine: naming the right Mathlib lemma is something they do well.
+The practical skill for a big library: you do not memorize lemmas, you search. exact?/apply? are core Lean tactics (no Mathlib needed) that read the current goal and propose imported lemmas that close it — here Nat.add_comm, which is in core. The naming convention is the other half — once you internalize "namespace.subject_property," you can guess a name and confirm with autocomplete. Important for this course: the autograder project imports no Mathlib, so only core lemmas + your own are in scope; you'd add Mathlib in a larger project. loogle is a type-pattern search engine (web + a #loogle command), not a bare tactic. AI assistants are genuinely good at naming the right lemma.
 :::
 
 ---
@@ -280,6 +347,8 @@ inductive Reachable {S} (ts : TransitionSystem S) : S → Prop where
 def Invariant {S} (ts) (P : S → Prop) : Prop :=
   ∀ s, Reachable ts s → P s
 ```
+
+`structure` bundles named fields (a record); `inductive` defines a type by listing the only ways to build its values; `→` is "function / implies"; `∀ s` is "for all states `s`". (Snippets elide some explicit type binders — see the file.)
 
 `Reachable` is an **inductive predicate** — the Lean version of "states reachable in finitely many steps."
 
@@ -340,6 +409,8 @@ The fix: **strengthen** to a conjunction that *is* inductive:
 
 $$\Phi(s) \equiv (s.x \le 10) \ \wedge\ (s.\text{mode} = \text{off} \to s.x = 0)$$
 
+($\Phi$ — capital "phi" — names the strengthened invariant; $\equiv$ means "is defined as"; $\wedge$ is "and".)
+
 ::: notes
 This is the central insight of the day, foreshadowed all week. "x ≤ 10" is true of all reachable states but is not by-itself inductive: from an arbitrary state with x = 10 you cannot conclude the successor satisfies it without also knowing the mode/x relationship. The cure is strengthening — find a stronger Φ that IS inductive and implies what you want. Discovering the right strengthening is the creative core of invariant proofs (and exactly where AI help is hit-or-miss).
 :::
@@ -355,7 +426,7 @@ theorem counterInv_inductive : InductiveInvariant CounterTS counterInv :=
   ⟨counterInv_init, counterInv_step⟩
 ```
 
-1. holds initially, 2. preserved by every step, 3. bundle into `InductiveInvariant`.
+1. holds initially, 2. preserved by every step, 3. bundle into `InductiveInvariant` (the `⟨…, …⟩` is Lean's *anonymous constructor* — here it packages the two proofs into the `∧`).
 
 ::: notes
 The proof skeleton. Part 1 (init) is trivial: the initial state has mode = off and x = 0, so both conjuncts hold. Part 2 (step) is the work — the case analysis. Part 3 just packages them. Then we read off the user-facing invariants by strengthening (next slides). This is the exact shape every safety proof of a transition system takes.
@@ -386,6 +457,50 @@ The case analysis mirrors the four guards exactly: mode off vs on, then press vs
 
 ---
 
+## The same proof, as a tree
+
+<svg viewBox="0 0 880 372" style="display:block;margin:0.3em auto;max-width:94%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="pt-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="395" y1="60" x2="150" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="238" y="84" text-anchor="middle" font-size="12.5" fill="#146a96">mode = off</text>
+  <line x1="448" y1="60" x2="578" y2="98" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="540" y="78" text-anchor="middle" font-size="12.5" fill="#146a96">mode = on</text>
+  <line x1="568" y1="140" x2="430" y2="213" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="470" y="172" text-anchor="middle" font-size="12.5" fill="#146a96">press</text>
+  <line x1="612" y1="140" x2="690" y2="203" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="676" y="172" text-anchor="middle" font-size="12.5" fill="#146a96">¬press</text>
+  <line x1="688" y1="245" x2="612" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="618" y="284" text-anchor="middle" font-size="12.5" fill="#146a96">x &lt; 10</text>
+  <line x1="715" y1="245" x2="792" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
+  <text x="772" y="284" text-anchor="middle" font-size="12.5" fill="#146a96">x ≥ 10</text>
+  <rect x="345" y="18" width="158" height="42" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
+  <text x="424" y="44" text-anchor="middle" font-size="14" fill="#1c1c1c">counterInv s′ ?</text>
+  <rect x="50" y="116" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="125" y="142" text-anchor="middle" font-size="12.5" fill="#1e6b32">x unchanged ✓</text>
+  <rect x="528" y="98" width="120" height="42" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="588" y="124" text-anchor="middle" font-size="14" fill="#1c1c1c">mode = on</text>
+  <rect x="345" y="213" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="420" y="239" text-anchor="middle" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
+  <rect x="648" y="203" width="104" height="42" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="700" y="229" text-anchor="middle" font-size="14" fill="#1c1c1c">¬press</text>
+  <rect x="512" y="310" width="178" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="601" y="336" text-anchor="middle" font-size="12" fill="#1e6b32">x := x+1 ≤ 10 ✓ omega</text>
+  <rect x="730" y="310" width="130" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="795" y="336" text-anchor="middle" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
+</svg>
+
+Three nested case splits (mode → press → `x < 10`); each of the four leaves closes by `simp` + `omega`. `cases … <;> simp … <;> omega` collapses the whole tree into a couple of lines.
+
+::: notes
+The exact structure of `counterInv_step`, drawn. This is the "proof tree" view: the root is the goal (the invariant holds in the successor), each branch is a `cases`/`by_cases` split on a guard, and each green leaf is a closed subgoal. Mapping it back to the four SMV/Z3 guards makes the proof feel inevitable rather than mysterious — and shows why the `<;>` combinator is so useful: it applies the same closer (`simp` then `omega`) to every leaf at once.
+:::
+
+---
+
 ## Strengthening: read off what you wanted
 
 ```lean
@@ -396,7 +511,7 @@ theorem CounterTS_inv2_proved : Invariant CounterTS (fun s => s.mode = .off → 
   invariant_strengthening CounterTS counterInv _ counterInv_inductive (fun _ h => h.2)
 ```
 
-The user-facing invariants are **one-line corollaries** of the strong invariant.
+The user-facing invariants are **one-line corollaries** of the strong invariant. (`fun _ h => h.1` is an anonymous function that projects the first half of the `∧`; `h.2` takes the second.)
 
 ::: notes
 Once Φ is proved inductive, every property it implies is a one-liner: invariant_strengthening takes the inductive Φ and a pointwise implication Φ ⇒ Ψ and gives Invariant Ψ. h.1 and h.2 just project the conjunction. This is the payoff of strengthening: do the hard inductive work once on Φ, then harvest all the individual specs cheaply. Compare to nuXmv, which checked each spec independently.
@@ -417,6 +532,25 @@ If `sorryAx` appears, the proof has a hole. (This is exactly what the Day-3 auto
 
 ::: notes
 Critical gotcha. A green build is NOT proof — Lean treats sorry as a warning so you can build work-in-progress. The real check is #print axioms: a finished proof depends only on Lean's standard axioms (propext, Quot.sound, sometimes Classical.choice). If sorryAx shows up, there is a hole. Our autograder runs exactly this check, because "lake build passed" would let a student submit a sorry-filled proof and get full marks.
+:::
+
+---
+
+## Beyond safety: termination via ranking functions
+
+Safety = "nothing bad happens" (what we just proved). **Liveness** = "something good *eventually* happens" — proved with a **ranking function**: a `Nat`-valued measure that strictly *decreases* every step.
+
+```lean
+-- Gcd.lean: Euclid's algorithm terminates because (a + b) strictly drops
+def gcd (a b : Nat) : Nat := ...
+  termination_by a + b      -- the measure that must shrink
+  decreasing_by omega       -- proof that it shrinks on each recursive call
+```
+
+A measure bounded below by 0 can't decrease forever ⇒ the loop must stop. (This is the discrete cousin of a Lyapunov function.)
+
+::: notes
+The example project ships ranking-function machinery (TransitionSystem.lean's IsRankingFunction; Gcd.lean's terminating Euclid) but no slide mentions it — this closes that gap and rounds out the safety-vs-liveness story from Day 2. `termination_by` names the measure; `decreasing_by` proves it drops; because Nat is well-founded (no infinite descending chain), termination follows. The same idea proves *progress*/liveness of a reactive system: exhibit a measure that strictly decreases until the good thing happens.
 :::
 
 ---
@@ -582,12 +716,12 @@ The bridge: Days 1-3 worked on models of the counter; Day 4 connects specs and p
 
 In `examples/CounterDemo`:
 
-1. `lake build`; confirm the five `sorry` warnings are only on the auto-generated stubs.
-2. In `Counter.lean`, find the three pieces of the inductive-invariant pattern.
-3. Add and prove **one** new invariant — e.g. `x > 0 → mode = on` — via strengthening; confirm with `#print axioms`.
+1. `lake build` — the solution files compile clean (no `sorry`); open a `*Starter.lean` to see the fill-in-the-blank `sorry` holes you'd complete.
+2. In `Counter.lean`, find the three pieces of the inductive-invariant pattern (`counterInv_init`, `counterInv_step`, `counterInv_inductive`).
+3. Prove **one** new corollary from the strengthened `Φ` — e.g. `mode = off → x < 10` — via `invariant_strengthening`, and confirm with `#print axioms` (no `sorryAx`).
 
 ::: notes
-Self-contained, runs in the room. The deliverable is one new proved invariant plus the axiom check confirming no sorry. x > 0 → mode = on is a good target: it follows from the strengthened Φ by a short case split. This exercises the whole pattern end to end.
+Self-contained, runs in the room. The deliverable is one new proved corollary plus the axiom check confirming no sorry. The solution files (imported by the root `CounterDemo.lean`) are sorry-free; the `*Starter.lean` scaffolds hold the holes. `Counter.lean` already proves x ≤ 10, mode = off → x = 0, AND x > 0 → mode = on, so pick a genuinely new target like `mode = off → x < 10` (immediate from the second conjunct + omega) to practice the strengthening pattern end to end.
 :::
 
 ---
