@@ -340,7 +340,9 @@ Three minutes of live coding. The Claude Code prompt is "give me an SMT-LIB enco
 
 ## Quick check: SAT or UNSAT?
 
-For each formula, predict `sat` or `unsat`:
+Symbol key (we define these properly next block): $\neg$ not, $\wedge$ and, $\vee$ or, $\to$ implies, $\forall$ for all, $\exists$ there exists, $\mathbb{Z}$ the integers.
+
+For each formula, predict `sat` (some assignment makes it true) or `unsat` (none can):
 
 1. $p \wedge \neg p$
 2. $p \vee \neg p$
@@ -408,11 +410,15 @@ Mathematicians know this; computer scientists sometimes don't. The proof-system 
 
 ## Propositional logic — syntax
 
-**Atomic propositions:** $p, q, r, \dots$ — variables ranging over $\{\bot, \top\}$.
+**Atomic propositions:** $p, q, r, \dots$ — variables each ranging over $\{\bot, \top\}$ (the two truth values: $\bot$ = false, $\top$ = true).
 
 **Formulas** are built inductively:
 
 $$\varphi ::= p \;\mid\; \neg \varphi \;\mid\; \varphi \wedge \varphi \;\mid\; \varphi \vee \varphi \;\mid\; \varphi \to \varphi \;\mid\; \varphi \leftrightarrow \varphi$$
+
+Read this grammar as "a formula is an atom, or a negation, or two formulas joined by a connective." ($::=$ means "is one of the following forms"; $\mid$ separates the alternatives.)
+
+**Connectives:** $\neg$ not, $\wedge$ and, $\vee$ or (inclusive), $\to$ implies (if…then), $\leftrightarrow$ if and only if.
 
 Examples:
 
@@ -440,7 +446,7 @@ Write $[\![\varphi]\!]_v$ for the **truth value (meaning) of $\varphi$ under $v$
 | $\varphi \vee \psi$ | $\top$ iff at least one is $\top$ |
 | $\varphi \to \psi$ | $\top$ iff $[\![\varphi]\!]_v = \bot$ or $[\![\psi]\!]_v = \top$ |
 
-We write $v \models \varphi$ if $[\![\varphi]\!]_v = \top$.
+We write $v \models \varphi$ (read "$v$ **satisfies** $\varphi$") if $[\![\varphi]\!]_v = \top$ — i.e. the assignment $v$ makes $\varphi$ come out true. The symbol $\models$ recurs all week: an assignment or model on the left, a formula on the right.
 
 ::: notes
 Standard Tarskian semantics. The implication row is the one that bites — "false implies anything" surprises mathematicians the first time. The convention is universal across SMT, model checking, and proof assistants.
@@ -463,6 +469,8 @@ Everything reduces to satisfiability:
 - $\varphi$ valid $\iff$ $\neg \varphi$ unsatisfiable.
 - $\Gamma \models \varphi \iff \Gamma \cup \{\neg \varphi\}$ unsatisfiable.
 
+($\iff$ means "exactly when / if and only if". *NP-complete* = answers are easy to **check** but, as far as anyone knows, hard to **find**; *co-NP-complete* is the mirror image, for "always true" questions.)
+
 ::: notes
 This is the single most important slide in the propositional-logic block. Every FM tool reduces its question to satisfiability. When you want to check "is this property always true?" the tool asks "is the negation satisfiable?" If unsat, you've proved validity. This is the whole strategy of bounded model checking, of `:prove` in Cryptol, of `simp` closure checks in Lean — every time.
 :::
@@ -479,6 +487,8 @@ This is the single most important slide in the propositional-logic block. Every 
 | $(p \to q) \wedge (q \to r) \wedge (p \to r)$ | satisfiable | $v(p) = v(q) = v(r) = \top$ |
 | $(p \to q) \wedge p \wedge \neg q$ | unsatisfiable | modus ponens contradiction |
 
+The last row is an **entailment** check in disguise: $\{p \to q,\; p\} \models q$ holds *because* adding $\neg q$ makes the set unsatisfiable — exactly the $\Gamma \cup \{\neg\varphi\}$ trick from the previous slide.
+
 ::: notes
 Work through each one orally for ten seconds. The third one is famously where physicists get confused — "weakening" feels wrong because the premise can ignore the consequent's antecedent. It's correct in classical logic; in intuitionistic logic the same formula is also valid. Lean 4 uses intuitionistic by default, with classical as an axiom available via `Classical.em`.
 :::
@@ -489,13 +499,13 @@ Work through each one orally for ten seconds. The third one is famously where ph
 
 Adds:
 
-- **Variables and quantifiers**: $\forall x.\; \varphi(x)$, $\exists y.\; \varphi(y)$.
+- **Variables and quantifiers**: $\forall x.\; \varphi(x)$ ("for all $x$, $\varphi$ holds") and $\exists y.\; \varphi(y)$ ("there exists a $y$ for which $\varphi$ holds").
 - **Function symbols and predicate symbols** of fixed arity. Constants are 0-ary functions.
 - **Terms** built from variables and function applications.
 
 A first-order **signature** $\Sigma$ lists the function and predicate symbols and their arities. A **structure** $\mathcal{M}$ for $\Sigma$ gives:
 
-- A nonempty domain $|\mathcal{M}|$.
+- A nonempty domain $|\mathcal{M}|$ — the set of objects the quantifiers range over (e.g. all the integers).
 - An interpretation of each function symbol as an actual function on $|\mathcal{M}|$.
 - An interpretation of each predicate symbol as an actual relation on $|\mathcal{M}|$.
 
@@ -528,13 +538,15 @@ The undecidability result is what motivates the move to SMT — instead of tryin
 
 | Theory | Domain | Examples | Decidable? |
 |---|---|---|---|
-| **EUF** | uninterpreted | $f(a) = b \wedge f(b) \neq c$ | yes |
-| **LIA** | $\mathbb{Z}$, linear | $3x + 2y = 7 \wedge x > 0$ | yes |
-| **LRA** | $\mathbb{R}$, linear | $x + y \le 1 \wedge x \ge 0$ | yes |
-| **BV** | $[2^n]$, bit-wise | $x \;\&\; (x-1) = 0$ | yes |
+| **EUF** (equality + uninterpreted functions) | black-box functions | $f(a) = b \wedge f(b) \neq c$ | yes |
+| **LIA** (linear integer arithmetic) | $\mathbb{Z}$, linear | $3x + 2y = 7 \wedge x > 0$ | yes |
+| **LRA** (linear real arithmetic) | $\mathbb{R}$, linear | $x + y \le 1 \wedge x \ge 0$ | yes |
+| **BV** (bit-vectors) | fixed-width words | $x \;\&\; (x-1) = 0$ | yes |
 | **Arrays** | $A : I \to V$ | $\text{store}(a, i, v)[i] = v$ | yes |
-| **NIA** | $\mathbb{Z}$, nonlinear | $x \cdot y = z \wedge \dots$ | **undecidable** |
-| **NRA** | $\mathbb{R}$, nonlinear | $x^2 + y^2 = 25$ | decidable (Tarski 1948); exponential |
+| **NIA** (nonlinear integer arithmetic) | $\mathbb{Z}$, nonlinear | $x \cdot y = z \wedge \dots$ | **undecidable** |
+| **NRA** (nonlinear real arithmetic) | $\mathbb{R}$, nonlinear | $x^2 + y^2 = 25$ | decidable (Tarski 1948); CAD (Collins 1975) is doubly-exponential |
+
+*"Linear"* = never multiply two unknowns; *"nonlinear"* allows $x\cdot y$ or $x^2$. A *bit-vector* is an integer in a fixed number of bits (like a 32-bit machine word); $\&$ is bitwise-AND. For arrays, $\text{store}(a,i,v)$ is array $a$ with index $i$ set to $v$, and $a[i]$ reads index $i$. EUF treats each function as a black box — equal inputs give equal outputs, nothing more.
 
 Z3 supports all of these. The `(set-logic …)` directive tells it which fragment to assume.
 
@@ -573,10 +585,12 @@ $$T = (S, S_0, \rightarrow, AP, L)$$
 where:
 
 - $S$ — the set of states (possibly infinite)
-- $S_0 \subseteq S$ — the initial states
-- $\rightarrow \;\subseteq S \times S$ — the transition relation (write $s \rightarrow s'$)
+- $S_0 \subseteq S$ — the initial states ($\subseteq$ = "is a subset of": every initial state is a state)
+- $\rightarrow \;\subseteq S \times S$ — the transition relation (write $s \rightarrow s'$ for "$s$ can step to $s'$")
 - $AP$ — a set of atomic propositions
-- $L : S \to 2^{AP}$ — a labeling
+- $L : S \to 2^{AP}$ — a labeling ($2^{AP}$ is the *powerset* of $AP$ — all its subsets — so $L(s)$ is the set of propositions true in state $s$)
+
+Heads-up: the arrow $\rightarrow$ here is the *transition* relation between states — a different use from logical "implies" $\to$ in the logic section.
 
 A **trace** is a (finite or infinite) sequence $s_0, s_1, s_2, \dots$ with $s_0 \in S_0$ and $s_i \rightarrow s_{i+1}$ for all $i$.
 
@@ -592,9 +606,9 @@ This is the central formalism for the entire week. Every model checker, theorem 
 
 State and input:
 
-- `mode ∈ {off, on}`
-- `x ∈ ℕ`
-- `press : Bool` (external input)
+- `mode ∈ {off, on}` (∈ = "is an element of"; mode is off or on)
+- `x ∈ ℕ` (ℕ = the natural numbers 0, 1, 2, …)
+- `press : Bool` (external input — true if the button is pressed this step)
 
 Behavior:
 
@@ -689,12 +703,39 @@ Starting from $(\text{off}, 0)$:
 (off, 0)                            ← back to initial
 ```
 
-The reachable set is **12 states**: $\{(\text{off}, 0)\} \cup \{(\text{on}, k) : 0 \le k \le 10\}$.
+The reachable set is **12 of the 22 states**: $\{(\text{off}, 0)\} \cup \{(\text{on}, k) : 0 \le k \le 10\}$.
 
 The safety property $x \le 10$ holds on all twelve. ✓
 
 ::: notes
 We could verify by hand because the state space is finite and small. Day 2's nuXmv does this enumeration automatically. Day 3's Lean does it by induction without ever enumerating. Day 1's Z3 does a *bounded* version — "is x = 11 reachable in ≤ N steps for N = 5, 10, 30?" and answers UNSAT for each. We trade completeness for not having to construct the state space.
+:::
+
+---
+
+## Reachable, bounded, bad — the picture
+
+<svg viewBox="0 0 680 330" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <ellipse cx="310" cy="180" rx="300" ry="144" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.8"/>
+  <text x="310" y="20" text-anchor="middle" font-size="15" fill="#5b6168">all states S — 22 (mode × x)</text>
+  <ellipse cx="252" cy="186" rx="218" ry="118" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="232" y="96" text-anchor="middle" font-size="15" fill="#146a96">reachable — 12</text>
+  <ellipse cx="200" cy="200" rx="132" ry="72" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
+  <text x="200" y="190" text-anchor="middle" font-size="14" fill="#0e4f70">reachable in ≤ N steps</text>
+  <text x="200" y="212" text-anchor="middle" font-size="11.5" fill="#0e4f70">(what BMC explores)</text>
+  <circle cx="565" cy="150" r="9" fill="#c0392b"/>
+  <text x="565" y="131" text-anchor="middle" font-size="13.5" fill="#922b21">x = 11</text>
+  <text x="565" y="180" text-anchor="middle" font-size="11.5" fill="#922b21">bad &amp;</text>
+  <text x="565" y="196" text-anchor="middle" font-size="11.5" fill="#922b21">unreachable</text>
+</svg>
+
+- **All states** (22): every $(\text{mode}, x)$ pair you could write down.
+- **Reachable** (12): what the system can actually get to from $(\text{off}, 0)$.
+- **Reachable in $\le N$ steps**: what bounded model checking explores — it grows toward the reachable boundary as $N$ rises.
+- **Bad** ($x = 11$): sits *outside* reachable, so no trace ever hits it — BMC keeps returning UNSAT; Day 2 *proves* it can never happen.
+
+::: notes
+This one picture is the conceptual core of the week. Bounded checking searches the innermost ring; the bug we care about sits outside the reachable set entirely. BMC can only ever certify "not in the ≤N ring." To claim "unreachable, ever" you need the full-reachability methods of Day 2 (exhaust the reachable set) or Day 3 (an inductive argument that never enumerates). The gap between the ≤N ring and the reachable boundary is exactly the gap bounded methods cannot close.
 :::
 
 ---
@@ -806,6 +847,43 @@ The kernel of every modern SAT solver. **CDCL** (Conflict-Driven Clause Learning
 
 ::: notes
 DPLL is the algorithm participants need to know. CDCL is what they use; the only differences operationally are clause learning (a conflict produces a learned clause that prunes the search forever after) and non-chronological backjumping (you don't have to undo one assignment at a time; you can leap back to the actual cause of the conflict).
+:::
+
+---
+
+## DPLL in action: a tiny trace
+
+Solve $\varphi = (p \vee q) \wedge (\neg p \vee q) \wedge (p \vee \neg q)$. Decide a variable, propagate the forced literals, backtrack on conflict.
+
+<svg viewBox="0 0 720 270" style="display:block;margin:0.4em auto;max-width:74%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="360" y1="58" x2="175" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="240" y="78" text-anchor="middle" font-size="13" fill="#146a96">p = ⊥</text>
+  <line x1="360" y1="58" x2="545" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="480" y="78" text-anchor="middle" font-size="13" fill="#146a96">p = ⊤</text>
+  <line x1="175" y1="146" x2="175" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <line x1="545" y1="146" x2="545" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <rect x="300" y="14" width="120" height="44" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
+  <text x="360" y="41" text-anchor="middle" font-size="15" fill="#1c1c1c">decide p</text>
+  <rect x="85" y="102" width="180" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="175" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
+  <rect x="103" y="190" width="144" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+  <text x="175" y="217" text-anchor="middle" font-size="14" fill="#922b21">✗ conflict</text>
+  <rect x="455" y="102" width="180" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="545" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
+  <rect x="463" y="190" width="164" height="44" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="545" y="217" text-anchor="middle" font-size="13.5" fill="#1e6b32">✓ SAT: p = q = ⊤</text>
+</svg>
+
+- $p = \bot$: clause $(p \vee q)$ forces $q = \top$ → now $(p \vee \neg q)$ has all literals false: **conflict**, backtrack.
+- $p = \top$: clause $(\neg p \vee q)$ forces $q = \top$ → every clause satisfied: **SAT**, model $p = q = \top$.
+
+::: notes
+The whole DPLL loop on the smallest formula that exercises it: one decision, a unit-propagation cascade on each branch, one conflict, one backtrack, one satisfying leaf. "Unit propagation" = when a clause has exactly one unassigned literal left, that literal is forced true. CDCL's one addition: when you hit the conflict on the left, *learn* the clause that records "p = ⊥ leads to failure" so the search never revisits it. Every industrial SAT solver is this loop with better bookkeeping (watched literals, VSIDS, restarts — next slide).
 :::
 
 ---
@@ -942,6 +1020,36 @@ For $n = 1, 2, 3, 4, 5$: every answer is `unsat`. The pigeonhole principle, veri
 
 ::: notes
 Pigeonhole is the classical SAT teaching example. Notice the structure: we encode the problem (each pigeon in some hole; no two pigeons in the same hole), call check-sat, and trust the verdict. The encoding is exactly what mathematics says; Z3 mechanizes the search. Industrial verification problems have the same structure, just at million-variable scale.
+:::
+
+---
+
+## Live: Sudoku as constraints, not search
+
+[`day01/examples/puzzles/sudoku.py`](../examples/puzzles/sudoku.py) — one integer per cell, three "all-different" rules, plus the clues.
+
+```python
+cells = [[z3.Int(f"c_{r}_{c}") for c in range(9)] for r in range(9)]
+for r in range(9):
+    for c in range(9):
+        s.add(cells[r][c] >= 1, cells[r][c] <= 9)        # each cell holds a digit 1–9
+for r in range(9):
+    s.add(z3.Distinct(cells[r]))                          # each row: all 9 different
+for c in range(9):
+    s.add(z3.Distinct([cells[r][c] for r in range(9)]))  # each column: all different
+for br in range(3):
+    for bc in range(3):                                   # each 3×3 box: all different
+        s.add(z3.Distinct([cells[3*br+dr][3*bc+dc]
+                           for dr in range(3) for dc in range(3)]))
+# pin the given clues, then s.check() / s.model()
+```
+
+We never write a backtracking search — we *state what a solution is* and let Z3 find one. (`z3.Distinct(xs)` = "these values are pairwise unequal".)
+
+Same shape, more puzzles in `examples/puzzles/`: **N-Queens**, **KenKen**, **magic squares**.
+
+::: notes
+This is the single most important idea in the SMT half of the day: declarative, not imperative. The Sudoku rules are three families of Distinct constraints plus the clues; Z3 does all the search. Run it live — it solves the classic puzzle instantly and even verifies uniqueness with a blocking clause (assert the found grid is forbidden; if still sat, a second solution exists). Then point at the other puzzles as the take-home menu: KenKen adds arithmetic "cage" constraints, N-Queens adds diagonal constraints, magic squares add row/column/diagonal sum constraints — all the same "constraints, not search" shape.
 :::
 
 ---
