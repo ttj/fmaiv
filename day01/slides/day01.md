@@ -685,7 +685,7 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
 
 ## The counter as an explicit state machine
 
-<svg viewBox="0 0 960 230" style="display:block;margin:0.3em auto;max-width:95%;height:auto" font-family="Inter, system-ui, sans-serif">
+<svg viewBox="0 0 960 252" style="display:block;margin:0.3em auto;max-width:95%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs>
     <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
@@ -695,8 +695,8 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
   <text x="40" y="142" text-anchor="middle" font-size="12" fill="#5b6168">start</text>
   <path d="M720,126 L720,64 L114,64 L114,126" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
   <text x="417" y="56" text-anchor="middle" font-size="13" fill="#146a96">press ∨ x = 10</text>
-  <path d="M96,176 C82,216 146,216 132,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="114" y="208" text-anchor="middle" font-size="13" fill="#146a96">¬press</text>
+  <path d="M94,176 C74,232 154,232 134,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="114" y="244" text-anchor="middle" font-size="12" fill="#146a96">¬press</text>
   <line x1="166" y1="150" x2="276" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
   <text x="221" y="142" text-anchor="middle" font-size="13" fill="#146a96">press</text>
   <line x1="382" y1="150" x2="450" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
