@@ -1,0 +1,34 @@
+name: examples
+
+# Verify every day's worked examples by actually running the tools on them
+# (z3, NuSMV, Lean/lake, CBMC, Cryptol, SAW) inside the course image, which has
+# all of them preinstalled. Mirrors `scripts/check_examples.sh`.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "day0*/examples/**"
+      - "scripts/check_examples.sh"
+      - ".github/workflows/examples.yml"
+  pull_request:
+    paths:
+      - "day0*/examples/**"
+      - "scripts/check_examples.sh"
+      - ".github/workflows/examples.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run all example verifications in the course image
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work \
+            ghcr.io/verivital/fmaiv-autograde:latest \
+            bash scripts/check_examples.sh
