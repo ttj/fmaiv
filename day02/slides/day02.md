@@ -47,6 +47,25 @@ Three teaching blocks. L1 is "how do I describe the system" (SMV). L2 is "how do
 
 ---
 
+## "nuXmv" vs "NuSMV" — what you'll actually run
+
+The slides say **nuXmv**; the course autograder runs **NuSMV 2.6.0**. They share the SMV language and the `is true / is false` verdict format, so everything here works in both.
+
+| Capability | NuSMV 2.6.0 (what you run) | nuXmv (superset) |
+|---|---|---|
+| Symbolic (BDD) model checking | ✓ | ✓ |
+| Bounded model checking (SAT) | ✓ | ✓ |
+| k-induction for invariants | ✓ | ✓ |
+| IC3 / PDR, infinite-state (SMT) | — | ✓ |
+
+We *mention* the nuXmv-only features but never require them.
+
+::: notes
+Set expectations up front so nobody is confused when the tool they install is called NuSMV. The two are command-line-compatible for everything we do: same `.smv` files, same `INVARSPEC/CTLSPEC/LTLSPEC`, same verdict text. nuXmv adds IC3/PDR and infinite-state SMT-based checking on top; we point those out but the homework and autograder only use NuSMV features. Note neither tool has an explicit-state engine — that's SPIN's world (see the algorithms slide).
+:::
+
+---
+
 ## Learning objectives for Day 2
 
 By the end of today you will be able to:
@@ -174,6 +193,8 @@ The single most important SMV idiom for newcomers: a VAR with no assignment is a
       esac;
 ```
 
+In SMV, `&` = and, `|` = or, `!` = not; a `case` picks the **first** guard that matches (top to bottom), and `TRUE :` is the catch-all default.
+
 This is the same counter, line for line — and the same four guards as the Z3 `step()` from Day 1.
 
 ::: notes
@@ -191,6 +212,7 @@ CTLSPEC   AG AF (mode = off & x = 0); -- always eventually "home"
 LTLSPEC   F (x = count_max);          -- eventually maximal
 ```
 
+- `->` reads "implies": `A -> B` says whenever `A` holds, `B` must too.
 - `INVARSPEC p` — `p` holds in every reachable state (pure safety).
 - `CTLSPEC` / `LTLSPEC` — richer temporal properties (next block).
 - nuXmv checks **every** spec in the file when you run it.
@@ -224,11 +246,52 @@ This is a real pedagogical point and a gotcha I want students to internalize. Th
 |---|---|---|
 | `counter.smv` | the running counter | nondeterministic input |
 | `traffic_light.smv` | four-phase intersection | timed phases, mutual exclusion of greens |
-| `mutex.smv` | two-process mutual exclusion | Peterson-style flags + turn |
+| `mutex.smv` | two-process mutual exclusion | flags + turn (idle/waiting/critical) |
+| `peterson.smv` | Peterson's algorithm | interleaving scheduler + fairness |
+| `elevator.smv` | single-car elevator | request handling, safety |
 | `gcd_01.smv` | Euclid's GCD | explicit program counter (a *program* as a TS) |
 
 ::: notes
-These four (all from verivital/smvis) show the range of SMV modeling. mutex is the classic concurrency example. gcd_01 shows the key trick for turning an ordinary sequential program into a transition system: add a program-counter variable ranging over line labels — a preview of Day 4, where CBMC does this for C automatically.
+These show the range of SMV modeling. The four original files (counter, traffic_light, mutex, gcd_01) come from verivital/smvis; peterson and elevator are course-specific examples that avoid the deprecated `process` keyword. mutex and peterson are the classic concurrency examples (peterson is the genuinely-Peterson one). gcd_01 shows the key trick for turning an ordinary sequential program into a transition system: add a program-counter variable ranging over line labels — a preview of Day 4, where CBMC does this for C automatically.
+:::
+
+---
+
+## traffic_light.smv as a state machine
+
+<svg viewBox="0 0 960 210" style="display:block;margin:0.3em auto;max-width:96%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="tl-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="200" y1="129" x2="268" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
+  <text x="234" y="120" text-anchor="middle" font-size="12.5" fill="#146a96">timer = 4</text>
+  <line x1="440" y1="129" x2="508" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
+  <text x="474" y="120" text-anchor="middle" font-size="12.5" fill="#146a96">1 tick</text>
+  <line x1="680" y1="129" x2="748" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
+  <text x="714" y="120" text-anchor="middle" font-size="12.5" fill="#146a96">timer = 2</text>
+  <path d="M835,100 L835,50 L115,50 L115,100" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
+  <text x="475" y="42" text-anchor="middle" font-size="12.5" fill="#146a96">1 tick (cycle repeats)</text>
+  <rect x="30" y="100" width="170" height="58" rx="10" fill="#e7f6ec" stroke="#27843f" stroke-width="2"/>
+  <text x="115" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: green</text>
+  <text x="115" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: red</text>
+  <rect x="270" y="100" width="170" height="58" rx="10" fill="#fbf3df" stroke="#B49248" stroke-width="2"/>
+  <text x="355" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: yellow</text>
+  <text x="355" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: red</text>
+  <rect x="510" y="100" width="170" height="58" rx="10" fill="#e7f6ec" stroke="#27843f" stroke-width="2"/>
+  <text x="595" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: red</text>
+  <text x="595" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: green</text>
+  <rect x="750" y="100" width="170" height="58" rx="10" fill="#fbf3df" stroke="#B49248" stroke-width="2"/>
+  <text x="835" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: red</text>
+  <text x="835" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: yellow</text>
+  <text x="115" y="182" text-anchor="middle" font-size="11.5" fill="#5b6168">▲ initial</text>
+</svg>
+
+Four phases cycle in order; the `timer` counts ticks within each phase. Exactly one direction is ever non-red, so the safety invariants — never two greens, never two yellows — hold by construction.
+
+::: notes
+The same SMV file (`traffic_light.smv`), drawn as the state machine it describes. The three `next(...)` case statements jointly walk this 4-cycle: green→yellow→red on the main side, interleaved with the side road. This is the picture students should sketch before writing any temporal property: once you can see the cycle, "never two greens" (`AG !(main=green & side=green)`) and "main always eventually green" (`AG AF main=green`) are obvious. Note both yellow phases are gold-tinted, both green phases green-tinted — color carries meaning here.
 :::
 
 ---
@@ -300,6 +363,19 @@ Motivate the new logic. The properties we care about quantify over time / execut
 
 ---
 
+## Two property shapes: safety and liveness
+
+Almost every requirement is one of these (or a combination):
+
+- **Safety** — *"something bad never happens."* A counterexample is a **finite path** to the bad state. *(e.g. `x` never exceeds 10; two greens never lit together.)*
+- **Liveness** — *"something good eventually happens."* A counterexample is an **infinite run** (a lasso) where the good thing never occurs. *(e.g. every waiting process eventually enters its critical section.)*
+
+::: notes
+This vocabulary is the backbone of the whole day, so name it explicitly before the operators. The rule of thumb: safety is refuted by a finite trace you can point at; liveness is refuted by an infinite trace (a loop) where the promised good event never arrives. Invariants (`G`/`AG`) are the canonical safety properties; "eventually"/"infinitely often" (`F`, `G F`) are the canonical liveness ones. Lamport's original framing (1977) is exactly this two-way split.
+:::
+
+---
+
 ## LTL — linear temporal logic
 
 LTL views the future as a **single path** (implicitly, all paths). Operators on a path:
@@ -307,8 +383,8 @@ LTL views the future as a **single path** (implicitly, all paths). Operators on 
 - `X p` — **neXt**: `p` in the next state.
 - `F p` — **Finally** (eventually): `p` at some future state.
 - `G p` — **Globally** (always): `p` at every future state.
-- `p U q` — **Until**: `p` holds until `q` becomes true (and `q` does).
-- `p R q` — **Release**: dual of until.
+- `p U q` — **Until**: `p` holds until `q` becomes true (and `q` does eventually become true).
+- `p R q` — **Release** (the dual of *until*): `q` must stay true up to and including the moment `p` first becomes true — and forever if `p` never does.
 
 ::: notes
 LTL operators, one line each. The mental model: fix a single infinite trace; each operator is a claim about that trace from the current position. "Implicitly all paths" because an LTL spec is true of a system iff it is true of *every* trace. X is the only operator that looks exactly one step; F/G are the workhorses; U is the expressive one that F and G are special cases of (F p = true U p, G p = ¬F¬p).
@@ -387,7 +463,7 @@ Neither subsumes the other:
 - **CTL-only**: `AG EF p` — "from every reachable state, `p` is still reachable." LTL cannot say this (no existential path quantifier).
 - **LTL-only**: `F G p` — "eventually `p` holds forever." CTL's `AF AG p` is *not* equivalent.
 
-Most tools (nuXmv included) support both. **CTL\*** is the superset.
+Most tools (NuSMV/nuXmv included) support both. **CTL\*** is the larger logic that freely mixes path quantifiers (`A`/`E`) with temporal operators — it contains both LTL and CTL.
 
 ::: notes
 This is the classic theorem (Week 10): LTL and CTL have incomparable expressive power. The two canonical witnesses: AG EF p (CTL, not LTL) and FG p (LTL, not CTL — AFAG p is strictly stronger). Don't belabor the proof; the practical point is "pick the logic that can express your property, and know that some tools/algorithms are faster for one than the other." CTL* unifies them but is rarely needed in practice.
@@ -479,10 +555,10 @@ Final block. Three algorithm families, the BDD machinery that makes symbolic mod
 | **Symbolic (BDD)** | boolean encoding of state *sets* | >100 state bits | variable-order sensitive; weak on arithmetic |
 | **Bounded (SAT/SMT)** | length-`N` unrolling | no state space at all | refutes only; needs completeness arg |
 
-nuXmv supports all three.
+NuSMV/nuXmv run the **symbolic** and **bounded** engines; explicit-state enumeration is the SPIN family (a different tool).
 
 ::: notes
-The three families, the same ones Week 6/7 cover. Explicit-state (SPIN-style) enumerates states one at a time — simplest, but dies on big state spaces. Symbolic (the classic SMV/nuXmv approach) represents whole *sets* of states as boolean functions via BDDs, so it can handle astronomically many states if they compress well. Bounded (Day 1's approach) skips the state space entirely and unrolls — great for finding bugs, but only complete with extra work (k-induction, interpolation). nuXmv can do all three; you pick per problem.
+The three families, the same ones Week 6/7 cover. Explicit-state (SPIN-style) enumerates states one at a time — simplest, but dies on big state spaces. Symbolic (the classic SMV/NuSMV/nuXmv approach) represents whole *sets* of states as boolean functions via BDDs, so it can handle astronomically many states if they compress well. Bounded (Day 1's approach) skips the state space entirely and unrolls — great for finding bugs, but only complete with extra work (k-induction, interpolation). NuSMV and nuXmv implement the symbolic (BDD) and bounded (SAT) engines and let you pick per problem; explicit-state enumeration is SPIN's domain, not these tools'.
 :::
 
 ---
@@ -491,10 +567,10 @@ The three families, the same ones Week 6/7 cover. Explicit-state (SPIN-style) en
 
 Represent a **set of states** by a boolean formula true exactly on that set.
 
-- Reachable set $R_0 = \text{init}$.
-- $R_{k+1} = R_k \cup \text{Image}(R_k)$ — states reachable in one more step.
-- Stop when $R_{k+1} = R_k$ (a **fixpoint**): that's all reachable states.
-- Safety check: is $R_\infty \cap \text{Bad} = \varnothing$?
+- Reachable set $R_0 = \text{init}$ (the initial states).
+- $R_{k+1} = R_k \cup \text{Image}(R_k)$ — add the one-step successors ($\text{Image}(R)$ = all states reachable in one step from $R$; $\cup$ = set union).
+- Stop when $R_{k+1} = R_k$ (a **fixpoint** — nothing new appears): that's all reachable states.
+- Safety check: is $R_\infty \cap \text{Bad} = \varnothing$? ($\cap$ = states in both sets; $\varnothing$ = empty set — so no bad state is reachable.)
 
 The whole computation is boolean-formula manipulation — no state is ever enumerated individually.
 
@@ -504,17 +580,69 @@ This is the heart of symbolic model checking (Week 6/7). Instead of visiting sta
 
 ---
 
+## The fixpoint, on the counter
+
+Run the reachable-set iteration by hand — it lands on the **same 12 states** as Day 1's BFS:
+
+$$R_0 = \{(\text{off},0)\}$$
+$$R_1 = R_0 \cup \{(\text{on},0)\}, \quad R_2 = R_1 \cup \{(\text{on},1)\}, \quad \dots$$
+$$R_{11} = R_{10} \cup \{(\text{on},10)\}, \qquad R_{12} = R_{11}\ \text{(fixpoint)}$$
+
+Now $R_{12} \cap \{x > 10\} = \varnothing$ — the safety invariant holds, and **no individual state was ever enumerated**: each $R_k$ is one boolean formula (one BDD).
+
+::: notes
+This makes "sets as formulas" concrete and ties straight back to Day 1's hand-BFS. Each $R_k$ is the characteristic function of a set of states, stored as a BDD; `Image` and `∪` are BDD operations; the fixpoint test $R_{12} = R_{11}$ is a constant-time BDD pointer comparison thanks to canonicity. The counter is tiny so the sets are small, but the same loop runs on systems with $10^{100}$ states — as long as the BDDs compress.
+:::
+
+---
+
 ## BDDs — binary decision diagrams
 
 A **BDD** is a canonical, compressed decision tree for a boolean function.
 
-- **Shannon expansion**: $f = (x \wedge f|_{x=1}) \vee (\neg x \wedge f|_{x=0})$.
-- Apply recursively over a **fixed variable order** → a DAG.
+- **Shannon expansion**: $f = (x \wedge f|_{x=1}) \vee (\neg x \wedge f|_{x=0})$ — split on one variable ($\wedge$ and, $\vee$ or, $\neg$ not; $f|_{x=1}$ is $f$ with $x$ fixed true).
+- Apply recursively over a **fixed variable order** → a **DAG** (directed acyclic graph — a decision tree with identical subgraphs shared).
 - Reduce: merge identical subgraphs, drop redundant nodes.
 - Result is **canonical**: two functions are equal iff their BDDs are identical.
 
 ::: notes
 BDDs (Bryant 1986) are why symbolic model checking works. Shannon expansion splits a function on one variable; doing it over a fixed order and sharing common substructure yields a compact DAG. Canonicity is the magic property: equality of boolean functions becomes pointer equality of BDDs, so the fixpoint test (R_{k+1} = R_k) is cheap. The catch is on the next slide.
+:::
+
+---
+
+## A BDD, drawn
+
+The function $f = \text{ite}(a,b,c) = (a \wedge b) \vee (\neg a \wedge c)$ — "if `a` then `b` else `c`" — as a BDD:
+
+<svg viewBox="0 0 460 330" style="display:block;margin:0.3em auto;max-width:42%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="bdd-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="248" y1="62" x2="318" y2="132" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bdd-ah)"/>
+  <line x1="212" y1="62" x2="142" y2="132" stroke="#5b6168" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#bdd-ah)"/>
+  <line x1="340" y1="172" x2="352" y2="262" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bdd-ah)"/>
+  <line x1="318" y1="168" x2="124" y2="266" stroke="#5b6168" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#bdd-ah)"/>
+  <line x1="142" y1="168" x2="336" y2="266" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bdd-ah)"/>
+  <line x1="120" y1="172" x2="108" y2="262" stroke="#5b6168" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#bdd-ah)"/>
+  <circle cx="230" cy="46" r="24" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="230" y="52" text-anchor="middle" font-size="18" fill="#1c1c1c">a</text>
+  <circle cx="330" cy="152" r="24" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="330" y="158" text-anchor="middle" font-size="18" fill="#1c1c1c">b</text>
+  <circle cx="130" cy="152" r="24" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="130" y="158" text-anchor="middle" font-size="18" fill="#1c1c1c">c</text>
+  <rect x="330" y="262" width="42" height="38" rx="5" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="351" y="287" text-anchor="middle" font-size="17" fill="#1e6b32">1</text>
+  <rect x="88" y="262" width="42" height="38" rx="5" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="2"/>
+  <text x="109" y="287" text-anchor="middle" font-size="17" fill="#5b6168">0</text>
+</svg>
+
+Solid edge = that variable is **1**; dashed = **0**. Follow your path of choices down to a terminal box (the output). The single shared `0` and `1` are what make it a **DAG**, not a tree — and why function equality becomes pointer-equality of BDDs.
+
+::: notes
+This is the picture behind the previous slide's Shannon expansion: the root splits on `a`, the solid (a=1) branch is `f|a=1 = b`, the dashed (a=0) branch is `f|a=0 = c`. Trace an input: a=0, c=1 → follow dashed from a to c, solid from c to 1 → output 1. The two crossing edges in the middle are the two ways to reach the shared terminals — that sharing is the whole point of "reduced" BDDs and is why canonicity holds. Variable order here is a, then b/c; the next slide shows why that choice can make or break the size.
 :::
 
 ---
@@ -525,12 +653,12 @@ The same function can be **tiny or exponential** depending on variable order.
 
 - Good order → linear-size BDD.
 - Bad order → exponential blow-up.
-- Finding the optimal order is itself NP-hard; tools use heuristics + dynamic reordering.
+- Finding the optimal order is itself **NP-hard** (believed to have no efficient general algorithm); tools use heuristics + dynamic reordering.
 
 Arithmetic (multipliers) has **no** good order — BDDs are bad at it. That's where SAT/SMT (Day 1, Day 4) wins.
 
 ::: notes
-The Achilles' heel of BDDs: variable ordering. A classic example is a multiplier circuit, whose BDD is exponential under every order — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. nuXmv has dynamic reordering heuristics (the -dynamic flag we use in the autograder). The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
+The Achilles' heel of BDDs: variable ordering. A classic example is the middle output bit of a multiplier circuit, whose BDD is exponential under every variable order (Bryant 1991) — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. NuSMV and nuXmv both support dynamic reordering; the autograder runs `NuSMV -dynamic`. The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
 :::
 
 ---
@@ -543,7 +671,7 @@ Day 1's idea, now in context:
 - Ask: is there a length-`k` path to a bad state?
 - **SAT** → bug found (a real counterexample). **UNSAT** → no bug *of length ≤ k*.
 
-To make BMC **complete**: add k-induction or compute a completeness threshold (the diameter of the state graph).
+To make BMC **complete**: add *k-induction* (if a property holds for the first `k` steps, and "`k` good steps ⇒ the next is good," it holds forever) or compute a *completeness threshold* (the state graph's diameter — its longest shortest-path).
 
 ::: notes
 Tie back to Day 1. BMC is unbeatable at finding shallow bugs fast and gives a concrete counterexample. Its weakness is completeness — UNSAT at depth k says nothing about depth k+1. The fixes (k-induction, interpolation, IC3/PDR) turn BMC into a complete method; nuXmv implements several. For this course the message is: BMC refutes cheaply, symbolic/BDD proves exhaustively, and modern tools blend them.
@@ -597,13 +725,15 @@ Weaken `next(x)` (off-by-one: allow `x < count_max + 1`) and re-run:
 ```text
 -- specification x <= count_max  is false
 -- as demonstrated by the following execution sequence
-  -> State: 1.1 <-  mode = off, x = 0,  press = FALSE
-  -> State: 1.2 <-  mode = on,  x = 0,  press = FALSE
+  -> State: 1.1  <- mode = off, x = 0,  press = TRUE    (off → on)
+  -> State: 1.2  <- mode = on,  x = 0,  press = FALSE
+  -> State: 1.3  <- mode = on,  x = 1,  press = FALSE
   ...
-  -> State: 1.12 <- mode = on,  x = 11, press = FALSE
+  -> State: 1.12 <- mode = on,  x = 10, press = FALSE
+  -> State: 1.13 <- mode = on,  x = 11, press = FALSE   <-- x > count_max
 ```
 
-The trace is a **witness** — the exact input sequence that breaks the property.
+The trace is a **witness** — the exact input sequence that breaks the property. (13 states: one press to flip on, then 11 increments; the violation shows at `1.13`.)
 
 ::: notes
 The counterexample is the single most useful output of a model checker. It is not "something failed" — it is a concrete, replayable execution: the precise sequence of inputs (press values) and the resulting states, ending at the violating state (x = 11). This is debugging gold: you can step through it, reproduce it, and fix the exact transition. Contrast with a failed test, which tells you *that* something broke; the counterexample tells you *how*.
@@ -629,19 +759,19 @@ The exact methods on these slides run on the largest chips and systems:
 
 - **Cadence JasperGold**, **Synopsys VC Formal** — symbolic + BMC on every modern SoC.
 - **SymbiYosys** (open-source) — SAT-based on Verilog.
-- **Intel** post-FDIV — formal hardware verification as a release gate.
+- **Intel** post-FDIV — formal datapath verification (via Symbolic Trajectory Evaluation, a cousin of these methods) as a release gate.
 
 The counter is a toy; the engine is production-grade.
 
 ::: notes
-Close the loop to Day 1's industrial framing. The student should leave knowing that "model checking" is not academic — it is the verification backbone of the semiconductor industry. JasperGold runs on Apple Silicon; the FDIV bug (Day 1) is precisely why. Same BDD/SAT engines, same temporal-logic specs, just at billions-of-states scale with heavy engineering.
+Close the loop to Day 1's industrial framing. The student should leave knowing that "model checking" is not academic — it is the verification backbone of the semiconductor industry. Tools like JasperGold are used across the largest SoCs; the FDIV bug (Day 1) is precisely what motivated formal datapath verification (Intel built that around Symbolic Trajectory Evaluation, consistent with the Day 1 slide). Same family of BDD/SAT/STE engines and temporal specs, just at billions-of-states scale with heavy engineering.
 :::
 
 ---
 
 ## L3 recap
 
-- **Explicit / symbolic / bounded** — three engines; nuXmv has all.
+- **Symbolic / bounded** — the two engines NuSMV/nuXmv run (explicit-state is SPIN's domain).
 - **Symbolic MC** computes the reachable set as a fixpoint over **BDDs**; ordering is everything.
 - **BMC** refutes cheaply; k-induction makes it complete.
 - A **counterexample** is a concrete, replayable witness — finite path or lasso.
@@ -703,7 +833,7 @@ Pick **one** of `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`:
 
 - Verify the two given properties; explain each verdict.
 - Add and verify **one safety** and **one liveness** property of your own.
-- For `mutex`: state mutual exclusion (`AG !(p1=crit & p2=crit)`) and no-starvation (`AG(p1=wait -> AF p1=crit)`).
+- For `mutex`: state mutual exclusion (`AG !(process1 = critical & process2 = critical)`) and no-starvation (`AG(process1 = waiting -> AF process1 = critical)`).
 
 See [`assignments/day02.md`](../assignments/day02.md).
 
