@@ -167,6 +167,8 @@ Karpathy named **"vibe coding"** (Feb 2025) — "give in to the vibes, forget th
 
 But AI-generated code is *often wrong*: Veracode's 2025 GenAI report found security flaws in **~45%** of AI-written samples; Apiiro reported AI assistants ship code **~4× faster but with ~10× the vulnerabilities** (2025); MIT Sloan documents the *hidden costs* — technical debt that destabilizes systems (2025). (Plus the ~51% vulnerable C and ~20% hallucinated packages from before.) **You own what the AI writes.**
 
+Dijkstra saw the hazard coming: *On the Foolishness of "Natural Language Programming"* (EWD667, 1978) argued natural language is too ambiguous to be a safe programming medium. Vibe coding is that idea *automated* — which is exactly why the right-hand column's discipline matters.
+
 > Generation is cheap; **correctness is the bottleneck**. That makes **verification the essential activity** — the subject of the next four days.
 
 ::: notes
@@ -207,6 +209,39 @@ This is the deliverable. The workshop is short — four days — so we will cove
 
 ---
 
+## Verification in one picture
+
+<svg viewBox="0 0 920 300" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="vtri-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <rect x="24" y="46" width="206" height="62" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="127" y="72" text-anchor="middle" font-size="17" font-weight="600" fill="#123a52">Model</text>
+  <text x="127" y="93" text-anchor="middle" font-size="12.5" fill="#355466">what the system is</text>
+  <rect x="24" y="168" width="206" height="62" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="127" y="194" text-anchor="middle" font-size="17" font-weight="600" fill="#6b531f">Specification</text>
+  <text x="127" y="215" text-anchor="middle" font-size="12.5" fill="#7a6334">what correct means</text>
+  <rect x="384" y="104" width="168" height="84" rx="8" fill="#eef3f7" stroke="#5b6168" stroke-width="2.4"/>
+  <text x="468" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#1c1c1c">Verifier</text>
+  <text x="468" y="162" text-anchor="middle" font-size="11.5" fill="#5b6168">solver · model checker · prover</text>
+  <rect x="690" y="40" width="208" height="64" rx="8" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
+  <text x="794" y="66" text-anchor="middle" font-size="16" font-weight="600" fill="#1c6b30">&#10003; Verified</text>
+  <text x="794" y="87" text-anchor="middle" font-size="12.5" fill="#2f6b40">proof / certificate</text>
+  <rect x="690" y="176" width="208" height="64" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+  <text x="794" y="202" text-anchor="middle" font-size="16" font-weight="600" fill="#922b21">&#10007; Counterexample</text>
+  <text x="794" y="223" text-anchor="middle" font-size="12.5" fill="#9c4036">a concrete bug trace</text>
+  <line x1="230" y1="74" x2="378" y2="128" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
+  <line x1="230" y1="200" x2="378" y2="166" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
+  <line x1="552" y1="132" x2="684" y2="74" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
+  <line x1="552" y1="160" x2="684" y2="206" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
+</svg>
+
+A **verifier** takes a **model** (what the system *is*) and a **specification** (what *correct* means) and returns one of exactly two things: a **proof** that *every* behavior meets the spec, or a **counterexample** — one concrete behavior that breaks it. Every tool this week is an instance of this picture.
+
+::: notes
+The mental model for the entire course, as a picture before the formalism (this is the model/spec/verifier/result flow from the instructor's own slides). Two inputs — the model (the system, as a transition system, formula, or program) and the specification (the property: an assertion, a temporal-logic formula, a theorem statement) — feed a verifier, which is whatever engine the day uses (Z3 on Day 1, nuXmv on Day 2, Lean on Day 3, CBMC/SAW on Day 4). The output is binary in spirit: either a proof/certificate that the property holds over *all* behaviors, or a counterexample that exhibits a single offending behavior. Stress the "all vs one" asymmetry — it's exactly what separates verification from testing, and it sets up the Dijkstra/Knuth quotes next. Keep returning to this picture; every later tool just fills in the three boxes differently.
+:::
+
+---
+
 ## The verification triple
 
 Every formal-verification effort, regardless of tool, instantiates the same triple:
@@ -222,6 +257,22 @@ $$\Big(\;\underbrace{\text{model}}_{\text{what the system is}},\;\;\underbrace{\
 
 ::: notes
 Memorize this triple. It is the single most useful organizing principle in the field. Every paper, every tool, every demo will fit into it. When you read a new FM paper, your first question is "what's the model here, what's the spec, what counts as proof?" and the paper becomes much easier to read.
+:::
+
+---
+
+## Testing vs. proof, in two quotes
+
+> "Program testing can be used to show the presence of bugs, but never to show their absence!"
+> — **Edsger W. Dijkstra**, *Notes on Structured Programming*, 1970
+
+> "Beware of bugs in the above code; I have only proved it correct, not tried it."
+> — **Donald E. Knuth**, 1977
+
+Testing **samples** behaviors; verification reasons about **all** of them. That gap is the whole reason this field exists — and exactly what the FFmpeg bug (run five million times by fuzzers, still missed) showed.
+
+::: notes
+The two quotes that frame the week, requested as content rather than buried in notes. Dijkstra's line (from *Notes on Structured Programming*, 1970 — also EWD249) is the field's founding aphorism: a test exercises one input; passing tells you nothing about the inputs you didn't try. Knuth's line (1977, from a note on the TeX/"Notes on the van Emde Boas construction" correspondence) is the witty complement — proof and testing are different activities, and even a proof rests on assumptions, so good engineers do both. The synthesis for this audience: testing samples the behavior space; verification quantifies over all of it (the "all vs one" asymmetry from the previous picture). Tie it straight back to Glasswing's FFmpeg bug — five million fuzzing executions of the affected line, and the flaw still hid, because testing cannot demonstrate absence. That is the gap formal methods fills.
 :::
 
 ---
