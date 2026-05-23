@@ -637,6 +637,44 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
 
 ---
 
+## The counter as a state machine
+
+<svg viewBox="0 0 960 230" style="display:block;margin:0.3em auto;max-width:95%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="20" y1="150" x2="60" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="40" y="142" text-anchor="middle" font-size="12" fill="#5b6168">start</text>
+  <path d="M720,126 L720,64 L114,64 L114,126" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#146a96">press ∨ x = 10</text>
+  <path d="M96,176 C82,216 146,216 132,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="114" y="208" text-anchor="middle" font-size="13" fill="#146a96">¬press</text>
+  <line x1="166" y1="150" x2="276" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="221" y="142" text-anchor="middle" font-size="13" fill="#146a96">press</text>
+  <line x1="382" y1="150" x2="450" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="416" y="120" text-anchor="middle" font-size="12.5" fill="#146a96">¬press ∧ x &lt; 10</text>
+  <line x1="554" y1="150" x2="668" y2="150" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+  <rect x="62" y="126" width="104" height="48" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="114" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">off, 0</text>
+  <rect x="278" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="330" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 0</text>
+  <rect x="450" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="502" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 1</text>
+  <text x="612" y="160" text-anchor="middle" font-size="26" fill="#5b6168">⋯</text>
+  <rect x="668" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="720" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 10</text>
+</svg>
+
+The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
+
+::: notes
+The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is why the inductive invariant needs strengthening: `x ≤ 10` alone doesn't capture that `off` forces `x = 0`.
+:::
+
+---
+
 ## Reachable states: BFS by hand
 
 Starting from $(\text{off}, 0)$:
