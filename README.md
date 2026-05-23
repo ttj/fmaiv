@@ -139,8 +139,8 @@ Light reading to ground the course material. None of these are required reading;
 - **J. Lewis and B. Martin.** *Cryptol: High Assurance, Retargetable Crypto Development and Validation.* In *IEEE Military Communications Conference (MILCOM 2003)*, vol. 2, pp. 820–825, 2003. <https://doi.org/10.1109/MILCOM.2003.1290218>
   - The original Cryptol paper from Galois and the NSA, introducing it as a DSL for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
 
-- **smvis** — interactive SMV / nuXmv model visualizer (state graphs and BDDs). <https://github.com/verivital/smvis>
-  - Used on Day 2 as a hosted browser fallback for nuXmv and to visualize the example models; the Day 2 `.smv` examples are drawn from its example set.
+- **smvis** — interactive SMV / NuSMV model visualizer (state graphs and BDDs). **Run it in your browser:** <https://bit.ly/fmaiv_smvis> · source: <https://github.com/verivital/smvis>
+  - Used on Day 2 to run NuSMV with no install and to visualize the example models, state graphs, and BDDs interactively; the Day 2 `.smv` examples are drawn from its example set.
 
 - **leansmv** — SMV-to-Lean translator and library for proving inductive invariants of transition systems in Lean 4. <https://github.com/ttj/leansmv>
   - The Day 3 `CounterDemo` Lean material derives from this project.

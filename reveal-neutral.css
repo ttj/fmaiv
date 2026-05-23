@@ -71,19 +71,19 @@
 /* ---- Slide-number badge ------------------------------------------------ */
 #fmaiv-slideno { color: var(--accent-ink); font-family: 'Inter', sans-serif; opacity: 0.7; }
 
-/* ---- Section / chapter dividers: dark blue-slate ------------------------ */
+/* ---- Section / chapter dividers: light sky-blue ------------------------- */
 .reveal section.section, .reveal section.title {
-  background: linear-gradient(135deg, #16263a 0%, #1f4368 100%);
+  background: linear-gradient(135deg, #eaf5fc 0%, #aed8f2 100%);
 }
 .reveal section.section h1, .reveal section.section h2,
 .reveal section.title h1,   .reveal section.title h2 {
-  color: #ffffff; border: none;
+  color: #123a52; border: none;
 }
 .reveal section.section h1::after, .reveal section.title h1::after {
   content: ""; display: block; width: 64px; height: 4px;
   background: var(--vu-gold); margin: 0.5em auto 0;
 }
-.reveal section.section p, .reveal section.title p { color: #cdd8db; }
+.reveal section.section p, .reveal section.title p { color: #355466; }
 .reveal section.section, .reveal section.title { text-align: center; }
 
 /* ---- Title slide: Vanderbilt brand + CCC lockup ------------------------ */

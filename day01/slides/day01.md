@@ -651,7 +651,39 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
 
 ---
 
-## The counter as a state machine
+## The counter as a symbolic state machine
+
+<svg viewBox="0 0 760 300" style="display:block;margin:0.3em auto;max-width:90%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="sym-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/>
+    </marker>
+  </defs>
+  <line x1="56" y1="160" x2="124" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
+  <text x="90" y="150" text-anchor="middle" font-size="12" fill="#5b6168">init x = 0</text>
+  <path d="M165,120 C152,76 228,76 215,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
+  <text x="190" y="66" text-anchor="middle" font-size="12.5" fill="#146a96">¬press / x′ := x</text>
+  <path d="M535,120 C522,74 598,74 585,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
+  <text x="560" y="64" text-anchor="middle" font-size="12.5" fill="#146a96">¬press ∧ x &lt; 10 / x′ := x+1</text>
+  <line x1="252" y1="160" x2="497" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
+  <text x="375" y="151" text-anchor="middle" font-size="13" fill="#146a96">press / x′ := x</text>
+  <path d="M520,204 Q375,286 236,206" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
+  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#146a96">press ∨ x = 10 / x′ := 0</text>
+  <ellipse cx="190" cy="160" rx="62" ry="42" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="190" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">off</text>
+  <ellipse cx="560" cy="160" rx="62" ry="42" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="560" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">on</text>
+</svg>
+
+Two control modes; the count `x` stays a **variable**. Each edge is **guard / update** — exactly the symbolic transition relation $\varphi_T$ over $(s, s')$. The *next* slide "unrolls" this into explicit states by enumerating `x = 0, 1, …, 10`.
+
+::: notes
+This is the abstract/symbolic view a model checker actually reasons about: the control graph is tiny (two modes) and `x` is carried symbolically via guard/update edge labels — an *extended* finite-state machine. The next slide unrolls it into explicit (mode, x) states; nuXmv (Day 2) instead keeps it symbolic, representing whole *sets* of states as formulas/BDDs and computing successors of the relation `x′ := x+1` directly. Same four guards as every other encoding, now drawn as a labeled graph. The primed `x′` is the standard convention for "value in the next state" — it returns on Day 2 in the symbolic transition relation.
+:::
+
+---
+
+## The counter as an explicit state machine
 
 <svg viewBox="0 0 960 230" style="display:block;margin:0.3em auto;max-width:95%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs>
@@ -681,7 +713,7 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
   <text x="720" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 10</text>
 </svg>
 
-The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
+This **unrolls** the symbolic machine above: `x` becomes part of the state. The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
 
 ::: notes
 The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is why the inductive invariant needs strengthening: `x ≤ 10` alone doesn't capture that `off` forces `x = 0`.

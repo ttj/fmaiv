@@ -16,6 +16,7 @@ on:
       # so "day0?/slides" never matched day01..day04. Use "day*" instead.
       - "day*/slides/*.md"
       - "reveal-custom.css"
+      - "reveal-neutral.css"
       - "reveal-fit.html"
       - ".github/workflows/pages.yml"
   workflow_dispatch: {}

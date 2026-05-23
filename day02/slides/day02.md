@@ -641,6 +641,8 @@ The function $f = \text{ite}(a,b,c) = (a \wedge b) \vee (\neg a \wedge c)$ — "
 
 Solid edge = that variable is **1**; dashed = **0**. Follow your path of choices down to a terminal box (the output). The single shared `0` and `1` are what make it a **DAG**, not a tree — and why function equality becomes pointer-equality of BDDs.
 
+Build and reduce BDDs yourself in the browser: [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis).
+
 ::: notes
 This is the picture behind the previous slide's Shannon expansion: the root splits on `a`, the solid (a=1) branch is `f|a=1 = b`, the dashed (a=0) branch is `f|a=0 = c`. Trace an input: a=0, c=1 → follow dashed from a to c, solid from c to 1 → output 1. The two crossing edges in the middle are the two ways to reach the shared terminals — that sharing is the whole point of "reduced" BDDs and is why canonicity holds. Variable order here is a, then b/c; the next slide shows why that choice can make or break the size.
 :::
@@ -695,6 +697,8 @@ nuXmv -int counter.smv
 > check_ltlspec            # all LTLSPECs
 > quit
 ```
+
+**No install? Run it in your browser:** [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis) — the **smvis** tool runs NuSMV and visualizes state graphs and BDDs interactively.
 
 ::: notes
 Two modes. Batch (just `nuXmv file.smv`) checks every spec and prints verdicts — what the autograder uses. Interactive (`-int`) lets you build the model once with `go` and then run individual check commands, inspect the BDDs, simulate traces, etc. For class we mostly use batch; interactive is for exploration. (In our autograding image this is NuSMV, which shares the SMV language and verdict format.)
@@ -815,7 +819,7 @@ The bridge: model checking enumerates a finite reachable set; theorem proving pr
 
 ## In-session exercise
 
-With `nuXmv` (or the smvis tool) on `counter.smv`:
+With `nuXmv` (or **smvis** in your browser — [bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis)) on `counter.smv`:
 
 1. Confirm the passing `INVARSPEC`s are `true` and the deliberately-false ones are `false`.
 2. Introduce the off-by-one bug in `next(x)`; read the counterexample; identify the exact press sequence.
@@ -850,7 +854,7 @@ The homework deepens the model-checking workflow on a non-counter system. Mutex 
 - **Cavada et al.** *The nuXmv Symbolic Model Checker*, CAV 2014.
 - **Bryant.** *Graph-Based Algorithms for Boolean Function Manipulation*, IEEE TC 1986 — BDDs.
 - **nuXmv user manual** — <https://nuxmv.fbk.eu/>
-- **smvis** (browser nuXmv + visualizations) — <https://github.com/verivital/smvis>
+- **smvis** (browser NuSMV + BDD/state-graph visualizer) — **run it:** <https://bit.ly/fmaiv_smvis> · source: <https://github.com/verivital/smvis>
 
 Full list: repo [README.md](../../README.md#background-references).
 

@@ -64,4 +64,4 @@ nuXmv -int counter.smv
 
 ## Browser fallback
 
-If you cannot install nuXmv locally before the live nuXmv block (L3), [smvis](https://github.com/verivital/smvis) runs a hosted nuXmv on Hugging Face Spaces and renders the same models with state-graph and BDD visualizations.
+If you cannot install nuXmv locally before the live nuXmv block (L3), **smvis** ([bit.ly/fmaiv_smvis](https://bit.ly/fmaiv_smvis)) runs a hosted NuSMV in your browser and renders the same models with state-graph and BDD visualizations. Source: <https://github.com/verivital/smvis>.
