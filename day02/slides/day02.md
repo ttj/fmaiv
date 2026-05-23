@@ -223,6 +223,36 @@ Properties and model in one file is an SMV convention worth highlighting — the
 
 ---
 
+## Four SMV modeling idioms
+
+The whole language is small. Four idioms cover almost everything you'll write:
+
+- **Free input** — a `VAR` with no `init`/`next`. The environment picks any value each round (`press`). This is how nondeterminism enters with *zero* extra syntax.
+- **Explicit nondeterminism** — `next(s) := {idle, waiting};` means the next value is chosen from the set, nondeterministically. (Used in `mutex.smv`: `process1 = idle : {idle, waiting}`.)
+- **`DEFINE`** — `DEFINE d := b | c;` is a *macro*: every use of `d` is textually replaced by `(b | c)`. No new state variable, no extra BDD variable — just a name for a sub-expression.
+- **`MODULE`** — a reusable component, instantiated like an object: `proc1 : user(sem);`. Each instance gets its own copy of the local variables (`proc1.state`).
+
+::: notes
+Straight from Week 5's SMV-language slides. The free-input idiom is the one beginners miss — an unassigned VAR is not "undefined," it is "the environment's choice," which is exactly how you model an open system. The `{...}` set-expression is the second source of nondeterminism (an under-specified or abstract design). DEFINE vs VAR matters for BDD size: a DEFINE adds no BDD variable (the sub-formula is inlined wherever used), whereas an ASSIGNed VAR becomes part of the invariant relation and costs a variable. MODULE + dotted names (`proc1.state`) is how the mutex and Peterson examples build two processes from one template — preview of the concurrency examples.
+:::
+
+---
+
+## Synchronous vs. asynchronous composition
+
+When you compose components, *whose clock ticks?*
+
+- **Synchronous** — every component takes a step **together**, each round. One step of the whole = one step of *each* part. (Hardware on a shared clock; our `traffic_light.smv` updates all three lights every tick.)
+- **Asynchronous** — one step of the whole = a step by **exactly one** component; the others' variables stay unchanged (an *interleaving*). (Threads, distributed processes.)
+
+SMV models asynchrony *inside* the synchronous framework: add a scheduler that picks who moves (this is `peterson.smv`'s scheduler variable).
+
+::: notes
+Week 5's composition slides. The distinction is the single biggest modeling decision for concurrency. Synchronous = lock-step (every assignment fires each round); asynchronous = pick-one-and-step, leaving the rest frozen — which is what generates the interleaving explosion. The classic gotcha: asynchronous composition has many more reachable states for the same components, because every interleaving order is a distinct path. SMV's old `process` keyword did this automatically but is deprecated; our examples (peterson) instead add an explicit scheduler input — a free VAR that nondeterministically names which process moves — which is both clearer and not deprecated. This is also why a frame condition (`y' = y` for the non-moving process) matters: in asynchronous steps you must say the others don't change.
+:::
+
+---
+
 ## counter.smv has true *and* false specs on purpose
 
 `counter.smv` includes specs that **hold** and specs that **fail**:
@@ -409,6 +439,174 @@ The lasso is the key intuition for why model checking infinite behaviors is deci
 
 ---
 
+## One trace, marked up
+
+Fix one counter run and mark where `mode = on` holds (●) vs not (○):
+
+```text
+position:  s0   s1   s2   s3   s4   s5   s6  ...
+mode=on:   ○    ●    ●    ●    ●    ○    ●   ...
+            (off) (on)(on)(on)(on)(off)(on)
+```
+
+We'll read each LTL operator against **this one trace**, from position `s0`. The valuation function gives each proposition a 0/1 at each position; an operator is a claim about the rest of the trace from where you stand.
+
+<svg viewBox="0 0 760 140" style="display:block;margin:0.3em auto;max-width:94%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <circle cx="57"  cy="30" r="7" fill="#ffffff" stroke="#5b6168" stroke-width="1.6"/>
+  <circle cx="163" cy="30" r="7" fill="#2b9fd4"/>
+  <circle cx="269" cy="30" r="7" fill="#2b9fd4"/>
+  <circle cx="375" cy="30" r="7" fill="#2b9fd4"/>
+  <circle cx="481" cy="30" r="7" fill="#2b9fd4"/>
+  <circle cx="587" cy="30" r="7" fill="#ffffff" stroke="#5b6168" stroke-width="1.6"/>
+  <circle cx="693" cy="30" r="7" fill="#2b9fd4"/>
+  <rect x="16"  y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="57"  y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">off</text>
+  <rect x="122" y="46" width="82" height="34" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/><text x="163" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="228" y="46" width="82" height="34" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/><text x="269" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="334" y="46" width="82" height="34" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/><text x="375" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="440" y="46" width="82" height="34" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/><text x="481" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="546" y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="587" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">off</text>
+  <rect x="652" y="46" width="82" height="34" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/><text x="693" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
+  <text x="57"  y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₀</text>
+  <text x="163" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₁</text>
+  <text x="269" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₂</text>
+  <text x="375" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₃</text>
+  <text x="481" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₄</text>
+  <text x="587" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₅</text>
+  <text x="693" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₆ ⋯</text>
+  <text x="57"  y="124" text-anchor="middle" font-size="11.5" fill="#146a96">▲ you are here</text>
+</svg>
+
+Caption: the same run, drawn as a timeline — every LTL operator below is read off this picture.
+
+::: notes
+Establish ONE concrete trace before walking the operators, so each operator slide refers to the same picture (the instructor does exactly this in the LTL-semantics video: "everything we define will be with respect to a trace"). The marking ●/○ for on/off lets students literally point. From the counter's structure this run is realistic: off, then a press flips it on (s1), it counts s1..s4, resets to off at s5, on again at s6. Position numbering starts at s0 = time 0 (the video's "if we omit n we mean time zero").
+:::
+
+---
+
+## `X p` — neXt, on the trace
+
+`X p` ("in the next state, `p`") looks **exactly one step** forward.
+
+- At `s0`: `X (mode = on)` asks "is `mode = on` at `s1`?" — `s1` is ● → **true**.
+- At `s4`: `X (mode = on)` asks about `s5` — `s5` is ○ → **false**.
+
+$$(\rho, n) \models X\,p \quad\text{iff}\quad (\rho, n{+}1) \models p$$
+
+`X` is the only operator that pins down a single, exact position. Everything else quantifies over a *range* of future positions.
+
+::: notes
+X is the simplest semantics — shift by one. Glossing: ρ is the trace, n the position, ⊨ "satisfies." Emphasize "exactly one step": beginners conflate X ("the very next state") with F ("some later state"). The counter makes the difference visible — X(on) at s0 is true but is a different claim from F(on). nuXmv supports X in LTLSPEC; note CTL's analogue needs a path quantifier (AX/EX), the subject of the CTL slides.
+:::
+
+---
+
+## `F p` — Finally / eventually, on the trace
+
+`F p` ("at some position now or later, `p`") is an **existential** over future positions.
+
+- `F (x = count_max)` on the counter: is there *any* position where `x = 10`? On a counting run, yes → **true**.
+- `F (mode = on)` at `s0`: `s1` is already ● → **true** (the witness can be the current state or any later one).
+
+$$(\rho, n) \models F\,p \quad\text{iff}\quad \exists\, m \ge n.\ (\rho, m) \models p$$
+
+One witnessing position is enough. `F` is how you say "reachable along this run."
+
+::: notes
+F = "there exists a future position." The existential is the key word — one witness suffices, which is why F is the liveness/reachability workhorse. Note m ≥ n (not m > n): p at the current position counts. Tie to Day 1: "F (x=10)" is the LTL way to ask the bounded-reachability question Z3 asked, but now over the whole infinite run, not length ≤ N.
+:::
+
+---
+
+## `G p` — Globally / always, on the trace
+
+`G p` ("at every position from here on, `p`") is the **universal** dual of `F`.
+
+- `G (x <= count_max)` on the counter: every reachable state has `x ≤ 10` → **true** (this is the safety invariant).
+- `G (mode = on)` at `s0`: `s0` is ○ → **false** (one bad position kills it).
+
+$$(\rho, n) \models G\,p \quad\text{iff}\quad \forall\, m \ge n.\ (\rho, m) \models p \qquad G\,p \equiv \neg F \neg p$$
+
+A single position where `p` fails refutes `G p`. `G`/`F` are De Morgan duals: "always" = "never not."
+
+::: notes
+G = "for all future positions." Contrast sharply with F: F needs one good position, G needs all positions good; one bad one is a counterexample (finite prefix!). The duality G p ≡ ¬F¬p is the temporal De Morgan — worth saying aloud because it is the bridge to "a safety violation is a reachable ¬p state." This G is exactly INVARSPEC's meaning, and the canonical safety property.
+:::
+
+---
+
+## `p U q` — Until, on the trace
+
+`p U q` ("`p` holds until `q` does, and `q` *does* eventually") bundles a deadline with an obligation.
+
+- `(mode = on) U (mode = off)` at `s1`: `mode = on` at `s1..s4`, then `mode = off` at `s5` → **true**.
+- It would be **false** if `mode` never returned to off (the obligation "`q` eventually" is unmet) — even though `p` held the whole time.
+
+$$(\rho, n) \models p\,U\,q \;\;\text{iff}\;\; \exists\, m \ge n.\ (\rho, m)\models q \ \wedge\ \forall\, i,\ n \le i < m.\ (\rho, i)\models p$$
+
+`F` and `G` are special cases: $F\,q \equiv \text{true}\,U\,q$, and `U` is the most expressive basic operator.
+
+::: notes
+Until is the expressive one — strong until here (the textbook/Alur default): q is REQUIRED to happen, and p must hold strictly before it (positions i with n ≤ i < m; p need not hold AT m). The two failure modes: (1) q never comes, (2) p drops before q arrives. Show both on the trace. F q = true U q makes F a derived operator; this is why a minimal LTL is just X and U. nuXmv writes it `p U q` in LTLSPEC.
+:::
+
+---
+
+## `p R q` — Release (the dual of Until)
+
+`p R q` ("`q` must hold up to **and including** the step where `p` first becomes true — and forever if `p` never does"):
+
+$$p\,R\,q \;\equiv\; \neg(\neg p\,U\,\neg q)$$
+
+- `q` is the **guarantee**; `p` is the event that **releases** it.
+- If `p` never happens, `q` must hold forever — so $G\,q \equiv \text{false}\,R\,q$.
+
+Example: `(mode = off) R (x <= count_max)` — "`x ≤ 10` stays true at least until the counter is off." Since `x ≤ 10` always holds, this is **true** whether or not `mode` ever turns off.
+
+::: notes
+Release is the De Morgan dual of Until and the operator students find slipperiest. The intuition: q is a promise that holds continuously until p "releases" it from holding; if p never fires, the promise holds forever — which is why G q = false R q. Defining it via the dual ¬(¬p U ¬q) ties it back to Until and the duality theme. It is rarely written by hand but appears constantly as the result of pushing negations inward (e.g., negating p U q for a counterexample automaton), so it earns one slide.
+:::
+
+---
+
+## Why finite-state ⇒ decidable: the lasso
+
+A trace is infinite, but a finite system has only finitely many states — so any infinite run must **revisit** a state, then it can repeat that loop forever.
+
+- Every infinite behavior = a **stem** (finite prefix) + a **cycle** (repeated forever) = a **lasso**.
+- There are only finitely many distinct stems and cycles.
+- So "does *some* infinite run violate the property?" becomes a **finite** search over lassos.
+
+That is why model checking decides $G\,p$, $F\,G\,p$, "infinitely often," etc., even though they quantify over infinite time.
+
+<svg viewBox="0 0 540 214" style="display:block;margin:0.3em auto;max-width:60%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="lasso-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="63" y1="110" x2="100" y2="110" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="138" y1="110" x2="175" y2="110" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="212" y1="104" x2="284" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="318" y1="70" x2="422" y2="70" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="440" y1="88" x2="440" y2="132" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="422" y1="150" x2="318" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <line x1="300" y1="132" x2="300" y2="88" stroke="#5b6168" stroke-width="1.8" marker-end="url(#lasso-ah)"/>
+  <circle cx="45" cy="110" r="18" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <circle cx="120" cy="110" r="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <circle cx="195" cy="110" r="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <circle cx="300" cy="70" r="18" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
+  <circle cx="440" cy="70" r="18" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
+  <circle cx="440" cy="150" r="18" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
+  <circle cx="300" cy="150" r="18" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
+  <text x="120" y="170" text-anchor="middle" font-size="12.5" fill="#5b6168">stem</text>
+  <text x="370" y="200" text-anchor="middle" font-size="12.5" fill="#146a96">cycle (repeats forever)</text>
+</svg>
+
+Caption: every infinite run through finitely many states is a lasso — a stem into a repeating cycle — which is what makes infinite-time properties decidable.
+
+::: notes
+This is the conceptual keystone for the whole liveness story (Week 10) and answers the student question logged in week10 ("how are these eventual questions decidable but not the halting problem?"): the halting problem has unboundedly many states (a tape), but a FINITE-state system's runs are lassos, so checking "is there an accepting cycle?" is a finite graph search (the pigeonhole argument: finitely many states ⇒ some state recurs). This is the bridge to Büchi-automata model checking — an LTL property becomes "is there a reachable cycle satisfying the negation?" Keep it intuitive; the automata machinery is Week 10, not needed here.
+:::
+
+---
+
 ## LTL patterns you'll actually write
 
 | Formula | English |
@@ -421,6 +619,66 @@ The lasso is the key intuition for why model checking infinite behaviors is deci
 
 ::: notes
 These five cover most real specs. G F p ("infinitely often") and F G p ("eventually always") are the two combinations people most often confuse — G F is for liveness/fairness ("the scheduler runs each process infinitely often"), F G is for stabilization ("after some point the system stays up"). G(p → F q) is the response pattern — the single most common real-world requirement ("every request eventually gets a response").
+:::
+
+---
+
+## `G F p` — infinitely often, worked
+
+`G F p` = "at **every** position, `p` happens **again** later" = `p` recurs forever (the **recurrence** pattern).
+
+- Counter: `G F (mode = off & x = 0)` is **true** — every fair run keeps returning home. (This is a *shipped* `counter.smv` spec that passes.)
+- Traffic light: `G F (main_light = green)` is **true** — the cycle relights main green forever.
+
+**Violating trace** looks like: `p` happens a *last* time and then never again — e.g. a run that gets stuck `mode = on` would falsify `G F (mode = off)`.
+
+::: notes
+G F = "infinitely often" = Repeatedly (Alur's name, Week 9). The reading the instructor uses: "at whatever step we're talking about, there is always a p in the future." This is THE liveness/fairness shape (a fair scheduler runs each process infinitely often). The violating shape is a lasso whose cycle has no p — connect to the lasso slide. Both examples here are real shipped specs that pass, so students can run them.
+:::
+
+---
+
+## `F G p` — stabilization, worked
+
+`F G p` = "from **some** position on, `p` holds **forever** after" = the system settles (the **persistence** pattern).
+
+- Counter: `F G (mode = on)` is **false** — reaching `x = 10` always forces `off`, so `on` can never become permanent. (Shipped failing spec.)
+- A thermostat reaching and holding setpoint: `F G (|temp - target| < 1)` — **true** if it eventually stops oscillating.
+
+`F G p` and `G F p` are the two most-confused combinations: `G F` = "comes back forever," `F G` = "stays put eventually." `F G p` is **stronger** ($F G\,p \Rightarrow G F\,p$).
+
+::: notes
+F G = "eventually always" = Persistently. The duality (Week 9): Repeatedly p ≡ ¬Persistently ¬p, and Persistently is strictly stronger than Repeatedly. The counter example is shipped and FALSE — a great contrast with the previous slide's true G F. Hammer the confusion pair: students should be able to say which of G F / F G a plain-English requirement needs. "Eventually the server stays up" = F G; "the server is up infinitely often" = G F.
+:::
+
+---
+
+## `G (p -> F q)` — response, worked
+
+`G (p -> F q)` = "**every** time `p` happens, `q` happens **at or after** it" — the single most common real requirement.
+
+- Mutex: `G (process1 = waiting -> F (process1 = critical))` — "every request is eventually served" (no starvation). Shipped `mutex.smv` spec.
+- `request -> F grant`, `press -> F door_opens`, `alarm -> F shutdown`.
+
+**Violating trace**: a `p` with no later `q` — e.g. `process1` waits, but a cycle keeps letting `process2` in forever while `process1` never enters. That stuck cycle is the counterexample.
+
+::: notes
+The response pattern — G(p → F q) — is the workhorse of real specs (Dwyer's specification patterns put "response" at the top by frequency). The instructor's phrasing: "if p has occurred then eventually q has occurred, and this should occur infinitely often." Tie the violation to the lasso AND to fairness: without fairness, the no-starvation property genuinely fails (the mutex file even warns about this in its comments), because an unfair run can starve process1 — exactly the cycle counterexample. This motivates the fairness slide later.
+:::
+
+---
+
+## Quick warning: `F p & F q` ≠ `F (p & q)`
+
+Splitting a temporal operator across a connective changes the meaning.
+
+- `F p & F q` — `p` happens *sometime*, `q` happens *sometime* — possibly at **different** positions.
+- `F (p & q)` — `p` and `q` true at the **same** position.
+
+On the trace `x = 0,1,0,1,0,1,\dots`: `F(x=0) & F(x=1)` holds, but `F(x=0 & x=1)` is impossible. The first is **strictly weaker**.
+
+::: notes
+This is the instructor's own worked counterexample (Week 9, repeated twice in the videos and the robot-goals example): Eventually(p)&Eventually(q) does NOT distribute into Eventually(p&q). The 0,1,0,1 trace is exactly the disproof he gives. Useful because it generalizes: F distributes over ∨ but not ∧; G distributes over ∧ but not ∨. A frequent real bug — writing F a & F b when you meant the events to coincide.
 :::
 
 ---
@@ -456,6 +714,96 @@ AG = invariant (same intent as LTL's G but branching). EF = "can we reach it" �
 
 ---
 
+## The computation tree
+
+Unfold the transition system from the initial state: each branch is a nondeterministic choice. The result is the **computation tree** — *all* possible futures at once.
+
+```text
+                (off,0)
+                /      \         <- press? two choices
+           (off,0)    (on,0)
+            /  \        /  \
+        (off,0)(on,0)(on,1)(off,0)
+          ...    ...   ...   ...
+```
+
+- An **LTL** formula is read along **one path** (one root-to-leaf branch).
+- A **CTL** formula is read at **nodes**, with `A` (all branches from here) / `E` (some branch from here).
+
+<svg viewBox="0 0 620 248" style="display:block;margin:0.3em auto;max-width:74%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <line x1="296" y1="46" x2="196" y2="86" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="232" y="60" text-anchor="middle" font-size="11" fill="#5b6168">¬p</text>
+  <line x1="326" y1="46" x2="424" y2="86" stroke="#B49248" stroke-width="2.8"/>
+  <text x="392" y="60" text-anchor="middle" font-size="11" fill="#8a6d2f">p</text>
+  <line x1="170" y1="114" x2="118" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
+  <line x1="190" y1="116" x2="242" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
+  <line x1="432" y1="116" x2="388" y2="156" stroke="#B49248" stroke-width="2.8"/>
+  <line x1="450" y1="116" x2="512" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
+  <line x1="380" y1="186" x2="380" y2="206" stroke="#B49248" stroke-width="2.8"/>
+  <circle cx="310" cy="30" r="20" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
+  <text x="310" y="35" text-anchor="middle" font-size="11.5" fill="#1c1c1c">off,0</text>
+  <circle cx="180" cy="100" r="18" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="180" y="105" text-anchor="middle" font-size="11" fill="#1c1c1c">off,0</text>
+  <circle cx="440" cy="100" r="18" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
+  <text x="440" y="105" text-anchor="middle" font-size="11" fill="#1c1c1c">on,0</text>
+  <circle cx="110" cy="170" r="15" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="1.8"/>
+  <circle cx="250" cy="170" r="15" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="1.8"/>
+  <circle cx="380" cy="170" r="16" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
+  <text x="380" y="175" text-anchor="middle" font-size="10.5" fill="#1c1c1c">on,1</text>
+  <circle cx="520" cy="170" r="15" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="1.8"/>
+  <text x="110" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="250" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="380" y="228" text-anchor="middle" font-size="15" fill="#8a6d2f">⋯</text>
+  <text x="520" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="585" y="36" text-anchor="end" font-size="11" fill="#8a6d2f">gold = one path (LTL)</text>
+  <text x="585" y="52" text-anchor="end" font-size="11" fill="#5b6168">whole tree = CTL</text>
+</svg>
+
+Caption: the counter's computation tree — LTL talks about one highlighted path; CTL quantifies over the branches with A/E.
+
+::: notes
+The computation tree is THE mental model for CTL (Week 9 builds it explicitly from the counter's nondeterministic `press`). The branching comes from the free input: at every (off,·) and (on,·) node press can be TRUE or FALSE, so each node has two children. The single most important contrast for the expressiveness slide: LTL is a property of a path (one branch), CTL is a property of a node in the tree (so it can say "from this node SOME branch does X" — the E quantifier LTL lacks). Draw it once; refer back when explaining AG EF.
+:::
+
+---
+
+## CTL operators, one at a time
+
+Each pairs a path quantifier (`A` all / `E` some) with a temporal operator, read at the **current node**:
+
+| | `X` (next) | `F` (eventually) | `G` (always) |
+|---|---|---|---|
+| **`A`** (all paths) | `AX p`: `p` at *every* next state | `AF p`: *every* path hits `p` | `AG p`: `p` on *every* reachable state |
+| **`E`** (some path) | `EX p`: `p` at *some* next state | `EF p`: *some* path reaches `p` | `EG p`: *some* path keeps `p` forever |
+
+Plus `A[p U q]` / `E[p U q]`. Counter readings:
+
+- `EF (x = 10)` — **true**: some path counts up to 10.
+- `AF (x = 10)` — **false**: the path that keeps pressing never lets `x` climb.
+- `EG (mode = on)` — **false**: every on-run is forced off at `x = 10`.
+
+::: notes
+The 2×3 table is the whole of CTL's core (plus until). Walk the A/E split with the counter: EF(x=10) true but AF(x=10) false is the cleanest demonstration that the quantifier matters — same temporal operator F, opposite verdicts, because of the toggling path. EX/AX need the tree (one step = children of the current node). This mirrors the instructor's CTL "semantics through examples" videos. Note CTL syntax REQUIRES the pairing — you cannot write bare `F p` in CTLSPEC, every temporal op needs an A or E.
+:::
+
+---
+
+## `AG EF p` — recoverability
+
+`AG EF p` nests two quantifiers: "**on every** reachable state (`AG`), **some** path gets back to `p` (`EF`)."
+
+- "No matter where the system wanders, it can **always still return** to `p`."
+- Counter: `AG EF (mode = off)` — **true**: from any reachable state, some run returns home. (The **reset** property.)
+- Mutex: `AG EF (process1 = critical)` — "process 1 can always eventually get in (on *some* schedule)." Shipped, passes.
+
+This is the canonical property **CTL can express and LTL cannot** — the next slide says why.
+
+::: notes
+AG EF is recoverability / the reset property — the instructor's headline example of "expressible in CTL, not LTL: from every state there is an execution back to the initial state." The nesting reads outside-in: AG = at all reachable states, EF = there exists a path reaching p. The "some path" is the crux — it is an existential over futures, which LTL (all-paths-only) structurally cannot state. Both shipped examples (counter return-home, mutex can-still-enter) pass, so they are runnable. Distinguish from AG AF p (every path returns — a much stronger, often-false claim).
+:::
+
+---
+
 ## LTL vs CTL — incomparable
 
 Neither subsumes the other:
@@ -467,6 +815,21 @@ Most tools (NuSMV/nuXmv included) support both. **CTL\*** is the larger logic th
 
 ::: notes
 This is the classic theorem (Week 10): LTL and CTL have incomparable expressive power. The two canonical witnesses: AG EF p (CTL, not LTL) and FG p (LTL, not CTL — AFAG p is strictly stronger). Don't belabor the proof; the practical point is "pick the logic that can express your property, and know that some tools/algorithms are faster for one than the other." CTL* unifies them but is rarely needed in practice.
+:::
+
+---
+
+## *Why* the two are incomparable
+
+The argument is about **paths vs. nodes**, not difficulty:
+
+- **`AG EF p` is CTL-only.** `EF` says "*some* future path reaches `p`." LTL only ever quantifies over *all* paths of the system — it has **no existential path quantifier**, so it cannot say "from here, a path back to `p` exists." Branching is essential.
+- **`F G p` is LTL-only.** It means "on this path, `p` eventually stays on." The natural CTL translation `AF AG p` is **strictly stronger**: `AF AG p` demands a *single* moment after which *all* branches keep `p`, but `F G p` only constrains each path on its own. Two trees can agree on every path's `F G p` yet differ on `AF AG p`.
+
+**CTL\*** drops the "one quantifier per operator" rule (e.g. `A F G p`) and contains both.
+
+::: notes
+This is the deepening the task asks for — the branching ARGUMENT, not the bare assertion. Ground it in Week 10's slide 6: "EX(p) is CTL not in LTL — need to talk about all paths in LTL"; "AFG(p) is LTL not in CTL — CTL requires path quantifiers before temporal; closest is AFAG(p)." Key intuition for AG EF vs LTL: LTL's semantics is "true of the system iff true of every trace," and a single trace cannot mention OTHER branches, so EF is unreachable. For F G p vs AF AG p: AF AG p forces a common stabilization point across all paths; F G p lets each path stabilize at its own time — strictly weaker. The Emerson-Halpern / Vardi references in week10 are the formal source. Don't prove it; the path-vs-node picture (previous tree slide) is enough.
 :::
 
 ---
@@ -519,12 +882,52 @@ Fairness is the subtle part of liveness verification. Without it, many liveness 
 
 ---
 
+## Worked safety counterexample (finite path)
+
+Suppose we *broke* mutex so both processes could enter together and checked `INVARSPEC !(process1 = critical & process2 = critical)`. A safety violation is a **finite path** to the bad state:
+
+```text
+-- specification is false; as demonstrated by:
+ -> State 1.1 <- process1=idle,    process2=idle,    flag1=F, flag2=F
+ -> State 1.2 <- process1=waiting, process2=waiting, flag1=T, flag2=T
+ -> State 1.3 <- process1=critical,process2=critical            <-- BOTH in critical
+```
+
+You can **point at** the bad state and replay the exact 3-step sequence that reached it. That is the whole counterexample — finite, concrete, replayable.
+
+::: notes
+Safety counterexample = finite path (Week 9 "violation of a safety property is demonstrated by a finite execution"). Use the shipped mutex's mutual-exclusion spec as the running example, hypothetically broken so it actually fails (the real file passes it). Three states is enough to show the shape: init → both waiting → both critical. The teaching point repeated from L3 but pitched at the property level: safety = reachable bad state = finite witness. Contrast immediately with the next slide's lasso.
+:::
+
+---
+
+## Worked liveness counterexample (a lasso)
+
+Real `counter.smv` spec `G F (mode = on & x = count_max)` ("infinitely often we're on with x=10") is **false**. A liveness violation is a **lasso** — a stem into a repeating cycle where the good event never recurs:
+
+```text
+-- specification G F (mode = on & x = 10) is false
+ -> State 1.1 <- mode=off, press=FALSE, x=0     <-- stem
+ -- Loop starts here
+ -> State 1.2 <- mode=off, press=FALSE, x=0
+ -> State 1.2 <- mode=off, press=FALSE, x=0     <-- cycle: repeat forever
+```
+
+The cycle stays `off` forever (the environment simply never presses), so `(mode = on & x = 10)` *never* happens — the promised event is absent on an infinite run.
+
+::: notes
+This is the instructor's ACTUAL nuXmv demo counterexample (Week 9 temporal-specs screencast), verbatim in shape: the lasso is "mode off, press false, x=0, then repeat." The point he makes: press is a free input, so a perfectly legal run never presses, the counter sits in off forever, and "infinitely often on&x=10" is falsified. The "Loop starts here" / repeated-state notation is exactly nuXmv's. This is the canonical liveness counterexample: not a finite path but an infinite run shown as stem+cycle. Connect to the lasso slide from earlier and to fairness (FAIRNESS mode != off rules out exactly this degenerate run — which is why the home-recurrence spec passes but this one fails).
+:::
+
+---
+
 ## L2 recap
 
 - **Temporal logic** expresses claims about executions, not single states.
-- **LTL** (linear, all-paths) — `G`, `F`, `X`, `U`; patterns `G F`, `F G`, `G(p→F q)`.
-- **CTL** (branching, `A`/`E`) — `AG`, `EF`, `AF`, `AG EF`.
-- They are **incomparable**; `AG EF p` is CTL-only, `F G p` is LTL-only.
+- **LTL** (linear, one path) — `X`, `F`, `G`, `U`, `R`; patterns `G F` (∞-often), `F G` (stabilize), `G(p→F q)` (response).
+- **CTL** (branching, `A`/`E` on the computation tree) — `AG`, `EF`, `AF`, `EG`, `AG EF` (recoverable).
+- They are **incomparable** *because* LTL reads paths and CTL reads tree nodes: `AG EF p` needs `E` (CTL-only); `F G p` ≠ `AF AG p` (LTL-only).
+- A **safety** violation is a finite path; a **liveness** violation is a **lasso** (stem + cycle).
 - **Fairness** restricts to realistic executions for liveness.
 
 ::: notes
@@ -559,6 +962,40 @@ NuSMV/nuXmv run the **symbolic** and **bounded** engines; explicit-state enumera
 
 ::: notes
 The three families, the same ones Week 6/7 cover. Explicit-state (SPIN-style) enumerates states one at a time — simplest, but dies on big state spaces. Symbolic (the classic SMV/NuSMV/nuXmv approach) represents whole *sets* of states as boolean functions via BDDs, so it can handle astronomically many states if they compress well. Bounded (Day 1's approach) skips the state space entirely and unrolls — great for finding bugs, but only complete with extra work (k-induction, interpolation). NuSMV and nuXmv implement the symbolic (BDD) and bounded (SAT) engines and let you pick per problem; explicit-state enumeration is SPIN's domain, not these tools'.
+:::
+
+---
+
+## How hard is model checking? (1) the infinite-state wall
+
+Ask: "is `p` an invariant of transition system `T`?" The answer depends entirely on whether `T` is finite-state.
+
+- **Infinite state (e.g. unbounded `int` variables): UNDECIDABLE.** With mathematical integers, `T` can encode an arbitrary program / Turing machine — so invariant verification is as hard as the halting problem. The standard proof reduces from **Minsky two-counter machines**.
+- Intuition: there is **no a-priori bound** on the reachable states, so "examine them all" never terminates.
+
+This is why our SMV models bound every variable (`x : 0..25`) — and why **Day 3 (Lean)** needs *induction*, not enumeration, for unbounded systems.
+
+::: notes
+Straight from Week 7's "complexity of model checking" video. The headline beginners must take away: model checking is not magic — for genuinely infinite-state systems (real integers/reals) invariant verification is undecidable, by reduction from Minsky 2-counter machines (a Turing-complete model). The reason finite ranges appear everywhere in our .smv files is precisely to stay decidable. This also motivates Day 3: theorem proving handles the infinite/parametric case by induction on the transition relation, sidestepping undecidability of the exact reachable set. Connect to the student question in week10 (halting problem vs eventual truth).
+:::
+
+---
+
+## How hard is model checking? (2) finite-state = PSPACE
+
+Make every variable finite and the problem becomes **decidable** — but not cheap:
+
+- `k` boolean variables ⇒ up to $2^k$ states. A verifier *can* search them all, so it terminates.
+- Invariant / reachability checking for finite-state systems is **PSPACE-complete** — harder than NP-complete SAT (each step may itself need a SAT-like solve).
+- The practical face of that exponent is the **state-explosion problem**: state count blows up with variables, components, and interleavings.
+
+| Property logic | Model-checking complexity |
+|---|---|
+| **CTL** | $O(|S| \cdot |\varphi|)$ — linear in states × formula |
+| **LTL** | $O(|S| \cdot 2^{|\varphi|})$ — linear in states, exponential in *formula* size |
+
+::: notes
+Week 7 again: finite-state invariant verification is in PSPACE (the video says "a bit harder than NP-complete problems such as SAT"), and the exponential blow-up in the state space IS state explosion — the central engineering challenge the whole symbolic/BDD machinery exists to fight. The CTL-vs-LTL table is the standard textbook result (Clarke/Baier-Katoen): CTL model checking is linear in both the model and the formula; LTL is linear in the model but exponential in the FORMULA length (because you build a Büchi automaton of size 2^|φ|). Caveat worth stating: formulas are usually tiny, so LTL's formula-exponential is rarely the bottleneck — the STATE space is. This is also a reason tools historically favored CTL for raw speed, even though LTL is more used in practice.
 :::
 
 ---
@@ -951,6 +1388,7 @@ Close the loop to Day 1's industrial framing. The student should leave knowing t
 
 ## L3 recap
 
+- **Complexity**: invariant checking is **undecidable** for infinite-state (int vars ⇒ Turing-complete), **PSPACE** for finite-state — i.e. state explosion. CTL MC is linear; LTL is exponential in formula size.
 - **Symbolic / bounded** — the two engines NuSMV/nuXmv run (explicit-state is SPIN's domain).
 - **Symbolic MC** computes the reachable set as a fixpoint over **BDDs**; ordering is everything.
 - **BMC** refutes cheaply; k-induction makes it complete.
