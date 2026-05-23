@@ -54,7 +54,7 @@ jobs:
               -V minScale=0.2 -V maxScale=1.5 \
               -V center=false \
               -V controls=true -V progress=true -V hash=true \
-              -H reveal-custom.css -A reveal-fit.html
+              -H reveal-custom.css -H reveal-neutral.css -A reveal-fit.html
           done
 
       - name: Render slide PDFs (decktape)
