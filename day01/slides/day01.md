@@ -430,9 +430,9 @@ The grammar is the foundation. Note that we treat $\to$ as primitive, not derive
 
 A **valuation** $v$ is a function $\text{Var} \to \{\bot, \top\}$.
 
-The semantics extends $v$ to all formulas:
+Write $[\![\varphi]\!]_v$ for the **truth value (meaning) of $\varphi$ under $v$** — either $\top$ (true) or $\bot$ (false). It is defined by recursion on the structure of $\varphi$:
 
-| $\varphi$ | $[\![\varphi]\!]_v$ |
+| $\varphi$ | $[\![\varphi]\!]_v$ (its truth value under $v$) |
 |---|---|
 | $p$ | $v(p)$ |
 | $\neg \varphi$ | $\top$ iff $[\![\varphi]\!]_v = \bot$ |
