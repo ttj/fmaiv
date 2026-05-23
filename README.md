@@ -22,30 +22,38 @@ Markdown source is under `dayNN/slides/dayNN.md`.
 |---|---|---|
 | 1 | Foundations: logic, transition systems, SAT, and SMT | Propositional and first-order logic; structural operational semantics and transition systems as the unifying behavioral model; decision procedures; hands-on with the Z3 SMT solver. |
 | 2 | Model checking | Reactive systems modeled as transition systems; computation tree logic (CTL) and linear temporal logic (LTL); explicit-state, symbolic, and bounded model checking with nuXmv; counterexample-guided debugging. |
-| 3 | Theorem proving | Lean 4 with the Mathlib library for interactive proof; formalizing properties of transition systems and other mathematical structures; Claude Code for AI-assisted proof generation and checking. |
+| 3 | Theorem proving | Lean 4 for interactive proof (Mathlib-free, so it builds offline in seconds); formalizing properties of transition systems and other mathematical structures; Claude Code for AI-assisted proof generation and checking. |
 | 4 | Program and high-assurance verification | Programs as transition systems on memory states; bounded model checking of C with CBMC; Cryptol with the Software Analysis Workbench (SAW) for specifying and verifying bit-level algorithms; survey of neural-network verification and industrial deployments. |
 
-## Software prerequisites
+## Run the course online — no install (recommended)
 
-Please install the following before the course begins. Estimated total setup time on a modern laptop: 30–60 minutes. Disk footprint: roughly 6 GB.
+You do **not** need to install anything: every day runs in the browser, and every `dayNN/examples/` file is in the repo. Local installation is fully supported as a backup ([see below](#local-installation-backup)). The full online walkthrough — with the exact per-day run commands — is in [`notebooks/README.md`](notebooks/README.md).
+
+- **GitHub Codespaces — full toolset, one click.** [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ttj/fmaiv) A cloud container with **everything preinstalled**: `z3` (CLI + Python), `cbmc`, `cryptol`, `saw`, `NuSMV`, `lean`, and `smvis`. Open any `notebooks/*.ipynb` and run it, or use the integrated terminal (e.g. `cbmc file.c --unwind 5`). Free within GitHub's monthly allowance (120 core-hours; 180 for verified students via GitHub Education).
+- **Google Colab — per notebook, zero setup** (just a Google login): [`01_z3_python.ipynb`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/01_z3_python.ipynb) (Day 1 — Z3 in Python) and [`02_tools_cli.ipynb`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/02_tools_cli.ipynb) (Days 2 & 4 — CBMC and NuSMV). `z3`/`cbmc`/`NuSMV` install in seconds; `cryptol`/`saw` are large downloads — prefer Codespaces for those.
+- **Browser tools (no account needed):**
+  - **Day 1 (Z3)** — the interactive Z3 guide runs entirely in the browser: <https://microsoft.github.io/z3guide/>
+  - **Day 2 (model checking)** — **smvis** runs NuSMV with state/BDD visualization in the browser and accepts your own `.smv` files: <https://bit.ly/fmaiv_smvis>
+  - **Day 3 (Lean 4)** — the Lean web editor and the gamified Natural Number Game run in the browser: <https://live.lean-lang.org/> and <https://adam.math.hhu.de/>
+- **nuXmv** is license-gated (not redistributable), so it is **not** in Codespaces/Colab. Use the **smvis** web app above, or the preinstalled **`NuSMV`** (same SMV language and `is true/false` verdicts) for finite-state models.
+
+## AI coding assistant (recommended, either path)
+
+Bring **at least one** AI coding assistant so we can explore AI-assisted verification in class — we use **Claude Code** throughout; the others are encouraged for comparison. In Codespaces or local VS Code, install from the Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`):
+
+- **Claude Code** by Anthropic — <https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code> (sign in with an Anthropic Console or Claude.ai account).
+- **OpenAI Codex** — <https://marketplace.visualstudio.com/search?term=openai%20codex&target=VSCode> (OpenAI account; some features may require an API plan).
+- **Gemini Code Assist** by Google — <https://marketplace.visualstudio.com/items?itemName=Google.geminicodeassist> (Google account; the free individual tier suffices).
+
+## Local installation (backup)
+
+Prefer to run on your own machine? Install the following before the course begins. Estimated total setup time: 30–60 minutes; disk footprint roughly 6 GB.
 
 ### 1. Visual Studio Code
 
-The editor used throughout the course, with the Lean 4 extension for theorem proving.
+The editor used throughout the course. After installing, add the **Lean 4** (`leanprover`) and **Python** (`ms-python`) extensions from the marketplace, plus an AI assistant (see the section above).
 
 - Download: <https://code.visualstudio.com/Download>
-- Recommended extensions, installed from the marketplace once VS Code is running (open the Extensions panel with `Ctrl+Shift+X` / `Cmd+Shift+X` and search):
-  - **Lean 4** by `leanprover` — Lean 4 language support and proof state display.
-  - **Python** by `ms-python` — Python language support, debugging, and linting.
-- AI-assisted coding extensions — install **at least one** of the following so we can explore AI-assisted verification in class. We will use Claude Code throughout, but the other two are encouraged for comparison.
-  - **Claude Code** by Anthropic — Anthropic's coding agent integrated into VS Code. <https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code>
-  - **OpenAI Codex** — OpenAI's coding extension. <https://marketplace.visualstudio.com/search?term=openai%20codex&target=VSCode>
-  - **Gemini Code Assist** by Google — free for individuals. <https://marketplace.visualstudio.com/items?itemName=Google.geminicodeassist>
-
-Each AI extension requires a sign-in to its provider. Accounts are free or low-cost for the level of use we need; provider-specific details:
-- Claude Code: sign in with an Anthropic Console or Claude.ai account.
-- OpenAI Codex: sign in with an OpenAI account; some features may require an API plan.
-- Gemini Code Assist: sign in with a Google account; the free individual tier is sufficient.
 
 ### 2. Python 3.10 or newer
 
@@ -98,9 +106,9 @@ The Day 4 toolchain — [CBMC](https://github.com/diffblue/cbmc) (bounded model 
 
 If you prefer native installs, CBMC is in `apt`/`brew` and Cryptol/SAW ship Linux/macOS prebuilt tarballs from their releases pages; expect to pin clang's version against SAW's bitcode parser. Docker is strongly preferred.
 
-## Verify everything is installed
+### Verify a local install
 
-Run each of the following from a fresh terminal. Every command should print a version or help banner without error.
+After installing locally, run each of the following from a fresh terminal; every command should print a version or help banner without error. (In Codespaces these are all preinstalled — the container prints a readiness banner when it attaches, and the notebooks run end-to-end.)
 
 ```
 code --version
@@ -263,7 +271,7 @@ Where to go deeper after this intensive. These are the closest analogues we foun
 
 ## Course materials
 
-The four days live under [`day01/`](day01/) … [`day04/`](day04/), each containing a `README.md`, slides under `slides/`, worked examples under `examples/`, and a mini-project under `assignments/`.
+The four days live under [`day01/`](day01/) … [`day04/`](day04/), each containing a `README.md`, slides under `slides/`, worked examples under `examples/`, and a mini-project under `assignments/`. Browser/Colab runners are in [`notebooks/`](notebooks/) (see [`notebooks/README.md`](notebooks/README.md)), and the annotated external-resources list is in [`references/`](references/).
 
 ## Contact
 
