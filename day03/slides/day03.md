@@ -122,6 +122,122 @@ This is the conceptual core. A proposition like 5 = 5 is a type; a proof of it i
 
 ---
 
+## Everything has a type — even types
+
+In Lean, **every** expression has a type — and a type is itself an expression, so it has a type too:
+
+```lean
+#check (5 : Nat)     -- 5     : Nat
+#check Nat           -- Nat   : Type      (a data type lives in `Type`)
+#check Type          -- Type  : Type 1    (and `Type 1 : Type 2`, …)
+#check (5 = 5)       -- Prop              (a proposition)
+#check Prop          -- Prop  : Type      (propositions live in `Prop`)
+```
+
+So there are **three layers**: a *value* (`5`), its *type* (`Nat`), and the type's *type* (`Type`). Reading bottom-up: `5 : Nat : Type`.
+
+::: notes
+Beginners are unsettled that "types have types." Make it ordinary: in everyday math you don't usually ask "what kind of thing is the integers?" — Lean forces an answer, and the answer is `Type`. The three-layer ladder (value : type : universe) is the whole idea. We are NOT going to dwell on universe levels; the only takeaway is that the ladder never bottoms out, so `Type : Type` is avoided (it would be paradoxical) by an infinite tower `Type 0 : Type 1 : …`. They will never type a universe level by hand in this course.
+:::
+
+---
+
+## `Sort`, `Prop`, `Type` — the universes
+
+The types-of-types are called **universes**. Two matter to us:
+
+| Universe | Holds | Example members |
+|---|---|---|
+| `Prop` | **propositions** (things to prove) | `5 = 5`, `x ≤ 10`, `p ∧ q` |
+| `Type` (`= Type 0`) | ordinary **data types** | `Nat`, `Bool`, `CounterState` |
+
+`Type 0 : Type 1 : Type 2 : …` is an infinite tower (so nothing contains itself). `Sort` is the umbrella word covering both (`Prop = Sort 0`, `Type u = Sort (u+1)`).
+
+The key asymmetry: in `Prop`, **all proofs of one proposition are interchangeable** ("proof irrelevance") — we only care *that* it's proved, not *which* proof.
+
+::: notes
+One slide on universes, kept deliberately light. The single conceptual point worth carrying: `Prop` and `Type` are different universes for a reason — `Prop` is "proof-irrelevant" (any two proofs of the same proposition are treated as equal, because a proof is evidence, not data), whereas in `Type` two values of `Nat` like 3 and 4 are genuinely different data. That distinction is why `5 = 5` lives in `Prop` and `Nat` lives in `Type`. The `Sort u` umbrella and the universe tower are mentioned only so the words aren't mysterious if they appear in an error message; nobody in this audience needs to manipulate universe levels.
+:::
+
+---
+
+## Function types, and *dependent* function types
+
+A function type `A → B` is read "give me an `A`, get back a `B`":
+
+```lean
+#check (Nat.succ : Nat → Nat)          -- successor: a Nat in, a Nat out
+#check (fun n => n + n : Nat → Nat)    -- `fun x => …` is an anonymous function
+```
+
+A **dependent** function type lets the *result type depend on the input value* — written `(n : A) → B n`:
+
+```lean
+-- `∀ n, 0 + n = n` is a dependent function type:
+--   give it a Nat `n`, get back a PROOF of `0 + n = n` (a different proposition per n)
+#check (zero_add : ∀ n : Nat, 0 + n = n)
+```
+
+So `∀` ("for all") is just a dependent function type whose outputs are **proofs**. That single idea is what makes "propositions as types" powerful enough for real math.
+
+::: notes
+This is the one genuinely new piece of type theory beyond "proposition = type": dependency. Ordinary `A → B` is what everyone knows. The leap is that the codomain can mention the argument — `(n : Nat) → (0 + n = n)` is a function that, given a specific n, returns a proof tailored to that n. Then the punchline: `∀ x, P x` IS exactly that dependent function type, and a proof of a `∀` is literally a function you can apply to a witness. This demystifies why, later, applying a proof of `∀ s, …` to a particular state `s` is just function application. Keep it gentle; the `(n : A) → B n` notation is the only new symbol.
+:::
+
+---
+
+## Curry–Howard, in full: the logic ↔ types dictionary
+
+Every logical connective is a **type constructor**; every proof is a **term** that builds or uses it:
+
+| Logic | Type | To **prove** it… | To **use** it… |
+|---|---|---|---|
+| `P → Q` (implies) | function `P → Q` | write `fun (h : P) => …` | apply it: `h pq` |
+| `P ∧ Q` (and) | pair `P × Q` | `⟨hp, hq⟩` (give both) | project: `h.1`, `h.2` |
+| `P ∨ Q` (or) | tagged union | `Or.inl hp` / `Or.inr hq` | `cases` on which side |
+| `∃ x, P x` (exists) | dependent pair | `⟨w, hw⟩` (witness + proof) | `obtain ⟨w, hw⟩ := h` |
+| `¬ P` (not) | `P → False` | assume `P`, derive `False` | feed it a `P` to get `False` |
+| `True` | one-element type | `trivial` | — |
+| `False` | empty type | (impossible) | `absurd` — anything follows |
+
+A proof is a *program*; running the logic is *type-checking the program*.
+
+::: notes
+The full dictionary, the heart of the L1 deepening. Walk a few rows aloud. Implication is the deepest one for beginners: "to prove P implies Q is to write a function turning a proof of P into a proof of Q," and "to use such a proof is to apply it" — that's modus ponens as function application, which the existing tactic slide already hinted at with `exact hpq hp`. ∧ is a pair (`⟨_, _⟩` builds it, `.1/.2` take it apart — exactly the anonymous-constructor and projections the counter proof uses). ∃ is a dependent pair: a witness PLUS a proof about it. ¬P as `P → False` explains why proof-by-contradiction is "assume P, manufacture False." `False` is the empty type, so a proof of it would let you build anything (the principle of explosion / `absurd`). Every notation here recurs in Counter.lean, so this table is also a forward reference.
+:::
+
+---
+
+## A tiny term-mode proof of each connective
+
+No tactics — just *build the term* the dictionary prescribes:
+
+```lean
+-- implication: a function
+example (p q : Prop) : p → (q → p) :=
+  fun hp => fun _ => hp                 -- given p (and anything), return the p
+
+-- and: a pair (anonymous constructor ⟨ ⟩)
+example (p q : Prop) (hp : p) (hq : q) : p ∧ q :=
+  ⟨hp, hq⟩
+
+-- or: pick a side
+example (p q : Prop) (hp : p) : p ∨ q :=
+  Or.inl hp                            -- "left" injection
+
+-- exists: witness + proof
+example : ∃ n : Nat, n + 1 = 4 :=
+  ⟨3, rfl⟩                              -- witness 3; rfl proves 3 + 1 = 4
+```
+
+These compile with **no Mathlib** — the connectives are core Lean.
+
+::: notes
+Make the dictionary concrete with four-line term-mode proofs, so students see that "a proof is a term" is literal, not metaphor. The first is the classic `p → q → p` (constant function) — the simplest non-trivial proof in all of logic, and it's just `fun hp => fun _ => hp`. The ∧ proof is the anonymous constructor `⟨hp, hq⟩` they'll see packaging `counterInv_inductive`. The ∃ proof `⟨3, rfl⟩` is the witness-plus-evidence shape. Emphasize: these are term mode (no `by`), to reinforce that tactic mode is just a convenient way to *generate* terms like these. All core Lean — reassure the Mathlib-free audience.
+:::
+
+---
+
 ## What the kernel actually checks
 
 Everything reduces to **type-checking one term**:
@@ -134,6 +250,26 @@ So a 2-million-line library and an LLM are *equally untrusted*: whatever they em
 
 ::: notes
 The deck repeats "the kernel checks every step" but never says how — this says how (grounded in TPiL). The kernel does one job: type-check the final proof term (β/δ/ι-reduction up to definitional equality). Tactics and automation are elaborate term *generators*; none is trusted. This is the architectural reason AI-assisted proof is safe: a hallucinated step yields a term the kernel rejects. It's also why proofs can be checked in parallel and why "trust" is concentrated in a few thousand lines, not millions. (The one exception is `native_decide`, which also trusts the compiler — flag it when it appears.)
+:::
+
+---
+
+## What "re-check from scratch" means
+
+A traditional math proof "conveys a message" — peer review checks the *ideas*, and the fiddly steps are "too cumbersome" to verify line by line. Lean is the opposite: **every** step must exist as a term, and the kernel re-derives all of them.
+
+```lean
+theorem two_plus_two : 2 + 2 = 4 := by
+  rfl                                  -- tactic mode: short to WRITE
+-- but what the kernel RECEIVES and re-checks is a finished term:
+#print two_plus_two
+-- theorem two_plus_two : 2 + 2 = 4 := Eq.refl 4   (roughly)
+```
+
+You wrote one tactic; the kernel checked a concrete term (`Eq.refl 4`) and confirmed both sides really compute to `4`. The tactic was just a *convenient way to produce* that term — it earns no trust of its own.
+
+::: notes
+Grounds the "re-checked from scratch" claim in something students can see, and ties directly to the transcript: math proofs are informal and "some of the formal details are too cumbersome to check," whereas in a theorem prover "all of that reasoning would have to exist." `#print` reveals the term behind a tactic proof — here `rfl` elaborates to roughly `Eq.refl 4`, and the kernel verifies that `2 + 2` and `4` are definitionally equal (both reduce to 4). The pedagogical beat: the thing you TYPE (a tactic script) and the thing the kernel CHECKS (a proof term) are different artifacts; the script's only job is to build the term, and if it builds a bad term the kernel says no. This is the concrete version of "AI proposes, kernel disposes."
 :::
 
 ---
@@ -182,6 +318,90 @@ The single most illuminating contrast for a beginner, straight from Theorem Prov
 
 ---
 
+## Induction, the way you already know it
+
+The pen-and-paper recipe for "**P** holds for *all* naturals `n`":
+
+- **Base case** — prove `P(0)`.
+- **Inductive step** — *assume* `P(k)` (the **induction hypothesis**), prove `P(k+1)`.
+
+Classic example: $0 + 1 + \dots + n = \dfrac{n(n+1)}{2}$.
+
+- Base $n=0$: left side $=0$, right side $=\frac{0\cdot 1}{2}=0$. ✓
+- Step: assume $0+\dots+k=\frac{k(k+1)}{2}$ (the **IH**); then
+$$0+\dots+k+(k{+}1)=\underbrace{\tfrac{k(k+1)}{2}}_{\text{by IH}}+(k{+}1)=\tfrac{(k+1)(k+2)}{2}.\ \checkmark$$
+
+<svg viewBox="0 0 720 150" style="display:block;margin:0.3em auto;max-width:86%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="ind-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="104" y1="78" x2="130" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
+  <line x1="214" y1="78" x2="240" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
+  <line x1="324" y1="78" x2="350" y2="78" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ind-ah)"/>
+  <line x1="374" y1="78" x2="398" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
+  <line x1="482" y1="78" x2="558" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
+  <text x="520" y="124" text-anchor="middle" font-size="11.5" fill="#146a96">IH: P(k) ⟹ P(k+1)</text>
+  <rect x="22" y="56" width="82" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
+  <text x="63" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(0)</text>
+  <text x="63" y="124" text-anchor="middle" font-size="11.5" fill="#8a6d2f">base case</text>
+  <rect x="132" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="173" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(1)</text>
+  <rect x="242" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="283" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(2)</text>
+  <text x="362" y="84" text-anchor="middle" font-size="18" fill="#5b6168">⋯</text>
+  <rect x="400" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="441" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k)</text>
+  <rect x="560" y="56" width="92" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="606" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k+1)</text>
+</svg>
+
+::: notes
+Ground induction in exactly the instructor's recap example before showing it in Lean, so the Lean version feels like a transcription, not a new idea. Read the dominoes metaphor aloud: base case = knock over the first domino; inductive step = guarantee each domino knocks the next; conclusion = all fall. The IH is the phrase to land — "assume it for k" is not circular, it's the engine. The sum formula is the canonical instance and it's in the lecture; we do the algebra on the slide so the audience sees the IH actually getting *used* (the underbrace). The figure is the base/step + IH diagram the brief requests.
+:::
+
+---
+
+## The same induction, in Lean (from scratch)
+
+```lean
+theorem zero_add (n : Nat) : 0 + n = n := by
+  induction n with
+  | zero =>
+    -- BASE.   goal:  ⊢ 0 + 0 = 0
+    rfl                              -- both sides compute to 0
+  | succ k ih =>
+    -- STEP.   ih : 0 + k = k        (the induction hypothesis!)
+    --         goal:  ⊢ 0 + (k + 1) = k + 1
+    rw [Nat.add_succ]               -- 0 + (k+1)  ↦  (0 + k) + 1
+    -- now goal:  ⊢ (0 + k) + 1 = k + 1
+    rw [ih]                         -- rewrite 0 + k  ↦  k  using the IH
+    -- now goal:  ⊢ k + 1 = k + 1   — true by rfl, rw closes it automatically
+```
+
+`induction n` splits into the two ways a `Nat` is built: `zero`, and `succ k` (= `k+1`) **plus** the hypothesis `ih` for `k`. `Nat.add_succ` and `rw` are **core** Lean — no Mathlib.
+
+::: notes
+The from-scratch induction walkthrough the brief asks for, with the goal state annotated at every line so students watch the IH appear and get consumed. The crucial moment is `| succ k ih =>`: Lean hands you `k`, the goal at `k+1`, AND `ih : 0 + k = k` for free — that `ih` is the induction hypothesis, materialized as a named hypothesis you can `rw` with. The two rewrites are the whole proof: unfold `add_succ` to expose `0 + k`, then rewrite by the IH. End by noting `rw` auto-closes a goal that becomes `x = x`. Everything is core Lean — repeat for the Mathlib-free audience. This is the template the counter's reachability induction follows.
+:::
+
+---
+
+## Why `succ k ih` has that shape
+
+`induction` gives one case per **constructor** of the type, and a hypothesis for each recursive argument:
+
+```lean
+inductive Nat where
+  | zero : Nat            -- ⟶ case `zero`  (no IH: nothing recursive)
+  | succ (k : Nat) : Nat  -- ⟶ case `succ k ih`  (IH because `k : Nat` is recursive)
+```
+
+The induction principle is *generated from the type's definition*. That's the bridge to the counter: because `Reachable` is an **inductive** predicate (next block), it comes with its own induction principle — and that principle is exactly what proves an invariant.
+
+::: notes
+Demystify where `zero` / `succ k ih` come from: they are not magic tactic names, they are read straight off `Nat`'s two constructors. `zero` is non-recursive so it gets no IH; `succ` takes a `Nat` argument (recursive) so that argument's case carries an IH. State the general rule once — "one case per constructor, an IH per recursive field" — because it's the rule that will explain the shape of the `Reachable` induction (init case vs. step case) when we hit the inductive-invariant theorem. This is the conceptual hinge between the Nat warm-up and the real proof.
+:::
+
+---
+
 ## Tactics: building the proof term
 
 `by` opens a tactic block; each tactic transforms the **goal state** — the hypotheses, a turnstile `⊢`, and the target to prove.
@@ -198,6 +418,73 @@ The InfoView (Lean's live panel) shows this state after each tactic, until "no g
 
 ::: notes
 Tactics are programs that manipulate the proof state (hypotheses + goal). You watch the goal shrink in the InfoView as you apply tactics, until nothing remains. This interactive, stateful experience is what makes Lean usable — you are never staring at a blank page; you are transforming a concrete goal. This is also exactly the surface an AI assistant operates on: it reads the goal and proposes the next tactic.
+:::
+
+---
+
+## Reading a goal state (the `⊢` turnstile)
+
+The InfoView shows, at every moment: the **hypotheses** (what you know) above a line, the **turnstile** `⊢`, and the **goal** (what's left to prove):
+
+```text
+p q : Prop          -- two propositions are in scope
+hp : p              -- we have a proof of p, named hp
+hpq : p → q         -- we have a proof of p → q, named hpq
+⊢ q                 -- GOAL: we still must prove q
+```
+
+- Read `⊢ q` as "**turnstile** q" = "under the hypotheses above, prove `q`."
+- Each tactic *rewrites this whole picture*. The proof is done when the goal becomes **"no goals."**
+
+A tactic either **closes** the goal, **transforms** it, or **splits** it into several subgoals (each with its own `⊢`).
+
+::: notes
+Spend real time here — reading the goal state is THE core skill, and the deck never explicitly decodes the turnstile. The mental model: above the line is your toolbox (named hypotheses), below is the job. Three things a tactic can do — close (zero goals left), transform (same goal, different shape, e.g. `simp`), or split (several new goals, e.g. `cases` or `constructor`). When several goals are open you work them one at a time; the `·` bullet or `<;>` combinator manage that. Everything else today is just watching this picture evolve.
+:::
+
+---
+
+## Proof-state evolution, step by step
+
+Watch the state change as each tactic fires:
+
+```lean
+example (p q : Prop) (hpq : p → q) (hp : p) : q := by
+  -- ⊢ q                      (hyps: hpq : p → q,  hp : p)
+  apply hpq
+  -- ⊢ p                      (apply turned goal q into its premise p)
+  exact hp
+  -- no goals                 ✓ done
+```
+
+| After tactic | Goal | Why it changed |
+|---|---|---|
+| *(start)* | `⊢ q` | the theorem's claim |
+| `apply hpq` | `⊢ p` | to get `q` via `p → q`, now prove `p` |
+| `exact hp` | *no goals* | `hp` is exactly a proof of `p` |
+
+<svg viewBox="0 0 760 180" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="ps-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <line x1="234" y1="92" x2="284" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
+  <text x="259" y="82" text-anchor="middle" font-size="11" fill="#146a96">apply hpq</text>
+  <line x1="506" y1="92" x2="556" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
+  <text x="531" y="82" text-anchor="middle" font-size="11" fill="#146a96">exact hp</text>
+  <rect x="18" y="32" width="216" height="120" rx="9" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="34" y="58" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hp  : p</text>
+  <text x="34" y="80" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hpq : p → q</text>
+  <line x1="30" y1="94" x2="222" y2="94" stroke="#cdd5db" stroke-width="1.2"/>
+  <text x="34" y="120" font-size="13" fill="#146a96" font-family="JetBrains Mono, monospace">⊢ q</text>
+  <rect x="290" y="32" width="216" height="120" rx="9" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.6"/>
+  <text x="306" y="58" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hp  : p</text>
+  <text x="306" y="80" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hpq : p → q</text>
+  <line x1="302" y1="94" x2="494" y2="94" stroke="#cdd5db" stroke-width="1.2"/>
+  <text x="306" y="120" font-size="13" fill="#146a96" font-family="JetBrains Mono, monospace">⊢ p</text>
+  <rect x="562" y="32" width="184" height="120" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="1.8"/>
+  <text x="654" y="98" text-anchor="middle" font-size="14" fill="#1e6b32">no goals ✓</text>
+</svg>
+
+::: notes
+This is the proof-state-evolution diagram the brief asks for, rendered first as code + table so it reads even before the figure exists. The key teaching move: `apply hpq` does *backward* reasoning — "I want `q`; `hpq` produces `q` from `p`; so it suffices to prove `p`," and the goal literally becomes `⊢ p`. Then `exact hp` matches. Contrast with the earlier slide's `exact hpq hp`, which does it in ONE forward step — same proof term, two ways to drive there. Beginners find `apply` (work backward from the goal) more intuitive than composing the term forward, so showing both is worth it.
 :::
 
 ---
@@ -313,6 +600,45 @@ These are the tactics a student meets the moment they open Counter.lean / Transi
 
 ---
 
+## "Batteries-included": `decide` and `Decidable`
+
+Some propositions can be **settled by computation** — Lean has an algorithm that returns `true`/`false`. Those are **`Decidable`**, and `decide` just runs the algorithm:
+
+```lean
+example : (2 + 2 = 4) := by decide        -- compute: yes
+example : (3 < 10)    := by decide        -- compute: yes
+example : ModeVal.off ≠ ModeVal.on := by decide   -- compare constructors: yes
+example : ∀ n, n < 5 → n < 100 := by decide       -- ✗ can't: range of n is infinite
+```
+
+- A goal is `decide`-able only when the search is **finite** (equality of concrete values, small bounded checks). "For all naturals" is *not* finite, so `decide` declines.
+- `decide` is **core** Lean — no Mathlib. The kernel re-runs the computation, so it stays trusted (unlike `native_decide`, which compiles it and trusts the compiler).
+
+::: notes
+"Batteries-included automation" framing the brief wants. The concept under `decide` is `Decidable`: a proposition for which Lean can mechanically compute a yes/no. Concrete-value equalities (`2+2=4`), strict inequalities on literals (`3<10`), and constructor disequality (`off ≠ on`, used in the counter) are all decidable — `decide` evaluates and produces the proof. The boundary is finiteness: the moment a quantifier ranges over infinitely many naturals, there's no algorithm to run, so `decide` fails and you need induction/`omega`. Reiterate the trust caveat: plain `decide` is kernel-rechecked and safe; `native_decide` is the same idea compiled for speed but it bolts the compiler onto the trusted base — only reach for it when `decide` is too slow.
+:::
+
+---
+
+## `omega`: the linear-arithmetic workhorse
+
+`omega` is a **decision procedure** for linear arithmetic over `Nat`/`Int` — it *decides* goals built from `+`, `-`, `≤`, `<`, `=` and integer constants, with no lemmas from you:
+
+```lean
+example (x : Nat) (h : x < 10) : x + 1 ≤ 10 := by omega   -- ✓
+example (a b : Nat) (h : a + b = 10) (hb : b ≤ 3) : 7 ≤ a := by omega   -- ✓
+example (x : Nat) : x * x ≥ 0 := by omega   -- ✗ `x*x` is NON-linear — omega declines
+```
+
+- **Linear** = variables only added/subtracted and compared, never multiplied together. `x + 1`, `2*x` are fine; `x*y` is not.
+- `omega` is **core** Lean. It closes essentially *every* arithmetic leaf in the counter proof — e.g. from `x < 10` conclude `x + 1 ≤ 10`.
+
+::: notes
+`omega` earns its own slide because it does the heavy lifting in the counter and it's the cleanest example of "automation you can lean on without understanding its internals." The one literacy point: linear vs. non-linear. omega is complete for *linear* integer/Nat arithmetic (Presburger arithmetic) — give it any tangle of `+ - ≤ < =` over Nat/Int and it decides, including using hypotheses in context. It cannot do genuine multiplication of variables (`x*y`, `x²`), which is undecidable in general — so `x*x ≥ 0` is out (even though true). Tie it to the proof: every counter leaf ends in `omega` because each guard reduces to a linear fact like `x < 10 ⊢ x+1 ≤ 10`. Core Lean, no Mathlib.
+:::
+
+---
+
 ## Finding lemmas (library search)
 
 ```lean
@@ -327,6 +653,49 @@ Our `CounterDemo` project is **Mathlib-free**, so `exact?` searches Lean's *core
 
 ::: notes
 The practical skill for a big library: you do not memorize lemmas, you search. exact?/apply? are core Lean tactics (no Mathlib needed) that read the current goal and propose imported lemmas that close it — here Nat.add_comm, which is in core. The naming convention is the other half — once you internalize "namespace.subject_property," you can guess a name and confirm with autocomplete. Important for this course: the autograder project imports no Mathlib, so only core lemmas + your own are in scope; you'd add Mathlib in a larger project. loogle is a type-pattern search engine (web + a #loogle command), not a bare tactic. AI assistants are genuinely good at naming the right lemma.
+:::
+
+---
+
+## Inductive types: data built one way at a time
+
+An **inductive type** lists the *only* ways to construct its values (its **constructors**). You've already seen one — `Nat` is `zero` and `succ`:
+
+```lean
+inductive ModeVal | off | on          -- exactly two values; nothing else
+inductive Bool    | false | true      -- the same shape
+```
+
+The payoff: because the constructors are the *complete* list, Lean derives a matching **induction / recursion principle** automatically — "to handle any value, handle each constructor." That principle is what `cases` and `induction` run on.
+
+```lean
+example (m : ModeVal) : m = .off ∨ m = .on := by
+  cases m              -- splits into the off case and the on case — no others possible
+  · exact Or.inl rfl
+  · exact Or.inr rfl
+```
+
+::: notes
+Inductive types are the one structural idea the counter rests on, so give them a slide before `Reachable` arrives. The mental model: an inductive declaration is an *exhaustive* recipe list — `ModeVal` is off or on and there is no third option, which is precisely why `cases m` produces exactly two subgoals and why the proof is complete after handling both. Connect back: `Nat` from the induction slides is the same machinery with a recursive constructor. The deep point — "Lean auto-generates the induction principle from the constructor list" — is what makes the next slide's `Reachable` immediately give us a proof method. Don't define "recursor" formally; "the induction principle Lean builds for you" is enough for this audience.
+:::
+
+---
+
+## The recursor: an induction principle per type
+
+For every inductive type, Lean generates a **recursor** (`.rec`) — the formal statement of its induction principle. You rarely call it directly; `induction`/`cases` use it under the hood.
+
+```lean
+#check @Nat.rec
+-- to prove `motive n` for all n, supply:
+--   • a proof of `motive 0`                       (base case)
+--   • for each k, `motive k → motive (k+1)`        (step, given the IH)
+```
+
+So `induction n` is just `Nat.rec` with the base case and step filled in — *exactly* the base/step recipe from the warm-up. **Key idea:** define a thing inductively and you get its proof-by-induction principle **for free**.
+
+::: notes
+Name the recursor so the word isn't mysterious if it surfaces, but keep it light. The single takeaway: `Nat.rec` is the machine form of "prove P(0), prove P(k)⟹P(k+1)" — the dominoes slide, formalized — and the `induction` tactic is sugar over it. The `motive` is just "the property you're proving, as a function of the value." Why this matters NOW: it sets up the argument that `Reachable`, being inductive, automatically yields a principle whose two cases are "init states satisfy P" and "a step preserves P" — i.e. the inductive-invariant method is literally `Reachable.rec`. We won't prove that on a slide, but students should feel it's not a coincidence.
 :::
 
 ---
@@ -377,6 +746,29 @@ This is the workhorse theorem and it is proved generically (by induction on Reac
 
 ---
 
+## Why those two obligations? `Reachable`'s induction
+
+`Reachable` was defined with **two constructors** — so its induction principle has **two cases**, and they *are* the two proof obligations:
+
+```lean
+inductive Reachable (ts) : S → Prop where
+  | init : ts.init s → Reachable ts s              -- ⟶ base case
+  | step : Reachable ts s → ts.next s s' → Reachable ts s'  -- ⟶ step case (with IH)
+```
+
+To prove `∀ s, Reachable ts s → P s`, run `induction` on the `Reachable` proof:
+
+- **`init` case** — `s` is initial ⟹ show `P s`. *(This is the base obligation.)*
+- **`step` case** — `s'` follows a step from a reachable `s`, with **IH** `P s` ⟹ show `P s'`. *(This is the step obligation.)*
+
+That's it — the method isn't a separate trick, it's the recursor of `Reachable`. Finite or infinite state space, the induction is the same.
+
+::: notes
+This is the conceptual capstone of the bridge built over the last several slides: the inductive-invariant method is not an axiom we postulate, it's what falls out of `induction` on the `Reachable` proof, because `Reachable` has exactly two constructors. The `init` constructor becomes the base obligation (initial states satisfy P); the `step` constructor — which recursively references a `Reachable` proof — becomes the step obligation and *hands you the IH* `P s` for the predecessor, exactly like `succ k ih` handed you `ih`. So `inductive_invariant_holds` is proved once by `induction` on Reachable, and the two halves of `InductiveInvariant` are precisely the two cases. Emphasize the independence from state-space size: nothing here counts states, so infinite/parametric systems cost nothing — the payoff promised on the opening "Where we are" slide.
+:::
+
+---
+
 ## The counter as a Lean system
 
 From `CounterDemo/Counter.lean` (auto-translated from `counter.smv`):
@@ -417,6 +809,46 @@ This is the central insight of the day, foreshadowed all week. "x ≤ 10" is tru
 
 ---
 
+## Why a too-weak invariant fails (worked)
+
+A cleaner illustration. Two counters: `x` starts 0 and counts **up**, `y` starts `m` and counts **down**, in lockstep:
+
+```text
+init:  x = 0,  y = m
+step:  if x < m then  x := x + 1 ;  y := y − 1
+```
+
+Claim: `0 ≤ y ≤ m` is an invariant. **Try to prove it inductive — and watch it fail:**
+
+- Step case: assume only `0 ≤ y ≤ m`. Take a state with `y = 0` but (say) `x = 0`. The guard `x < m` is **enabled**, so we step: `y := y − 1` → `y` underflows below 0. ✗
+- The catch: that state (`x = 0, y = 0` with `m > 0`) is **not actually reachable** — but the weak invariant can't *see* that. It never tied `x` and `y` together.
+
+::: notes
+This is the instructor's own two-variable example from the lecture, and it's pedagogically sharper than the counter for *seeing* why strengthening is needed, because the failure is a concrete underflow rather than an abstract gap. Walk it slowly: with only `0 ≤ y ≤ m` in hand, the inductive step must cope with ANY state satisfying it — including the bogus `x=0, y=0` state — and there the decrement breaks the bound. The whole point (straight from the transcript): the proof fails on an UNREACHABLE state, because the invariant didn't capture the relationship between the variables. Model checking would never visit that state; induction, reasoning locally about one step, has no such protection unless we encode the relationship. Sets up the fix on the next slide.
+:::
+
+---
+
+## The fix: strengthen with the missing relationship
+
+The repair (the instructor's): add the conserved quantity the program maintains — **`x + y = m`**:
+
+$$\Psi(s)\ \equiv\ (0 \le y \le m)\ \wedge\ (x + y = m)$$
+
+($\Psi$ — capital "psi" — the strengthened invariant; it **implies** the original `0 ≤ y ≤ m`.)
+
+Now the step case goes through: if `x < m`, then since `x + y = m` we get `y ≥ 1`, so `y − 1 ≥ 0` — no underflow. The conjunct we added is exactly the fact that rules out the bogus state.
+
+**General proof rule** (sound, but *incomplete* — you must find $\Psi$ yourself):
+
+> To prove $\Phi$ is an invariant: find $\Psi$ with $\Psi \Rightarrow \Phi$, and show $\Psi$ is **inductive**. The strongest possible $\Psi$ is "the reachable states themselves."
+
+::: notes
+The payoff half of the worked example, again from the transcript. The added conjunct `x + y = m` is a *conserved quantity* (an "energy" the loop preserves) — and it's precisely the relationship whose absence let the proof fail. With it, `x < m` plus `x + y = m` forces `y ≥ 1`, so the decrement is safe; the bad state `x=0,y=0` is excluded because it violates `x+y=m`. Then state the general rule the instructor gives: strengthening is SOUND (if you find a Ψ⟹Φ that's inductive, Φ really is invariant) but INCOMPLETE in the sense that finding Ψ is on you — there's no algorithm, though the strongest valid Ψ is always "the exact reachable set." This is the same shape as the counter's Φ, and the reason the next slides' creative step (and the AI's hit-or-miss help) matters.
+:::
+
+---
+
 ## The proof, in three parts
 
 ```lean
@@ -453,6 +885,55 @@ Each leaf: `simp [hm, ...]` to reduce the if-then-else, then `omega` for the ari
 
 ::: notes
 The case analysis mirrors the four guards exactly: mode off vs on, then press vs not, then x<10 vs not. Each branch reduces (via simp on the controlling hypotheses) the if-then-else transition to a concrete equation for s'.mode and s'.x, and then omega discharges the arithmetic (e.g. x < 10 ⊢ x+1 ≤ 10). About 60 lines total. Bigger systems factor leaves into helper lemmas, but the shape never changes.
+:::
+
+---
+
+## One leaf, fully worked: `on, ¬press, x < 10`
+
+Take the branch where `mode = on`, the button is **not** pressed, and `x < 10`. The counter ticks: `x := x + 1`, mode stays `on`. We must re-establish $\Phi(s') = (s'.x \le 10) \wedge (s'.\text{mode} = \text{off} \to s'.x = 0)$.
+
+```lean
+· -- context here:
+  --   hx    : s.x ≤ 10                       (from Φ s)
+  --   hmode : s.mode = .off → s.x = 0        (from Φ s)
+  --   hm    : s.mode = .on                   (this branch)
+  --   hp    : ¬ (s.press = true)             (this branch)
+  --   hlt   : s.x < 10                       (this branch)
+  --   hx_next, hmode_next : s'.mode/s'.x via the if-then-else
+  simp [hm, hp, hlt] at hx_next hmode_next
+  -- simp used the three guards to collapse the if-then-else:
+  --   hx_next    : s'.x = s.x + 1
+  --   hmode_next : s'.mode = .on
+  refine ⟨?_, ?_⟩          -- split Φ s' into its two conjuncts
+  · omega                  -- ⊢ s'.x ≤ 10 :  from s'.x = s.x+1 and s.x < 10  ✓
+  · intro hoff             -- ⊢ s'.mode = .off → s'.x = 0
+    simp [hmode_next] at hoff   -- hoff : .on = .off — impossible, closes goal
+```
+
+::: notes
+The fully-worked leaf the brief asks for — the `on / ¬press / x<10` case, annotated so students see exactly how `simp` then `omega` discharge it. Beat by beat: (1) the context shows the two inherited conjuncts of Φ s plus the three branch facts; (2) `simp [hm, hp, hlt]` feeds the guards INTO the transition's if-then-else so it reduces to concrete equations `s'.x = s.x+1`, `s'.mode = .on` — this is the "simp normalizes the encoded transition" claim made concrete; (3) `refine ⟨?_, ?_⟩` splits the goal Φ s' into two subgoals; (4) first conjunct `s'.x ≤ 10` is pure linear arithmetic from `s'.x = s.x+1` and `s.x < 10`, so `omega`; (5) second conjunct is vacuous because `s'.mode = .on`, so the antecedent `s'.mode = .off` is `.on = .off`, which `simp` refutes. This single leaf is the whole method in miniature; the other three leaves differ only in which guard reduces and whether the off-implication is vacuous or forces x=0.
+:::
+
+---
+
+## Why `<;> simp <;> omega` collapses all four leaves
+
+Every leaf has the **same shape**: feed the branch guards to `simp` (reducing the if-then-else), then let `omega` finish the arithmetic. When all four leaves close the *same way*, one line does the lot:
+
+```lean
+theorem counterInv_step : ∀ s s', counterInv s → CounterTS.next s s' → counterInv s' := by
+  intro s s' ⟨hx, hmode⟩ ⟨p', hp, hmode_next, hx_next⟩
+  cases hm : s.mode <;>
+    by_cases hpr : s.press = true <;>
+    by_cases hlt : s.x < 10 <;>
+    simp_all <;> omega        -- run simp_all then omega on EVERY generated subgoal
+```
+
+`t <;> s` means "after `t`, run `s` on **every** subgoal `t` produced." So the three splits fan out into the leaves, and `simp_all <;> omega` closes them all at once.
+
+::: notes
+This pays off the `<;>` combinator the existing tree slide advertised, by showing the whole step proof collapsed. The teaching point: the explicit per-leaf proof on the previous slide and this one-liner produce the *same proof term* — the one-liner just exploits that all leaves are uniform. `cases hm : s.mode <;> by_cases … <;> by_cases …` builds the 2×2×2 fan of subgoals (some impossible and discharged immediately); then `simp_all <;> omega` applies the same closer everywhere. Warn beginners: the compressed form is satisfying but *opaque when it fails* — if one leaf doesn't close, you expand back to explicit bullets to see which. This is exactly the place an AI assistant is useful (draft the one-liner) and also where it bluffs (a one-liner that doesn't quite close), tying to L3.
 :::
 
 ---
@@ -555,6 +1036,27 @@ The example project ships ranking-function machinery (TransitionSystem.lean's Is
 
 ---
 
+## A second worked invariant: GCD correctness
+
+Euclid's algorithm subtracts the smaller from the larger until they meet:
+
+```text
+init:  x := m,  y := n
+step:  while x > 0 ∧ y > 0:  if x > y then x := x − y  else  y := y − x
+```
+
+What makes it *correct*? The **conserved quantity**: `gcd(x, y)` never changes across a step.
+
+$$\text{Inv}(x,y)\ \equiv\ \gcd(x, y) = \gcd(m, n)$$
+
+This is an **inductive** invariant: `gcd(x−y, y) = gcd(x, y)` (and symmetrically), so each step preserves it. When the loop ends (one variable hits 0), `gcd(x,0)=x` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
+
+::: notes
+The instructor closes the inductive-invariants lecture on exactly this GCD example, so include it as a second, non-counter instance — and note it's the *invariant* (correctness) angle, complementary to the previous slide's *termination* (ranking-function) angle on the very same algorithm. The core lesson, in the transcript's words: even though x and y change every step, the running gcd stays fixed, and that conserved quantity IS the inductive invariant — it "captures the core logic of the program." This reinforces the strengthening mindset (find the maintained relationship) on a system students recognize as genuinely useful, and it pairs naturally with the termination slide: invariant ⇒ partial correctness, ranking function ⇒ termination, together ⇒ total correctness.
+:::
+
+---
+
 ## L2 recap
 
 - A handful of tactics (`intro`, `simp`, `omega`, `cases`, `constructor`) close most goals.
@@ -594,6 +1096,44 @@ The pattern, again: **AI proposes, the kernel disposes.** A wrong suggestion fai
 
 ::: notes
 The genuinely new capability is goal-conditioned proof drafting. The safety property is structural: anything the AI writes must pass the kernel, so a hallucinated step simply fails to compile. This is why Lean + AI is trustworthy in a way that, say, an LLM writing prose mathematics is not — the verification is mechanical and total.
+:::
+
+---
+
+## Two kinds of prover: automated vs. interactive
+
+The lecture draws the line we've been living on both sides of:
+
+| | **Automated** (ATP / SMT) | **Interactive** (ITP) |
+|---|---|---|
+| Input | a formula | a theorem **+ a proof script** |
+| You do | press the button | guide the proof |
+| Output | yes / no / *time-out* | a checked **proof** (or failure) |
+| Logic | mostly first-order, decidable fragments | higher-order, full dependent types |
+| Examples | nuXmv, Z3 (Days 1–2) | Lean, Coq, Isabelle, PVS |
+
+- **Automation buys ease; expressiveness costs interaction.** Some specs (e.g. CompCert's compiler-correctness) simply *can't be stated* in the first-order language an SMT solver decides — you need the higher-order logic of an ITP.
+- The deep asymmetry behind all of it: **finding a proof is hard; checking one is easy.**
+
+::: notes
+This is the SMT-vs-ITP contrast the brief asks for, framed exactly as the instructor frames it across the Q&A and history transcripts. The table is the whole idea: an automated prover (SMT solver like Z3 under nuXmv) takes a formula and pushes a button, but is confined to decidable, mostly first-order fragments and may time out; an interactive prover takes a theorem AND your proof and checks it, at the price of your effort, but can express higher-order/dependent statements. The transcript's expressiveness point is the load-bearing one: things like CompCert's translation-correctness "can't necessarily be specified in first-order logic," which is *why* ITPs exist despite being harder. And the line that makes AI relevant — "finding proofs is hard, checking them is easy" — is the asymmetry the next slide builds the AI landscape on.
+:::
+
+---
+
+## The AI-proving landscape
+
+Because checking is cheap, the field has thrown search and learning at the *hard* half — finding proofs:
+
+- **Classic ATP / benchmarks** — TPTP problem sets; "Formalizing 100 Theorems"; competitions long predate LLMs.
+- **LLMs for math** — Minerva (Google, quantitative reasoning), tool-augmented models (LLM + Wolfram/SMT), and Gowers' "automatic theorem proving project" all asked: can models *find* proofs?
+- **Neural provers in Lean** — AlphaProof (IMO-silver level), DeepSeek-Prover-V2 (≈89% on miniF2F) — generate Lean scripts, then the **kernel checks every one**.
+- **Programs, not just papers** — DARPA's **PROVERS** program targets affordable formally-verified software at scale.
+
+The unifying bet: let AI *search* for the proof, let the *kernel* certify it. Hard-to-find, easy-to-check is the ideal shape for an AI + verifier loop.
+
+::: notes
+The AI-proving landscape the brief requests, assembled from the transcript's own references (TPTP, Formalizing 100 Theorems, Minerva, MathPrompter/tool-use, Gowers' project, DARPA PROVERS — the instructor names all of these) plus the two flagship Lean systems the existing deck already cites. Organize it as a progression: symbolic ATP and benchmarks (pre-LLM), then LLMs aimed at math, then neural provers that specifically emit *Lean* and get kernel-checked, then the engineering push (PROVERS) toward verified software at scale. The thesis to land — and it's the course's whole premise — is that the proof-search/proof-check asymmetry makes formal math the *ideal* arena for AI: a domain where a fallible generator is made trustworthy by an infallible checker. This is "AI proposes, kernel disposes" at field scale.
 :::
 
 ---
