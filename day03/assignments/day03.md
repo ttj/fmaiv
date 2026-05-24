@@ -35,7 +35,7 @@ In `CounterDemo/Counter.lean`, change the counter bound from **10 to 25** — it
 
 ### B.3 — A new system from scratch
 
-Translate a Day-2 SMV model into Lean, then prove one INVARSPEC of your choice. **Translating is one command** — the vendored translator drops a ready-to-prove module straight into the project:
+Translate a Day-2 SMV model into Lean, then prove one INVARSPEC of your choice. **Translating is one command** (run from the repo root — `cd` back out if you were in `examples/CounterDemo`):
 
 ```bash
 pip install -r scripts/smv2lean/requirements.txt        # lark (once)

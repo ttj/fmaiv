@@ -63,7 +63,7 @@ The slides say **nuXmv**; the course autograder runs **NuSMV 2.6.0**. They share
 We *mention* the nuXmv-only features but never require them.
 
 ::: notes
-Set expectations up front so nobody is confused when the tool they install is called NuSMV. The two are command-line-compatible for everything we do: same `.smv` files, same `INVARSPEC/CTLSPEC/LTLSPEC`, same verdict text. nuXmv adds IC3/PDR and infinite-state SMT-based checking on top; we point those out but the homework and autograder only use NuSMV features. Note neither tool has an explicit-state engine — that's SPIN's world (see the algorithms slide).
+Set expectations up front so nobody is confused when the tool they install is called NuSMV. The two are command-line-compatible for everything we do: same `.smv` files, same `INVARSPEC/CTLSPEC/LTLSPEC`, same verdict text. nuXmv adds IC3/PDR and infinite-state SMT-based checking on top; we point those out but the homework and autograder only use NuSMV features. Note both are symbolic-first (BDD + SAT engines); explicit-state enumeration is SPIN's domain (see the algorithms slide).
 :::
 
 ---

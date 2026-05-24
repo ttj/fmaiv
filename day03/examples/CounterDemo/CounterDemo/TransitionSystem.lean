@@ -182,12 +182,17 @@ theorem step_indexed_invariant {State : Type}
   obtain ⟨k, hk⟩ := hr                    -- pull out that k and its proof hk
   exact ⟨k, h k s hk⟩                     -- supply k together with P k s (from hypothesis h)
 
-/-- ★ THEOREM 6 — K-induction principle.
+/-- ★ THEOREM 6 — Step-indexed induction principle.
     A step-indexed property `P` is a step-indexed invariant if:
       (1) it holds on all initial states (at step 0), AND
       (2) if `P k` holds on a k-step reachable state and the state
           steps to s', then `P (k+1)` holds on s'.
-    This is the step-indexed analogue of `inductive_invariant_holds`. -/
+    This is the step-indexed analogue of `inductive_invariant_holds`.
+
+    NOTE — this is induction on the *step count* `k` (an indexed invariant),
+    which is NOT the same technique as the SAT/SMT "k-induction" taught on Day 2
+    (which looks back over `k` consecutive states with a simple-path constraint).
+    Same name, different method; here we mean the step-indexed one. -/
 theorem k_induction {State : Type}
     (ts : TransitionSystem State) (P : Nat → State → Prop)
     (hinit : ∀ s, ts.init s → P 0 s)

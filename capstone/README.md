@@ -25,6 +25,8 @@ Run each and confirm the verdict. Each links to the worked example.
 | 4 | CBMC | bounded on real C source | [`counter.c`](../day04/examples/counter.c) + [`counter_check.c`](../day04/examples/counter_check.c) | `cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions` | `VERIFICATION SUCCESSFUL` |
 | 4 | Cryptol | bit-precise (SMT on fixed-width) | [`counter.cry`](../day04/examples/counter.cry) | `cryptol -c ":prove bounded_invariant" counter.cry` | `Q.E.D.` |
 
+(`cryptol -c "CMD" file` runs one command and exits — the same as opening `cryptol counter.cry` and typing `:prove bounded_invariant` interactively, as on Day 4.)
+
 ## Part B — The comparison writeup (30 min)
 
 In one page, answer:

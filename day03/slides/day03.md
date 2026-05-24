@@ -1033,10 +1033,13 @@ Critical gotcha. A green build is NOT proof — Lean treats sorry as a warning s
 Safety = "nothing bad happens" (what we just proved). **Liveness** = "something good *eventually* happens" — proved with a **ranking function**: a `Nat`-valued measure that strictly *decreases* every step.
 
 ```lean
--- Gcd.lean: Euclid's algorithm terminates because (a + b) strictly drops
-def gcd (a b : Nat) : Nat := ...
-  termination_by a + b      -- the measure that must shrink
-  decreasing_by omega       -- proof that it shrinks on each recursive call
+-- Gcd.lean: Euclid's algorithm terminates because the first argument strictly drops
+def gcd (a b : Nat) : Nat :=
+  match a, b with
+  | 0,   b => b
+  | a+1, b => gcd (b % (a+1)) (a+1)              -- recurse on (b mod a+1, a+1)
+  termination_by a                               -- the measure that must shrink
+  decreasing_by exact Nat.mod_lt b (Nat.succ_pos a)  -- b % (a+1) < a+1
 ```
 
 A measure bounded below by 0 can't decrease forever ⇒ the loop must stop. (This is the discrete cousin of a Lyapunov function.)
@@ -1049,18 +1052,17 @@ The example project ships ranking-function machinery (TransitionSystem.lean's Is
 
 ## A second worked invariant: GCD correctness
 
-Euclid's algorithm subtracts the smaller from the larger until they meet:
+Euclid's algorithm replaces the pair `(a, b)` with `(b mod a, a)` until the first hits 0:
 
 ```text
-init:  x := m,  y := n
-step:  while x > 0 ∧ y > 0:  if x > y then x := x − y  else  y := y − x
+gcd a b  =  if a = 0 then b else gcd (b mod a) a
 ```
 
-What makes it *correct*? The **conserved quantity**: `gcd(x, y)` never changes across a step.
+What makes it *correct*? The **conserved quantity**: the `gcd` of the pair never changes across a step.
 
-$$\text{Inv}(x,y)\ \equiv\ \gcd(x, y) = \gcd(m, n)$$
+$$\text{Inv}(a,b)\ \equiv\ \gcd(a, b) = \gcd(m, n)$$
 
-This is an **inductive** invariant: `gcd(x−y, y) = gcd(x, y)` (and symmetrically), so each step preserves it. When the loop ends (one variable hits 0), `gcd(x,0)=x` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
+This is an **inductive** invariant: `gcd(b mod a, a) = gcd(a, b)`, so each step preserves it. When the first argument hits 0, `gcd(0, b) = b` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
 
 ::: notes
 I close the inductive-invariants lecture on exactly this GCD example, so include it as a second, non-counter instance — and note it's the *invariant* (correctness) angle, complementary to the previous slide's *termination* (ranking-function) angle on the very same algorithm. The core lesson, in the transcript's words: even though x and y change every step, the running gcd stays fixed, and that conserved quantity IS the inductive invariant — it "captures the core logic of the program." This reinforces the strengthening mindset (find the maintained relationship) on a system students recognize as genuinely useful, and it pairs naturally with the termination slide: invariant ⇒ partial correctness, ranking function ⇒ termination, together ⇒ total correctness.
