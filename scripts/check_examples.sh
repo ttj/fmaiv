@@ -69,7 +69,8 @@ if want "lake build (CounterDemo)"; then
   o="$( cd day03/examples/CounterDemo && lake build 2>&1 )"
   if [ $? -eq 0 ]; then ok "lake build (CounterDemo)"; else no "lake build (CounterDemo)"; sed 's/^/        /' <<<"$o" | tail -20; fi
 fi
-for mod in Counter CounterLadder TransitionSystem ArraySum Gcd TrafficLight Sorting SlideExamples; do
+for mod in Counter CounterLadder TransitionSystem ArraySum Gcd TrafficLight Sorting SlideExamples \
+           DiscreteMath ProgramVerif/Imp ProgramVerif/Examples NuXMV/GcdProofs NuXMV/MutexProofs; do
   want "Day3 $mod.lean: sorry-free" || continue
   f="day03/examples/CounterDemo/CounterDemo/$mod.lean"
   if grep -qnE '(^|[^[:alnum:]_])sorry([^[:alnum:]_]|$)' "$f"; then no "Day3 $mod.lean: contains sorry"; else ok "Day3 $mod.lean: sorry-free"; fi
