@@ -344,18 +344,18 @@ $$0+\dots+k+(k{+}1)=\underbrace{\tfrac{k(k+1)}{2}}_{\text{by IH}}+(k{+}1)=\tfrac
   <line x1="324" y1="78" x2="350" y2="78" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ind-ah)"/>
   <line x1="374" y1="78" x2="398" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
   <line x1="482" y1="78" x2="558" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
-  <text x="520" y="124" text-anchor="middle" font-size="11.5" fill="#146a96">IH: P(k) ⟹ P(k+1)</text>
+  <text x="520" y="124" text-anchor="middle" font-size="11.5" fill="#946E24">IH: P(k) ⟹ P(k+1)</text>
   <rect x="22" y="56" width="82" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="63" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(0)</text>
   <text x="63" y="124" text-anchor="middle" font-size="11.5" fill="#8a6d2f">base case</text>
-  <rect x="132" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="132" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="173" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(1)</text>
-  <rect x="242" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="242" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="283" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(2)</text>
   <text x="362" y="84" text-anchor="middle" font-size="18" fill="#5b6168">⋯</text>
-  <rect x="400" y="56" width="82" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="400" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="441" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k)</text>
-  <rect x="560" y="56" width="92" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="560" y="56" width="92" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="606" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k+1)</text>
 </svg>
 
@@ -474,19 +474,19 @@ example (p q : Prop) (hpq : p → q) (hp : p) : q := by
 <svg viewBox="0 0 760 180" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="ps-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="234" y1="92" x2="284" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
-  <text x="259" y="82" text-anchor="middle" font-size="11" fill="#146a96">apply hpq</text>
+  <text x="259" y="82" text-anchor="middle" font-size="11" fill="#946E24">apply hpq</text>
   <line x1="506" y1="92" x2="556" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
-  <text x="531" y="82" text-anchor="middle" font-size="11" fill="#146a96">exact hp</text>
+  <text x="531" y="82" text-anchor="middle" font-size="11" fill="#946E24">exact hp</text>
   <rect x="18" y="32" width="216" height="120" rx="9" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.6"/>
   <text x="34" y="58" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hp  : p</text>
   <text x="34" y="80" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hpq : p → q</text>
   <line x1="30" y1="94" x2="222" y2="94" stroke="#cdd5db" stroke-width="1.2"/>
-  <text x="34" y="120" font-size="13" fill="#146a96" font-family="JetBrains Mono, monospace">⊢ q</text>
+  <text x="34" y="120" font-size="13" fill="#946E24" font-family="JetBrains Mono, monospace">⊢ q</text>
   <rect x="290" y="32" width="216" height="120" rx="9" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.6"/>
   <text x="306" y="58" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hp  : p</text>
   <text x="306" y="80" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hpq : p → q</text>
   <line x1="302" y1="94" x2="494" y2="94" stroke="#cdd5db" stroke-width="1.2"/>
-  <text x="306" y="120" font-size="13" fill="#146a96" font-family="JetBrains Mono, monospace">⊢ p</text>
+  <text x="306" y="120" font-size="13" fill="#946E24" font-family="JetBrains Mono, monospace">⊢ p</text>
   <rect x="562" y="32" width="184" height="120" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="1.8"/>
   <text x="654" y="98" text-anchor="middle" font-size="14" fill="#1e6b32">no goals ✓</text>
 </svg>
@@ -958,26 +958,26 @@ A deliberately honest slide. The `<;>` combinator collapses the *shared* work, b
     </marker>
   </defs>
   <line x1="395" y1="60" x2="150" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="238" y="84" text-anchor="middle" font-size="12.5" fill="#146a96">mode = off</text>
+  <text x="238" y="84" text-anchor="middle" font-size="12.5" fill="#946E24">mode = off</text>
   <line x1="448" y1="60" x2="578" y2="98" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="540" y="78" text-anchor="middle" font-size="12.5" fill="#146a96">mode = on</text>
+  <text x="540" y="78" text-anchor="middle" font-size="12.5" fill="#946E24">mode = on</text>
   <line x1="568" y1="140" x2="430" y2="213" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="470" y="172" text-anchor="middle" font-size="12.5" fill="#146a96">press</text>
+  <text x="470" y="172" text-anchor="middle" font-size="12.5" fill="#946E24">press</text>
   <line x1="612" y1="140" x2="690" y2="203" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="676" y="172" text-anchor="middle" font-size="12.5" fill="#146a96">¬press</text>
+  <text x="676" y="172" text-anchor="middle" font-size="12.5" fill="#946E24">¬press</text>
   <line x1="688" y1="245" x2="612" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="618" y="284" text-anchor="middle" font-size="12.5" fill="#146a96">x &lt; 10</text>
+  <text x="618" y="284" text-anchor="middle" font-size="12.5" fill="#946E24">x &lt; 10</text>
   <line x1="715" y1="245" x2="792" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="772" y="284" text-anchor="middle" font-size="12.5" fill="#146a96">x ≥ 10</text>
+  <text x="772" y="284" text-anchor="middle" font-size="12.5" fill="#946E24">x ≥ 10</text>
   <rect x="345" y="18" width="158" height="42" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
   <text x="424" y="44" text-anchor="middle" font-size="14" fill="#1c1c1c">counterInv s′ ?</text>
   <rect x="50" y="116" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
   <text x="125" y="142" text-anchor="middle" font-size="12.5" fill="#1e6b32">x unchanged ✓</text>
-  <rect x="528" y="98" width="120" height="42" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="528" y="98" width="120" height="42" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="588" y="124" text-anchor="middle" font-size="14" fill="#1c1c1c">mode = on</text>
   <rect x="345" y="213" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
   <text x="420" y="239" text-anchor="middle" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
-  <rect x="648" y="203" width="104" height="42" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="648" y="203" width="104" height="42" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="700" y="229" text-anchor="middle" font-size="14" fill="#1c1c1c">¬press</text>
   <rect x="512" y="310" width="178" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
   <text x="601" y="336" text-anchor="middle" font-size="12" fill="#1e6b32">x := x+1 ≤ 10 ✓ omega</text>

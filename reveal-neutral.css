@@ -12,13 +12,13 @@
 
 :root {
   --ink:   #1c1c1c;     /* near-black (VU black) */
-  --muted: #5b6168;
-  --accent:#2b9fd4;      /* polished-neutral accent (light sky blue / cyan) */
-  --accent-ink: #146a96; /* darker sky for text/links on white (AA contrast) */
-  --accent-soft: #e7f3fb;
+  --muted: #4d4640;     /* warm dark neutral for title subtitle/author (no blue cast) */
+  --accent:#B49248;      /* VU Metallic Gold — rules, bars, borders (decoration) */
+  --accent-ink: #946E24; /* VU Oak — links / inline-code text on white (AA contrast) */
+  --accent-soft: #f6eeda; /* light gold — inline-code bg, table-header tint */
   --rule:  #e4e7ea;
-  --code-bg: #f6f8fa;
-  --code-border: #e1e6ea;
+  --code-bg: #faf8f3;     /* warm off-white code card */
+  --code-border: #e8e2d4;
   --vu-gold: #B49248;
   --vu-gold-soft: #CFAE70;
 }
@@ -56,7 +56,7 @@
 /* ---- Tables: zebra + soft borders -------------------------------------- */
 .reveal table { border-collapse: collapse; }
 .reveal thead th { background: var(--accent-soft); color: var(--ink); border: none; border-bottom: 2px solid var(--accent); }
-.reveal tbody tr:nth-child(even) { background: #f4f6f8; }
+.reveal tbody tr:nth-child(even) { background: #f7f4ee; }
 .reveal th, .reveal td { border: 1px solid var(--rule); }
 
 /* ---- Blockquotes / callouts -------------------------------------------- */
@@ -71,19 +71,29 @@
 /* ---- Slide-number badge ------------------------------------------------ */
 #fmaiv-slideno { color: var(--accent-ink); font-family: 'Inter', sans-serif; opacity: 0.7; }
 
-/* ---- Section / chapter dividers: light sky-blue ------------------------- */
+/* ---- RevealJS chrome (nav arrows, progress bar, links): brand gold ------
+   Set the reveal link-color custom props on .reveal itself so the controls
+   and progress bar inherit gold (beats the white-theme :root blue default,
+   regardless of stylesheet order). */
+.reveal {
+  --r-link-color: #946E24; --r-link-color-dark: #6f5219; --r-link-color-hover: #B49248;
+}
+.reveal .controls { color: var(--accent-ink); }
+.reveal .progress span { background: var(--accent); }
+
+/* ---- Section / chapter dividers: VU metallic-gold wash ------------------ */
 .reveal section.section, .reveal section.title {
-  background: linear-gradient(135deg, #eaf5fc 0%, #aed8f2 100%);
+  background: linear-gradient(135deg, #FEEEB6 0%, #E3C77E 100%);
 }
 .reveal section.section h1, .reveal section.section h2,
 .reveal section.title h1,   .reveal section.title h2 {
-  color: #123a52; border: none;
+  color: #1c1c1c; border: none;
 }
 .reveal section.section h1::after, .reveal section.title h1::after {
   content: ""; display: block; width: 64px; height: 4px;
-  background: var(--vu-gold); margin: 0.5em auto 0;
+  background: #946E24; margin: 0.5em auto 0;
 }
-.reveal section.section p, .reveal section.title p { color: #355466; }
+.reveal section.section p, .reveal section.title p { color: #5b4a22; }
 .reveal section.section, .reveal section.title { text-align: center; }
 
 /* ---- Title slide: Vanderbilt brand + CCC lockup ------------------------ */

@@ -217,13 +217,13 @@ This is the deliverable. The workshop is short — four days — so we will cove
 
 <svg viewBox="0 0 920 300" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="vtri-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
-  <rect x="24" y="46" width="206" height="62" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
-  <text x="127" y="72" text-anchor="middle" font-size="17" font-weight="600" fill="#123a52">Model</text>
-  <text x="127" y="93" text-anchor="middle" font-size="12.5" fill="#355466">what the system is</text>
+  <rect x="24" y="46" width="206" height="62" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
+  <text x="127" y="72" text-anchor="middle" font-size="17" font-weight="600" fill="#1c1c1c">Model</text>
+  <text x="127" y="93" text-anchor="middle" font-size="12.5" fill="#946E24">what the system is</text>
   <rect x="24" y="168" width="206" height="62" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="127" y="194" text-anchor="middle" font-size="17" font-weight="600" fill="#6b531f">Specification</text>
   <text x="127" y="215" text-anchor="middle" font-size="12.5" fill="#7a6334">what correct means</text>
-  <rect x="384" y="104" width="168" height="84" rx="8" fill="#eef3f7" stroke="#5b6168" stroke-width="2.4"/>
+  <rect x="384" y="104" width="168" height="84" rx="8" fill="#f5f3ef" stroke="#5b6168" stroke-width="2.4"/>
   <text x="468" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#1c1c1c">Verifier</text>
   <text x="468" y="162" text-anchor="middle" font-size="11.5" fill="#5b6168">solver · model checker · prover</text>
   <rect x="690" y="40" width="208" height="64" rx="8" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
@@ -857,16 +857,16 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
   <line x1="56" y1="160" x2="124" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
   <text x="90" y="150" text-anchor="middle" font-size="12" fill="#5b6168">init x = 0</text>
   <path d="M165,120 C152,76 228,76 215,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="190" y="66" text-anchor="middle" font-size="12.5" fill="#146a96">¬press / x′ := x</text>
+  <text x="190" y="66" text-anchor="middle" font-size="12.5" fill="#946E24">¬press / x′ := x</text>
   <path d="M535,120 C522,74 598,74 585,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="560" y="64" text-anchor="middle" font-size="12.5" fill="#146a96">¬press ∧ x &lt; 10 / x′ := x+1</text>
+  <text x="560" y="64" text-anchor="middle" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10 / x′ := x+1</text>
   <line x1="252" y1="160" x2="497" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="375" y="151" text-anchor="middle" font-size="13" fill="#146a96">press / x′ := x</text>
+  <text x="375" y="151" text-anchor="middle" font-size="13" fill="#946E24">press / x′ := x</text>
   <path d="M520,204 Q375,286 236,206" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#146a96">press ∨ x = 10 / x′ := 0</text>
+  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#946E24">press ∨ x = 10 / x′ := 0</text>
   <ellipse cx="190" cy="160" rx="62" ry="42" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="190" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">off</text>
-  <ellipse cx="560" cy="160" rx="62" ry="42" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <ellipse cx="560" cy="160" rx="62" ry="42" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="560" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">on</text>
 </svg>
 
@@ -889,22 +889,22 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
   <line x1="20" y1="150" x2="60" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
   <text x="40" y="142" text-anchor="middle" font-size="12" fill="#5b6168">start</text>
   <path d="M720,126 L720,64 L114,64 L114,126" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#146a96">press ∨ x = 10</text>
+  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#946E24">press ∨ x = 10</text>
   <path d="M94,176 C74,232 154,232 134,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="114" y="244" text-anchor="middle" font-size="12" fill="#146a96">¬press</text>
+  <text x="114" y="244" text-anchor="middle" font-size="12" fill="#946E24">¬press</text>
   <line x1="166" y1="150" x2="276" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="221" y="142" text-anchor="middle" font-size="13" fill="#146a96">press</text>
+  <text x="221" y="142" text-anchor="middle" font-size="13" fill="#946E24">press</text>
   <line x1="382" y1="150" x2="450" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="416" y="120" text-anchor="middle" font-size="12.5" fill="#146a96">¬press ∧ x &lt; 10</text>
+  <text x="416" y="120" text-anchor="middle" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10</text>
   <line x1="554" y1="150" x2="668" y2="150" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ah)"/>
   <rect x="62" y="126" width="104" height="48" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="114" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">off, 0</text>
-  <rect x="278" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="278" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="330" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 0</text>
-  <rect x="450" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="450" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="502" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 1</text>
   <text x="612" y="160" text-anchor="middle" font-size="26" fill="#5b6168">⋯</text>
-  <rect x="668" y="126" width="104" height="48" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="668" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="720" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 10</text>
 </svg>
 
@@ -945,11 +945,11 @@ We could verify by hand because the *reachable* state space is finite and small.
 <svg viewBox="0 0 680 330" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
   <ellipse cx="310" cy="180" rx="300" ry="144" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.8"/>
   <text x="310" y="20" text-anchor="middle" font-size="15" fill="#5b6168">all states S — infinite (mode × ℕ)</text>
-  <ellipse cx="252" cy="186" rx="218" ry="118" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
-  <text x="232" y="96" text-anchor="middle" font-size="15" fill="#146a96">reachable — 12</text>
-  <ellipse cx="200" cy="200" rx="132" ry="72" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
-  <text x="200" y="190" text-anchor="middle" font-size="14" fill="#0e4f70">reachable in ≤ N steps</text>
-  <text x="200" y="212" text-anchor="middle" font-size="11.5" fill="#0e4f70">(what BMC explores)</text>
+  <ellipse cx="252" cy="186" rx="218" ry="118" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
+  <text x="232" y="96" text-anchor="middle" font-size="15" fill="#946E24">reachable — 12</text>
+  <ellipse cx="200" cy="200" rx="132" ry="72" fill="#efe1c0" stroke="#946E24" stroke-width="2"/>
+  <text x="200" y="190" text-anchor="middle" font-size="14" fill="#946E24">reachable in ≤ N steps</text>
+  <text x="200" y="212" text-anchor="middle" font-size="11.5" fill="#946E24">(what BMC explores)</text>
   <circle cx="565" cy="150" r="9" fill="#c0392b"/>
   <text x="565" y="131" text-anchor="middle" font-size="13.5" fill="#922b21">x = 11</text>
   <text x="565" y="180" text-anchor="middle" font-size="11.5" fill="#922b21">bad &amp;</text>
@@ -1108,18 +1108,18 @@ Solve $\varphi = (p \vee q) \wedge (\neg p \vee q) \wedge (p \vee \neg q)$. Deci
     </marker>
   </defs>
   <line x1="360" y1="58" x2="175" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
-  <text x="240" y="78" text-anchor="middle" font-size="13" fill="#146a96">p = ⊥</text>
+  <text x="240" y="78" text-anchor="middle" font-size="13" fill="#946E24">p = ⊥</text>
   <line x1="360" y1="58" x2="545" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
-  <text x="480" y="78" text-anchor="middle" font-size="13" fill="#146a96">p = ⊤</text>
+  <text x="480" y="78" text-anchor="middle" font-size="13" fill="#946E24">p = ⊤</text>
   <line x1="175" y1="146" x2="175" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
   <line x1="545" y1="146" x2="545" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
   <rect x="300" y="14" width="120" height="44" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
   <text x="360" y="41" text-anchor="middle" font-size="15" fill="#1c1c1c">decide p</text>
-  <rect x="85" y="102" width="180" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="85" y="102" width="180" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="175" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
   <rect x="103" y="190" width="144" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
   <text x="175" y="217" text-anchor="middle" font-size="14" fill="#922b21">✗ conflict</text>
-  <rect x="455" y="102" width="180" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="455" y="102" width="180" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="545" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
   <rect x="463" y="190" width="164" height="44" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
   <text x="545" y="217" text-anchor="middle" font-size="13.5" fill="#1e6b32">✓ SAT: p = q = ⊤</text>
@@ -1180,17 +1180,17 @@ Empty clause derived $\Rightarrow$ **UNSAT**. This is a checkable certificate: a
   <defs><marker id="res-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="92" y1="62" x2="188" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
   <line x1="240" y1="62" x2="222" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
-  <text x="128" y="96" text-anchor="middle" font-size="11.5" fill="#146a96">resolve p</text>
+  <text x="128" y="96" text-anchor="middle" font-size="11.5" fill="#946E24">resolve p</text>
   <line x1="210" y1="158" x2="318" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
   <line x1="446" y1="62" x2="364" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
-  <text x="300" y="186" text-anchor="middle" font-size="11.5" fill="#146a96">resolve q</text>
-  <rect x="52" y="24" width="78" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="300" y="186" text-anchor="middle" font-size="11.5" fill="#946E24">resolve q</text>
+  <rect x="52" y="24" width="78" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="91" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(p)</text>
-  <rect x="180" y="24" width="120" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="180" y="24" width="120" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="240" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬p ∨ q)</text>
-  <rect x="400" y="24" width="92" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="400" y="24" width="92" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="446" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬q)</text>
-  <rect x="170" y="118" width="80" height="38" rx="8" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="170" y="118" width="80" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="210" y="142" text-anchor="middle" font-size="14" fill="#1c1c1c">(q)</text>
   <rect x="296" y="204" width="92" height="40" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
   <text x="342" y="230" text-anchor="middle" font-size="13.5" fill="#922b21">▢ empty</text>
@@ -1276,14 +1276,14 @@ Decide $\;a=b,\ b=c,\ d=e,\ b=s,\ d=t,\ f(a, g(d)) \ne f(b, g(e))$:
     </marker>
   </defs>
   <line x1="625" y1="88" x2="625" y2="130" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
-  <text x="700" y="114" text-anchor="middle" font-size="11.5" fill="#146a96">congruence: d = e</text>
+  <text x="700" y="114" text-anchor="middle" font-size="11.5" fill="#946E24">congruence: d = e</text>
   <line x1="160" y1="88" x2="320" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
   <line x1="560" y1="178" x2="450" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
-  <text x="300" y="200" text-anchor="middle" font-size="11.5" fill="#146a96">congruence: a = b, g(d) = g(e)</text>
-  <rect x="50" y="44" width="200" height="44" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <text x="300" y="200" text-anchor="middle" font-size="11.5" fill="#946E24">congruence: a = b, g(d) = g(e)</text>
+  <rect x="50" y="44" width="200" height="44" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="150" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ a, b, c, s }</text>
   <text x="150" y="34" text-anchor="middle" font-size="11" fill="#5b6168">a=b, b=c, b=s</text>
-  <rect x="540" y="44" width="170" height="44" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="540" y="44" width="170" height="44" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="625" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ d, e, t }</text>
   <text x="625" y="34" text-anchor="middle" font-size="11" fill="#5b6168">d=e, d=t</text>
   <rect x="540" y="134" width="170" height="44" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
@@ -1328,10 +1328,10 @@ This is the loop we describe in the "Adding the Theory Solvers" slide: theory at
 <svg viewBox="0 0 720 210" style="display:block;margin:0.3em auto;max-width:84%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="dpllt-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="284" y1="84" x2="436" y2="84" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
-  <text x="360" y="74" text-anchor="middle" font-size="11.5" fill="#146a96">propose: p₁ = p₂ = p₃ = ⊤</text>
+  <text x="360" y="74" text-anchor="middle" font-size="11.5" fill="#946E24">propose: p₁ = p₂ = p₃ = ⊤</text>
   <line x1="436" y1="132" x2="284" y2="132" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
   <text x="360" y="150" text-anchor="middle" font-size="11.5" fill="#922b21">T-conflict: learn ¬p₁ ∨ ¬p₂ ∨ ¬p₃</text>
-  <rect x="40" y="68" width="244" height="80" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="40" y="68" width="244" height="80" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="162" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">SAT engine (Boolean DPLL)</text>
   <text x="162" y="120" text-anchor="middle" font-size="12" fill="#5b6168">clauses { p₁, p₂, p₃ }</text>
   <rect x="436" y="68" width="244" height="80" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
@@ -1571,27 +1571,27 @@ This is the heart of the Week-8 "BMC as a SAT/SMT problem" slides, made explicit
   <line x1="8" y1="46" x2="32" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
   <text x="20" y="37" text-anchor="middle" font-size="11.5" fill="#5b6168">I</text>
   <line x1="116" y1="46" x2="154" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
-  <text x="135" y="37" text-anchor="middle" font-size="12" fill="#146a96">T</text>
+  <text x="135" y="37" text-anchor="middle" font-size="12" fill="#946E24">T</text>
   <line x1="238" y1="46" x2="276" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
-  <text x="257" y="37" text-anchor="middle" font-size="12" fill="#146a96">T</text>
+  <text x="257" y="37" text-anchor="middle" font-size="12" fill="#946E24">T</text>
   <line x1="360" y1="46" x2="438" y2="46" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#bmc1-ah)"/>
   <text x="399" y="38" text-anchor="middle" font-size="16" fill="#5b6168">⋯</text>
   <rect x="34" y="26" width="82" height="40" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="75" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₀</text>
-  <rect x="156" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="156" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="197" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₁</text>
-  <rect x="278" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="278" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="319" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₂</text>
-  <rect x="440" y="26" width="82" height="40" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="440" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="481" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s_k</text>
   <line x1="75" y1="66" x2="75" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="197" y1="66" x2="197" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="319" y1="66" x2="319" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="481" y1="66" x2="481" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
-  <text x="75" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
-  <text x="197" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
-  <text x="319" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
-  <text x="481" y="112" text-anchor="middle" font-size="11" fill="#146a96">¬p?</text>
+  <text x="75" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
+  <text x="197" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
+  <text x="319" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
+  <text x="481" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
   <line x1="75" y1="120" x2="481" y2="120" stroke="#5b6168" stroke-width="1.4"/>
   <line x1="278" y1="120" x2="278" y2="142" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bmc1-ah)"/>
   <rect x="150" y="142" width="256" height="32" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>

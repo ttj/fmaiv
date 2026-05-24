@@ -23,7 +23,7 @@
 /* Tables: shrink and de-pad the multi-row reference tables. */
 .reveal table { font-size: 0.56em; margin: 0.3em 0; border-collapse: collapse; }
 .reveal th, .reveal td { padding: 0.12em 0.55em; }
-.reveal thead th { background: #f0f0f0; }
+.reveal thead th { background: #f6eeda; }
 
 /* Code: small, full width, NO internal scroll (so the fit script sees the
    true height and scales the slide instead of hiding lines). */
@@ -36,7 +36,7 @@
 
 /* Block quotes: subtle gold rule instead of italics. */
 .reveal blockquote {
-  border-left: 4px solid #cfb87c; background: #fafafa;
+  border-left: 4px solid #B49248; background: #faf7f0;
   font-style: normal; font-size: 0.72em; padding: 0.2em 0.7em; width: 92%;
 }
 
