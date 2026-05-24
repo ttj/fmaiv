@@ -12,6 +12,8 @@ date: "Day 1 of 4"
 
 ## Logic, transition systems, SAT, SMT {.section}
 
+**Run it live (no install):** [Codespaces](https://codespaces.new/ttj/fmaiv) (full toolset) or Colab — today's notebook [`01_day1_logic_sat_smt`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/01_day1_logic_sat_smt.ipynb). All materials: <https://github.com/ttj/fmaiv>
+
 ::: notes
 Welcome. By the end of today every participant will have typed a Z3 query, formalized a small reactive system as a transition system, and asked an SMT solver to discharge a bounded-reachability question. In a later session we'll take what you encoded today and push it through a full model checker; by the end of the course the same little system will have been encoded five times in five different tools. The point isn't the tools — it's seeing the same `(model, specification, proof)` triple from five angles.
 :::

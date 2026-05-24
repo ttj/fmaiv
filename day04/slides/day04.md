@@ -12,6 +12,8 @@ date: "Day 4 of 4"
 
 ## CBMC, Cryptol, SAW, and where the field is going {.section}
 
+**Run it live (no install):** [Codespaces](https://codespaces.new/ttj/fmaiv) (full toolset) or Colab — today's notebook [`04_day4_program_verif`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/04_day4_program_verif.ipynb), plus the frontier NN notebooks [`05_nn_robustness`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/05_day4_nn_robustness.ipynb) · [`06_nn_mnist`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/06_day4_nn_mnist.ipynb). All materials: <https://github.com/ttj/fmaiv>
+
 ::: notes
 Days 1-3 verified models of the counter — an SMT formula, an SMV transition system, a Lean proof. Today we connect verification to *actual source code* (CBMC on C, Cryptol/SAW on C-vs-spec), and close with the research frontier: neural-network verification and how industry runs all of this at production scale. The counter appears one last time, in C and in Cryptol — its fourth and fifth encodings.
 :::

@@ -12,6 +12,8 @@ date: "Day 2 of 4"
 
 ## Reactive systems, temporal logic, and nuXmv {.section}
 
+**Run it live (no install):** [Codespaces](https://codespaces.new/ttj/fmaiv) (full toolset) or Colab — today's notebook [`02_day2_model_checking`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/02_day2_model_checking.ipynb). All materials: <https://github.com/ttj/fmaiv>
+
 ::: notes
 Day 1 ended with bounded model checking in Z3: "no counterexample of length ≤ N." Today we lift that to "no counterexample, ever," for finite-state systems. Same running counter; new tool. By the end you will read an SMV file, write CTL/LTL properties, run nuXmv, and read a counterexample trace. The conceptual jump is small — a transition system plus a temporal-logic property — but the payoff is large: an exhaustive answer instead of a bounded one.
 :::

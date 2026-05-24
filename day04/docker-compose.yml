@@ -1,7 +1,7 @@
 # Convenience wrapper around the Day 4 Dockerfile.
 #
 #     docker compose run --rm day04            # interactive shell
-#     docker compose run --rm day04 bash -lc "cd examples && cbmc counter.c counter_check.c --unwind 25 --unwinding-assertions"
+#     docker compose run --rm day04 bash -lc "cd examples && cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions"
 #
 # Bind-mounts the day04 folder at /work so edits made on the host (in VS Code,
 # vim, anywhere) appear inside the container instantly. The reverse is also
