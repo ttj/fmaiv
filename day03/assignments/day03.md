@@ -35,7 +35,14 @@ In `CounterDemo/Counter.lean`, change the counter bound from **10 to 25** — it
 
 ### B.3 — A new system from scratch
 
-Translate one of the SMV files from Day 2 — `traffic_light.smv`, `mutex.smv`, or `gcd_01.smv` — into Lean, then prove one INVARSPEC of your choice. **Two worked examples of exactly this workflow ship with the course**: [`NuXMV/Gcd.lean`](../examples/CounterDemo/CounterDemo/NuXMV/Gcd.lean) and [`NuXMV/Mutex.lean`](../examples/CounterDemo/CounterDemo/NuXMV/Mutex.lean) are the *translator's raw output* (a `TransitionSystem` plus one `sorry` stub per `INVARSPEC`), with the proofs filled in beside them in `GcdProofs.lean` / `MutexProofs.lean`. You can auto-translate a model with the vendored [`scripts/smv2lean/`](../../scripts/smv2lean/) (`pip install -r requirements.txt; python smv2lean.py model.smv`) and then discharge the stubs — or write the translation by hand, which is more educational.
+Translate a Day-2 SMV model into Lean, then prove one INVARSPEC of your choice. **Translating is one command** — the vendored translator drops a ready-to-prove module straight into the project:
+
+```bash
+pip install -r scripts/smv2lean/requirements.txt        # lark (once)
+scripts/smv2lean/to_lean.sh day02/examples/traffic_light.smv   # -> NuXMV/Traffic_light.lean
+```
+
+The output is a `TransitionSystem` with one `sorry` stub per `INVARSPEC` — fill them in. **Worked examples of exactly this workflow ship with the course**: [`NuXMV/Gcd`](../examples/CounterDemo/CounterDemo/NuXMV/Gcd.lean), [`Mutex`](../examples/CounterDemo/CounterDemo/NuXMV/Mutex.lean), and [`Elevator`](../examples/CounterDemo/CounterDemo/NuXMV/Elevator.lean) have their proofs filled in beside them in `*Proofs.lean` (Elevator even shows a *true* safety invariant and a *deliberately false* one, like the counter). [`NuXMV/Peterson`](../examples/CounterDemo/CounterDemo/NuXMV/Peterson.lean) and [`Prodcons`](../examples/CounterDemo/CounterDemo/NuXMV/Prodcons.lean) are pre-translated stubs left for you to prove. Or write the translation by hand, which is more educational.
 
 This is the most ambitious option. Plan for 60+ minutes and expect to ask Claude for help.
 
