@@ -1,0 +1,45 @@
+-- Spec-from-English challenge (request/grant arbiter) — full solution.
+--
+-- A one-client arbiter: it is idle until a request arrives, waits one step,
+-- grants, then returns to idle. The point of this file is the SPECS: each is
+-- the formalization of an English sentence. The starter (spec_challenge_starter.smv)
+-- gives the English and asks you to write the temporal-logic formula.
+--
+-- Each spec is marked HOLDS (nuXmv reports `true`) or DELIBERATELY FALSE
+-- (reports `false` with a counterexample). Operators: ! = not, & = and,
+-- | = or, -> = implies. Temporal: G = always, F = eventually, X = next step;
+-- EF p = "p is reachable on some path", AG p = "p on all paths always".
+MODULE main
+VAR
+  state : {idle, waiting, granted};   -- the arbiter's phase
+  req   : boolean;                    -- FREE INPUT: a client request, re-chosen each step
+
+ASSIGN
+  init(state) := idle;
+  -- First true guard wins. waiting -> granted -> idle is forced (one step each).
+  next(state) := case
+    state = idle & req  : waiting;    -- a request moves us to waiting
+    state = idle & !req : idle;       -- no request: stay idle
+    state = waiting     : granted;    -- always granted the step after waiting
+    state = granted     : idle;       -- release back to idle
+    TRUE                : state;
+  esac;
+
+-- (1) "Whenever the arbiter is waiting, it is eventually granted."  HOLDS.
+LTLSPEC G ((state = waiting) -> F (state = granted));
+
+-- (2) "The granted state is reachable."  HOLDS.
+CTLSPEC EF (state = granted);
+
+-- (3) "Once granted, the arbiter eventually returns to idle."  HOLDS.
+LTLSPEC G ((state = granted) -> F (state = idle));
+
+-- (4) "The arbiter never jumps straight from idle to granted (it must wait
+--      first)."  HOLDS. Note the X (next): the bad pattern is idle now AND
+--      granted next.
+LTLSPEC G !((state = idle) & X (state = granted));
+
+-- (5) "Eventually the arbiter is idle forever."  DELIBERATELY FALSE — a client
+--     that keeps requesting forces the idle/waiting/granted cycle to repeat, so
+--     nuXmv returns a lasso counterexample.
+LTLSPEC F G (state = idle);

@@ -96,6 +96,44 @@ The `*_starter.{cry,c}` files are stubs: Cryptol returns a **Counterexample**
 and CBMC reports **VERIFICATION FAILED** until you implement them (verify your
 version against the same property/harness).
 
+### Bounded loops, and why "for all `n`" needs induction (bridge to Day 3)
+
+CBMC is a *bounded* checker. See [`loop_invariant_demo.c`](../examples/loop_invariant_demo.c)
+(starter: [`loop_invariant_demo_starter.c`](../examples/loop_invariant_demo_starter.c)):
+
+```bash
+cbmc loop_invariant_demo.c --unwind 21 --unwinding-assertions   # SUCCESSFUL (n in 0..20)
+```
+
+The loop invariant `x == i` is the inductive fact that makes `x == n` true. CBMC
+confirms it for every `n` *up to* the bound `N` (we `__CPROVER_assume(n <= N)`
+and unwind `N+1`). The starter omits that bound — `--unwinding-assertions` then
+*fails*, because `n` is unbounded. Proving the same fact for **all** `n` at once,
+with no bound, is exactly what the Day-3 Lean proof does by induction.
+
+## Frontier: neural-network robustness (`examples/nn/`)
+
+The same verification question — "can the bad thing happen?" — for a neural
+network: within an L-infinity ball of radius `eps` around an input, can the
+prediction change? [`examples/nn/`](../examples/nn/) certifies it with
+**auto_LiRPA** (the CROWN engine under α,β-CROWN, the VNN-COMP winner), CPU-only:
+
+- Zero-install: open [`robustness.ipynb`](../examples/nn/robustness.ipynb) in Colab.
+- Codespace/local: `pip install -r examples/nn/requirements.txt; python examples/nn/robustness.py`
+  (the starter `robustness_starter.py` blanks the `compute_bounds` call).
+
+You will see a *certified* band of small `eps`, then a region where CROWN cannot
+certify and a PGD search finds a real adversarial example — the soundness vs.
+completeness story, now for learned models. For full-scale MNIST/CIFAR
+verification, see our [AAAI'26 VNN-COMP tutorial](https://vnn-comp.github.io/#aaai2026).
+
+## Capstone — one property, four tools
+
+To tie the week together, the [capstone](../../capstone/) walks the running
+counter (`x ≤ 10`) through Z3, nuXmv, Lean, and CBMC/Cryptol and asks you to
+compare what each style of verification buys you (bounded vs. unbounded vs.
+inductive vs. bit-precise).
+
 ## Survey discussion (optional, 10 min plenary)
 
 If time allows, pick one of the following and write a single paragraph:

@@ -32,3 +32,21 @@ jobs:
           docker run --rm -v "$PWD:/work" -w /work \
             ghcr.io/verivital/fmaiv-autograde:latest \
             bash scripts/check_examples.sh
+
+  # The Day-4 neural-network example needs PyTorch, which we deliberately keep
+  # OUT of the course image (it would add ~GBs to every pull). Test it here in a
+  # standalone CPU job instead, so the grading image stays lean.
+  nn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install CPU PyTorch + auto_LiRPA
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615
+      - name: Certify the NN robustness example
+        run: python day04/examples/nn/robustness.py

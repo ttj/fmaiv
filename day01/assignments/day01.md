@@ -46,7 +46,7 @@ incomplete result, then fill in the constraints).
 | Sudoku (9×9 Latin square + boxes) | `sudoku.py` | `sudoku_starter.py` |
 | KenKen / Calcudoku (Latin square + arithmetic cages) | `kenken.py` | `kenken_starter.py` |
 | N-Queens (no two queens attack) | `nqueens.py` | `nqueens_starter.py` |
-| Magic square (rows/cols/diagonals sum equal) | `magic_square.py` | — |
+| Magic square (rows/cols/diagonals sum equal) | `magic_square.py` | `magic_square_starter.py` |
 
 ```bash
 cd examples/puzzles
@@ -57,6 +57,21 @@ python kenken_starter.py    # incomplete until you fill the TODOs
 
 Good exercise: complete `kenken_starter.py` so its output matches `kenken.py`
 and it reports a unique solution.
+
+## Entailment and synthesis (`examples/`)
+
+Two short extras that round out "what an SMT solver does":
+
+- **Entailment as unsatisfiability** — [`z3_entailment.py`](../examples/z3_entailment.py)
+  (starter: [`z3_entailment_starter.py`](../examples/z3_entailment_starter.py)).
+  The key idiom behind every proof this week: `KB ⊨ G` iff `KB ∧ ¬G` is **UNSAT**.
+  Run it on the Socrates syllogism; the starter asks you to add the one `Not(goal)`
+  line. *Validity* (holds in all models) vs. *satisfiability* (holds in some) is
+  the distinction to take away.
+- **Synthesis as ∃∀ solving** — [`z3_synthesis.py`](../examples/z3_synthesis.py).
+  Verification asks "does it hold?"; synthesis asks "is there a parameter that
+  *makes* it hold?" Z3 finds the `k` in `∃k. ∀x∈[0,9]. x+k ∈ [10,19]`. A taster
+  for the deductive-synthesis idea you will see on Day 3.
 
 ## What to submit
 

@@ -1,0 +1,35 @@
+-- BMC bound hunt: a bug that lives at a specific depth.
+--
+-- This model is a plain counter 0 -> 1 -> ... -> 15 -> 0 -> ... A "bug" flag
+-- is true exactly when cnt = 12. The safety spec `INVARSPEC !bug` is therefore
+-- FALSE, and the shortest counterexample has length 12 (it takes 12 steps to
+-- drive cnt from 0 to 12).
+--
+-- The lesson — Bounded Model Checking (BMC) vs. unbounded model checking:
+--   * Plain `NuSMV bmc_depth.smv` does full (BDD) reachability and finds the
+--     violation immediately, reporting the spec false.
+--   * BMC only looks `k` steps deep. In nuXmv:
+--         read_model -i bmc_depth.smv ; go_bmc
+--         check_invar_bmc -k 11      -- NO counterexample (bug is deeper than 11)
+--         check_invar_bmc -k 12      -- counterexample found at depth 12
+--     Hunt for the smallest k that exposes the bug. That k is the bug's depth.
+--
+-- This is the flip side of Day-3 induction: induction proves a property for ALL
+-- depths at once; BMC only refutes (or fails to refute) up to depth k. A passing
+-- BMC run at depth k is NOT a proof unless k reaches the system's diameter.
+MODULE main
+VAR
+  cnt : 0..15;            -- a simple wrapping counter
+
+ASSIGN
+  init(cnt) := 0;
+  next(cnt) := case
+    cnt = 15 : 0;         -- wrap around at the top
+    TRUE     : cnt + 1;   -- otherwise just count up
+  esac;
+
+DEFINE bug := (cnt = 12);   -- the "bad" condition, reached only at step 12
+
+-- SAFETY (DELIBERATELY FALSE): claims the bug never happens. The shortest
+-- counterexample has length 12 — use it to calibrate how deep BMC must search.
+INVARSPEC !bug;

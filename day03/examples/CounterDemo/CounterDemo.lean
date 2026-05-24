@@ -5,6 +5,7 @@
 -- shared framework, then each example that builds on it.
 import CounterDemo.TransitionSystem
 import CounterDemo.Counter
+import CounterDemo.CounterLadder
 import CounterDemo.ArraySum
 import CounterDemo.Gcd
 import CounterDemo.Sorting
