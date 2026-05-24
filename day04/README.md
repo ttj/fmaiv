@@ -11,7 +11,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Opening | ~10 min | Programs as transition systems on memory states — the same machinery from Day 1, applied to source code. |
 | L1 — CBMC | ~50 min | Bounded model checking of C with CBMC: loop unwinding, `assert` / `assume`, nondeterministic inputs. Smoke test (`cbmc --version`). Hands-on: `counter.c` / `counter_check.c`, run `cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions`; then weaken the assertion to `x < 10`, watch CBMC produce a counterexample, and read it. |
 | Break | ~10 min | |
-| L2 — Cryptol + SAW | ~50 min | A bit-precise functional DSL for specifying algorithms; equivalence checking against C implementations via LLVM bitcode and SMT. Hands-on: `counter.cry` (the fifth encoding of the counter), `popcount.cry` / `popcount.c` with `:prove popcount_kernighan_eq`, and the `popcount.saw` C ↔ Cryptol equivalence proof. |
+| L2 — Cryptol + SAW | ~50 min | A bit-precise functional domain-specific language (DSL) for specifying algorithms; equivalence checking against C implementations via LLVM bitcode and SMT. Hands-on: `counter.cry` (the fifth encoding of the counter), `popcount.cry` / `popcount.c` with `:prove popcount_kernighan_eq`, and the `popcount.saw` C ↔ Cryptol equivalence proof. |
 | Break | ~10 min | |
 | L3 — The frontier | ~50 min | Neural-network verification (α,β-CROWN, NNV) with a **hands-on** `auto_LiRPA` robustness example (`examples/nn/`, CPU-only / Colab); industrial deployments at AWS, Microsoft, Galois; what comes next. Time to start the take-home mini-project and for Q&A. |
 | Wrap | ~10 min | Recap of the four days and intro to the take-home mini-project. |
@@ -72,7 +72,7 @@ Open a shell inside the container with this directory mounted at `/work`:
 docker compose run --rm day04
 ```
 
-You are now at `/work` with `cbmc`, `cryptol`, `saw`, and `clang` on `PATH`. Edit files in VS Code (or anywhere) on the host — they appear instantly inside the container, and anything the container writes (counterexamples, `.bc` files) lands on the host.
+You are now at `/work` with `cbmc`, `cryptol`, `saw`, and `clang` on `PATH`. Edit files in VS Code (or anywhere) on the host — they appear immediately inside the container, and anything the container writes (counterexamples, `.bc` files) lands on the host.
 
 Then run any of the demos:
 
@@ -99,7 +99,7 @@ docker compose run --rm day04 \
 - **macOS.** Docker Desktop on Apple Silicon emulates x86_64 for this image (CBMC and SAW publish x86_64 Linux binaries). The first run is slow under emulation; subsequent runs are fine. If you want native arm64 throughout, swap the SAW download in the `Dockerfile` for the `arm64` release once Galois ships one.
 - **Linux.** Use `docker compose` or `podman-compose` interchangeably. SELinux users may need `:z` on the bind mount: `volumes: ["./:/work:z"]`.
 
-## Running — native (if you really want to)
+## Running natively (optional)
 
 If you would rather install the tools directly on the host, the parent [`README.md`](../README.md) has install pointers for CBMC, Cryptol, and SAW per OS. Docker is still strongly preferred — version drift between SAW and the host LLVM is the single most common reason verification fails.
 

@@ -140,8 +140,8 @@ Worth a beat: the synchrony hypothesis is an abstraction, and like all abstracti
 
 ## Where reactive components show up
 
-- **Automobiles** — engine control, ABS, the throttle logic from the Toyota case (Day 1).
-- **Avionics** — flight control loops, TCAS collision avoidance.
+- **Automobiles** — engine control, anti-lock braking systems (ABS), the throttle logic from the Toyota case (Day 1).
+- **Avionics** — flight control loops, the Traffic Collision Avoidance System (TCAS).
 - **Hardware** — every synchronous digital circuit is an SRC on the clock edge.
 - **Protocols** — TCP, mutual-exclusion, cache coherence.
 
@@ -250,7 +250,7 @@ When you compose components, *whose clock ticks?*
 SMV models asynchrony *inside* the synchronous framework: add a scheduler that picks who moves (this is `peterson.smv`'s scheduler variable).
 
 ::: notes
-Week 5's composition slides. The distinction is the single biggest modeling decision for concurrency. Synchronous = lock-step (every assignment fires each round); asynchronous = pick-one-and-step, leaving the rest frozen — which is what generates the interleaving explosion. The classic gotcha: asynchronous composition has many more reachable states for the same components, because every interleaving order is a distinct path. SMV's old `process` keyword did this automatically but is deprecated; our examples (peterson) instead add an explicit scheduler input — a free VAR that nondeterministically names which process moves — which is both clearer and not deprecated. This is also why a frame condition (`y' = y` for the non-moving process) matters: in asynchronous steps you must say the others don't change.
+Week 5's composition slides. The distinction is the single biggest modeling decision for concurrency. Synchronous = lock-step (every assignment fires each round); asynchronous = pick-one-and-step, leaving the rest frozen — which is what generates the interleaving explosion. The classic pitfall: asynchronous composition has many more reachable states for the same components, because every interleaving order is a distinct path. SMV's old `process` keyword did this automatically but is deprecated; our examples (peterson) instead add an explicit scheduler input — a free VAR that nondeterministically names which process moves — which is both clearer and not deprecated. This is also why a frame condition (`y' = y` for the non-moving process) matters: in asynchronous steps you must say the others don't change.
 :::
 
 ---
@@ -267,7 +267,7 @@ Week 5's composition slides. The distinction is the single biggest modeling deci
 **Don't assume every spec is meant to pass.** Read each verdict against what you expect.
 
 ::: notes
-This is a real pedagogical point and a gotcha I want students to internalize. The example file mixes passing and failing specs deliberately, so you see nuXmv say both "true" and "false" and produce counterexamples for the false ones. In general, treating a tool's output as "should be all green" is how people miss real bugs — the verdict is data, not a grade.
+This is a real pedagogical point and a subtlety I want students to internalize. The example file mixes passing and failing specs deliberately, so you see nuXmv say both "true" and "false" and produce counterexamples for the false ones. In general, treating a tool's output as "should be all green" is how people miss real bugs — the verdict is data, not a grade.
 :::
 
 ---
@@ -1053,7 +1053,7 @@ $$(\text{mode}=\text{on}) \wedge \neg p \wedge (x < 10)\ \wedge\ (\text{mode}'=\
 If $T$ has $k$ variables, a *set of states* is a formula over $k$ variables and the *transition relation* is a formula over $2k$ variables. Variables a step doesn't touch need an explicit $y' = y$ (a **frame condition**).
 
 ::: notes
-The symbolic representation from Week 6 — the spine of symbolic model checking: represent both state sets and the transition relation as logical formulas, then do reachability by manipulating formulas. Primed variables are the standard "next state" convention (nuXmv's `next(x)`, TLA+'s `x'`, Lean's two-state relation). The frame condition (`y' = y` for untouched variables) is the classic gotcha: in code an untouched variable just stays; in a relation you must *say so*, or the solver may change it. This `φ_T` is exactly the symbolic state machine from Day 1, written as one big formula over (s, s').
+The symbolic representation from Week 6 — the spine of symbolic model checking: represent both state sets and the transition relation as logical formulas, then do reachability by manipulating formulas. Primed variables are the standard "next state" convention (nuXmv's `next(x)`, TLA+'s `x'`, Lean's two-state relation). The frame condition (`y' = y` for untouched variables) is the classic pitfall: in code an untouched variable just stays; in a relation you must *say so*, or the solver may change it. This `φ_T` is exactly the symbolic state machine from Day 1, written as one big formula over (s, s').
 :::
 
 ---
@@ -1179,7 +1179,7 @@ A **BDD** is a canonical, compressed decision tree for a boolean function.
 - Result is **canonical**: two functions are equal iff their BDDs are identical.
 
 ::: notes
-BDDs (Bryant 1986) are why symbolic model checking works. Shannon expansion splits a function on one variable; doing it over a fixed order and sharing common substructure yields a compact DAG. Canonicity is the magic property: equality of boolean functions becomes pointer equality of BDDs, so the fixpoint test (R_{k+1} = R_k) is cheap. The catch is on the next slide.
+BDDs (Bryant 1986) are why symbolic model checking works. Shannon expansion splits a function on one variable; doing it over a fixed order and sharing common substructure yields a compact DAG. Canonicity is the key property: equality of boolean functions becomes pointer equality of BDDs, so the fixpoint test (R_{k+1} = R_k) is cheap. The catch is on the next slide.
 :::
 
 ---
@@ -1293,10 +1293,10 @@ The same function can be **tiny or exponential** depending on variable order.
 - Bad order → exponential blow-up.
 - Finding the optimal order is itself **NP-complete** (Bollig & Wegener, 1996); tools use heuristics + dynamic reordering.
 
-Arithmetic (multipliers) has **no** good order — BDDs are bad at it. That's where SAT/SMT (Day 1, Day 4) wins.
+Arithmetic (multipliers) has **no** good order — BDDs scale poorly on it. That's where SAT/SMT (Day 1, Day 4) wins.
 
 ::: notes
-The Achilles' heel of BDDs: variable ordering. A classic example is the middle output bit of a multiplier circuit, whose BDD is exponential under every variable order (Bryant 1991) — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. NuSMV and nuXmv both support dynamic reordering (the `-dynamic` flag). The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
+The key weakness of BDDs: variable ordering. A classic example is the middle output bit of a multiplier circuit, whose BDD is exponential under every variable order (Bryant 1991) — which is exactly why hardware multipliers are verified with SAT-based methods, not BDDs. NuSMV and nuXmv both support dynamic reordering (the `-dynamic` flag). The practical lesson: BDDs are spectacular for control-dominated logic and poor for data-path arithmetic; know which tool to reach for.
 :::
 
 ---
@@ -1343,7 +1343,7 @@ Two ways to turn BMC's *bug-finding* into an unbounded *proof*:
 - **k-induction = BMC made complete.** *Base:* no counterexample in the first `k` steps (a BMC query). *Step:* whenever `P` holds along `k` consecutive states, it holds at the next — with a "no repeated state" (simple-path) constraint so it terminates. Pass both ⇒ `P` holds forever. Looking back `k` steps succeeds where 1-step induction fails.
 - **IC3 / PDR** (Property-Directed Reachability). Builds an inductive invariant *incrementally* as a chain of **frames** (over-approximations of "reachable in ≤ i steps"), learning a small clause from each *counterexample-to-induction* — **without ever unrolling** the transition relation. Often the fastest engine.
 
-**nuXmv runs both** (its `check_invar_ic3` uses IC3) — so when nuXmv proves your `G`-property, this is what's happening under the hood.
+**nuXmv runs both** (its `check_invar_ic3` uses IC3) — so when nuXmv proves your `G`-property, this is what is happening internally.
 
 ::: notes
 The "BMC is not the end of the line" slide — the gap a comparison against Berkeley 219C and the modern symbolic-MC literature flagged. Plain BMC only refutes up to depth k ("some early on called it just a good testing strategy, not verification"). k-induction reuses the *same* unrolled SAT/SMT encoding but adds an inductive step: if any k consecutive good states force the (k+1)-th to be good, and there's no short counterexample, the property holds at every depth; the simple-path constraint (the k states are distinct) guarantees a large-enough k terminates. IC3/PDR is the other workhorse and the conceptual payoff of the previous slide: it constructs an inductive invariant frame by frame, generalizing each counterexample-to-induction into a clause, never unrolling — Bradley's 2011 method, "one of the fastest SAT-based model-checking algorithms." The takeaway for this audience is not the internals but the landscape: nuXmv's invariant checking is k-induction + IC3 (per its CAV 2014 tool paper), so the "proof" half of model checking — not just the BMC "bug-finding" half — is exactly these algorithms searching for the inductive invariant from the previous slide.

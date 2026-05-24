@@ -114,7 +114,7 @@ Don't dwell, but place Lean in lineage. LCF introduced tactics (programs that bu
 #check (rfl : 5 = 5)    -- rfl is a *term* (proof) of that type
 ```
 
-Read `e : T` as "`e` has type `T`". `Nat` = the naturals 0,1,2,…; `Type` = the type of ordinary data types; `Prop` = the type of propositions (things provable); `#check` just prints a term's type.
+Read `e : T` as "`e` has type `T`". `Nat` = the naturals 0,1,2,…; `Type` = the type of ordinary data types; `Prop` = the type of propositions (statements that can be true or false); `#check` just prints a term's type.
 
 To prove `P` is to **construct a term of type `P`**. The kernel type-checks the term.
 
@@ -183,7 +183,7 @@ A **dependent** function type lets the *result type depend on the input value* �
 So `∀` ("for all") is just a dependent function type whose outputs are **proofs**. That single idea is what makes "propositions as types" powerful enough for real math.
 
 ::: notes
-This is the one genuinely new piece of type theory beyond "proposition = type": dependency. Ordinary `A → B` is what everyone knows. The leap is that the codomain can mention the argument — `(n : Nat) → (0 + n = n)` is a function that, given a specific n, returns a proof tailored to that n. Then the punchline: `∀ x, P x` IS exactly that dependent function type, and a proof of a `∀` is literally a function you can apply to a witness. This demystifies why, later, applying a proof of `∀ s, …` to a particular state `s` is just function application. Keep it gentle; the `(n : A) → B n` notation is the only new symbol.
+This is the one genuinely new piece of type theory beyond "proposition = type": dependency. Ordinary `A → B` is what everyone knows. The leap is that the codomain can mention the argument — `(n : Nat) → (0 + n = n)` is a function that, given a specific n, returns a proof tailored to that n. Then the key point: `∀ x, P x` IS exactly that dependent function type, and a proof of a `∀` is literally a function you can apply to a witness. This demystifies why, later, applying a proof of `∀ s, …` to a particular state `s` is just function application. Keep it gentle; the `(n : A) → B n` notation is the only new symbol.
 :::
 
 ---
@@ -691,7 +691,7 @@ Inductive types are the one structural idea the counter rests on, so give them a
 
 ## The recursor: an induction principle per type
 
-For every inductive type, Lean generates a **recursor** (`.rec`) — the formal statement of its induction principle. You rarely call it directly; `induction`/`cases` use it under the hood.
+For every inductive type, Lean generates a **recursor** (`.rec`) — the formal statement of its induction principle. You rarely call it directly; `induction`/`cases` use it internally.
 
 ```lean
 #check @Nat.rec
@@ -944,7 +944,7 @@ Tempting: split all the cases, then close them uniformly —
 So the shipped proof closes each leaf with the *right* tool — `simp` + `omega` on the counting leaves, `absurd … (by decide)` on the impossible-mode leaves — rather than one blanket tactic.
 
 ::: notes
-A deliberately honest slide. The `<;>` combinator collapses the *shared* work, but a single `simp_all <;> omega` does NOT finish the proof — omega even prints a counterexample on the off-mode leaves, because their goal is a constructor disequality (`on ≠ off`), not an arithmetic fact. That's exactly why the shipped counterInv_step in Counter.lean closes the impossible-mode leaves with `absurd … (by decide)` and the counting leaves with `omega`. Teaching point: match the closer to the goal's *kind* — arithmetic → omega, decidable equality → decide. This is also where an AI assistant bluffs: it'll happily propose a tidy one-liner the elaborator (Lean's engine that turns your tactic script into a proof term) then rejects (ties to L3).
+A deliberately honest slide. The `<;>` combinator collapses the *shared* work, but a single `simp_all <;> omega` does NOT finish the proof — omega even prints a counterexample on the off-mode leaves, because their goal is a constructor disequality (`on ≠ off`), not an arithmetic fact. That's exactly why the shipped counterInv_step in Counter.lean closes the impossible-mode leaves with `absurd … (by decide)` and the counting leaves with `omega`. Teaching point: match the closer to the goal's *kind* — arithmetic → omega, decidable equality → decide. This is also where an AI assistant is unreliable: it may propose a tidy one-liner the elaborator (Lean's engine that turns your tactic script into a proof term) then rejects (ties to L3).
 :::
 
 ---
@@ -1093,7 +1093,7 @@ We resume after the break with AI in the proof loop, and Lean in industry.
 # L3 — AI in the loop + Lean for real {.section}
 
 ::: notes
-Final block. The AI-assisted proof workflow (the headline of the course), an honest account of where AI helps and where it bluffs, and the industrial/research reality of Lean so students see this is not academic.
+Final block. The AI-assisted proof workflow (the headline of the course), an honest account of where AI helps and where it is unreliable, and the industrial/research reality of Lean so students see this is not academic.
 :::
 
 ---
@@ -1164,9 +1164,9 @@ The live demo, framed honestly. Dropping the `mode = off → x = 0` conjunct bre
 
 ---
 
-## Where AI is reliable — and where it bluffs
+## Where AI is reliable — and where it is not
 
-| Reliable | Bluffs |
+| Reliable | Unreliable |
 |---|---|
 | explaining what `omega`/`simp` did | "prove this" with no context |
 | naming a Mathlib lemma | long multi-file proofs |
@@ -1184,7 +1184,7 @@ An honest, calibrated account — this is what students most need. AI is genuine
 ## How to drive the AI well
 
 1. **Give it context** — show your `TransitionSystem` and state definitions first.
-2. **Ask for structure, not magic** — "suggest a strengthening that makes this inductive, with one-line justification."
+2. **Ask for structure, not a finished proof** — "suggest a strengthening that makes this inductive, with one-line justification."
 3. **Paste the elaborator error back** — Lean's error says exactly where it failed.
 4. **Iterate** — the AI usually fixes its own mistakes given the error; sometimes you step in.
 

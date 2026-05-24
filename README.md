@@ -66,7 +66,7 @@ Needed for the Z3 Python bindings used in several mini-projects. Python 3.12 is 
 
 ### 3. Z3
 
-The SMT solver from Microsoft Research, used as our SAT/SMT engine. The `z3-solver` package bundles both the Python bindings and a CLI binary.
+The SMT solver from Microsoft Research, used as our SAT/SMT engine. The `z3-solver` package bundles both the Python bindings and a command-line interface (CLI) binary.
 
 - Repository: <https://github.com/Z3Prover/z3>
 - Install:
@@ -145,7 +145,7 @@ Light reading to ground the course material. None of these are required reading;
   - The tool paper for nuXmv, the symbolic model checker we use on Day 2.
 
 - **J. Lewis and B. Martin.** *Cryptol: High Assurance, Retargetable Crypto Development and Validation.* In *IEEE Military Communications Conference (MILCOM 2003)*, vol. 2, pp. 820–825, 2003. <https://doi.org/10.1109/MILCOM.2003.1290218>
-  - The original Cryptol paper from Galois and the NSA, introducing it as a DSL for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
+  - The original Cryptol paper from Galois and the NSA, introducing it as a domain-specific language (DSL) for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
 
 - **smvis** — interactive SMV / NuSMV model visualizer (state graphs and BDDs). **Run it in your browser:** <https://bit.ly/fmaiv_smvis> · source: <https://github.com/verivital/smvis>
   - Used on Day 2 to run NuSMV with no install and to visualize the example models, state graphs, and BDDs interactively; the Day 2 `.smv` examples are drawn from its example set.

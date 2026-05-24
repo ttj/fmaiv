@@ -13,7 +13,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Break | ~10 min | |
 | L2 — Lean by example: the counter | ~50 min | The Day 2 counter reincarnated as a `TransitionSystem CounterState` (`CounterDemo/TransitionSystem.lean`, `Counter.lean`). Inductive invariants and the strengthening pattern; walk through `counterInv_init` and the first case of `counterInv_step`. Smoke test: `lake build` (builds successfully and **sorry-free** — the translator-generated `NuXMV/{Gcd,Mutex}.lean` are commented stubs, with the real proofs in `*Proofs.lean`). |
 | Break | ~10 min | |
-| L3 — AI in the loop + Lean for real | ~50 min | Hands-on walk-through of `CounterDemo/Counter.lean`: the strengthened invariant, the init lemma, the step lemma's case split, and how each `INVARSPEC` is read off via `invariant_strengthening`. Use Claude Code as a proof pair partner; discuss where it was right and where it bluffed. |
+| L3 — AI in the loop + Lean for real | ~50 min | Hands-on walk-through of `CounterDemo/Counter.lean`: the strengthened invariant, the init lemma, the step lemma's case split, and how each `INVARSPEC` is read off via `invariant_strengthening`. Use Claude Code as a proof pair partner; discuss where it was reliable and where it was not. |
 | Wrap | ~10 min | Recap and intro to the take-home mini-project. |
 
 **Take-home mini-project** (see `assignments/day03.md`): finish or extend a proof, using Claude Code as a pair partner.
