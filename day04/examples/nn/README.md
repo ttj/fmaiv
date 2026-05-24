@@ -3,7 +3,7 @@
 Certify whether a classifier's prediction can change inside an L-infinity ball
 around an input — the same "can the bad thing happen?" question as the rest of
 the week, now for a neural network. Engine: **auto_LiRPA** (the CROWN
-bound-propagation library under [alpha,beta-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN),
+bound-propagation library under [α,β-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN),
 the VNN-COMP winner).
 
 Everything is **CPU-only** and tiny (a 2-D, 2-class MLP) — no GPU, no dataset

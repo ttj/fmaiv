@@ -36,8 +36,12 @@ day01/
 ├── examples/
 │   ├── z3_smoke.py              ← smoke test
 │   ├── z3_smt_basics.smt2       ← SMT-LIB syntax intro
+│   ├── z3_smtlib_demo.smt2      ← SMT-LIB counter demo
 │   ├── z3_pigeonhole.py         ← classic SAT encoding
 │   ├── z3_counter_bounded.py    ← bounded reachability of the counter
-│   └── expected_output.txt      ← reference output for verification
+│   ├── z3_entailment.py         ← entailment as UNSAT (+ z3_entailment_starter.py)
+│   ├── z3_synthesis.py          ← synthesis as ∃∀ solving
+│   ├── expected_output.txt      ← reference output for verification
+│   └── puzzles/                 ← SMT puzzles: sudoku, kenken, nqueens, magic_square (each with a *_starter)
 └── assignments/day01.md
 ```

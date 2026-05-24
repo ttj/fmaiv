@@ -1,7 +1,9 @@
 ---
 title: "Day 3 — Theorem Proving with Lean 4 (and AI)"
 subtitle: "FMAIV: Formal Methods & AI-Assisted Verification"
-author: "Taylor T. Johnson"
+author:
+  - "Taylor Johnson — Associate Professor of Computer Science, Computer Engineering & Electrical Engineering; Associate Dean for Graduate Education, College of Connected Computing · taylor.johnson@vanderbilt.edu · [taylortjohnson.com](https://www.taylortjohnson.com/)"
+  - "Ben Wooding — Postdoctoral Scholar, Institute for Software Integrated Systems · ben.wooding@vanderbilt.edu · [woodingben.com](https://woodingben.com/)"
 institute: "Vanderbilt University"
 date: "Day 3 of 4"
 ---
@@ -1200,7 +1202,7 @@ Lean is not just for olympiad problems. PFR and LTE are research-level mathemati
 
 ---
 
-## Where Coq / Isabelle / Rocq still lead
+## Where Coq (now Rocq) and Isabelle still lead
 
 Lean is ascendant in mathematics, but:
 

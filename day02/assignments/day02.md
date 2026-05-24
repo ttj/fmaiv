@@ -6,7 +6,7 @@
 
 ## Part A — Warm-up on the counter (15 min)
 
-1. Run `nuXmv counter.smv`. Confirm every `INVARSPEC` is reported `true`.
+1. Run `nuXmv counter.smv` (or `NuSMV counter.smv`). This file is a deliberate *sampler*: the three core safety invariants hold (`x <= count_max`; `mode = off -> x = 0`; `x > 0 -> mode = on`), while two are intentionally false (`x < count_max` and `x <= count_max / 2`) and report a counterexample — because `x` does reach 10. Read one of those counterexamples and write a one-sentence explanation.
 2. In a copy of the file, change `init(x) := 0` to `init(x) := 5`. Which properties still hold? Which fail? Read the counterexample for at least one failing property and write a one-sentence English explanation.
 3. Revert the change.
 

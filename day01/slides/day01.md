@@ -1,7 +1,9 @@
 ---
 title: "Day 1 — Foundations: Logic, Transition Systems, SAT, SMT"
 subtitle: "FMAIV: Formal Methods & AI-Assisted Verification"
-author: "Taylor T. Johnson"
+author:
+  - "Taylor Johnson — Associate Professor of Computer Science, Computer Engineering & Electrical Engineering; Associate Dean for Graduate Education, College of Connected Computing · taylor.johnson@vanderbilt.edu · [taylortjohnson.com](https://www.taylortjohnson.com/)"
+  - "Ben Wooding — Postdoctoral Scholar, Institute for Software Integrated Systems · ben.wooding@vanderbilt.edu · [woodingben.com](https://woodingben.com/)"
 institute: "Vanderbilt University"
 date: "Day 1 of 4"
 ---
@@ -824,7 +826,7 @@ Same little system we'll see every day. Five tools, four pillars, one example. P
 
 ## The counter, formally
 
-$$S = \{\text{off}, \text{on}\} \times \{0, 1, \dots, 10\}$$
+$$S = \{\text{off}, \text{on}\} \times \mathbb{N}$$
 $$S_0 = \{(\text{off}, 0)\}$$
 
 Transition relation $\rightarrow$ (parameterized by a non-deterministic `press` at each step):
@@ -833,7 +835,7 @@ $$\begin{aligned}
 (\text{off}, x) &\xrightarrow{\neg p} (\text{off}, x) \\
 (\text{off}, x) &\xrightarrow{p} (\text{on}, x) \\
 (\text{on}, x) &\xrightarrow{\neg p \;\wedge\; x < 10} (\text{on}, x + 1) \\
-(\text{on}, x) &\xrightarrow{p \;\vee\; x = 10} (\text{off}, 0)
+(\text{on}, x) &\xrightarrow{p \;\vee\; x \ge 10} (\text{off}, 0)
 \end{aligned}$$
 
 Atomic propositions: $\text{mode}\_\text{off}, \text{mode}\_\text{on}, x{=}0, x{=}10, \dots$ as needed.
@@ -928,12 +930,12 @@ Starting from $(\text{off}, 0)$:
 (off, 0)                            ← back to initial
 ```
 
-The reachable set is **12 of the 22 states**: $\{(\text{off}, 0)\} \cup \{(\text{on}, k) : 0 \le k \le 10\}$.
+The state space is infinite ($x \in \mathbb{N}$), but the reachable set is just **12 states**: $\{(\text{off}, 0)\} \cup \{(\text{on}, k) : 0 \le k \le 10\}$ — which is exactly why "is $x = 11$ ever reachable?" is a sharp safety question.
 
 The safety property $x \le 10$ holds on all twelve. ✓
 
 ::: notes
-We could verify by hand because the state space is finite and small. Day 2's nuXmv does this enumeration automatically. Day 3's Lean does it by induction without ever enumerating. Day 1's Z3 does a *bounded* version — "is x = 11 reachable in ≤ N steps for N = 5, 10, 30?" and answers UNSAT for each. We trade completeness for not having to construct the state space.
+We could verify by hand because the *reachable* state space is finite and small. Day 2's nuXmv does this enumeration automatically. Day 3's Lean does it by induction without ever enumerating. Day 1's Z3 does a *bounded* version — "is x = 11 reachable in ≤ N steps for N = 5, 10, 30?" and answers UNSAT for each. We trade completeness for not having to construct the state space.
 :::
 
 ---
@@ -942,7 +944,7 @@ We could verify by hand because the state space is finite and small. Day 2's nuX
 
 <svg viewBox="0 0 680 330" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
   <ellipse cx="310" cy="180" rx="300" ry="144" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.8"/>
-  <text x="310" y="20" text-anchor="middle" font-size="15" fill="#5b6168">all states S — 22 (mode × x)</text>
+  <text x="310" y="20" text-anchor="middle" font-size="15" fill="#5b6168">all states S — infinite (mode × ℕ)</text>
   <ellipse cx="252" cy="186" rx="218" ry="118" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
   <text x="232" y="96" text-anchor="middle" font-size="15" fill="#146a96">reachable — 12</text>
   <ellipse cx="200" cy="200" rx="132" ry="72" fill="#cfe6f7" stroke="#146a96" stroke-width="2"/>
@@ -954,7 +956,7 @@ We could verify by hand because the state space is finite and small. Day 2's nuX
   <text x="565" y="196" text-anchor="middle" font-size="11.5" fill="#922b21">unreachable</text>
 </svg>
 
-- **All states** (22): every $(\text{mode}, x)$ pair you could write down.
+- **All states** (infinite): every $(\text{mode}, x)$ pair you could write down ($x \in \mathbb{N}$).
 - **Reachable** (12): what the system can actually get to from $(\text{off}, 0)$.
 - **Reachable in $\le N$ steps**: what bounded model checking explores — it grows toward the reachable boundary as $N$ rises.
 - **Bad** ($x = 11$): sits *outside* reachable, so no trace ever hits it — BMC keeps returning UNSAT; Day 2 *proves* it can never happen.

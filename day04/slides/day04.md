@@ -1,7 +1,9 @@
 ---
 title: "Day 4 — Program & High-Assurance Verification"
 subtitle: "FMAIV: Formal Methods & AI-Assisted Verification"
-author: "Taylor T. Johnson"
+author:
+  - "Taylor Johnson — Associate Professor of Computer Science, Computer Engineering & Electrical Engineering; Associate Dean for Graduate Education, College of Connected Computing · taylor.johnson@vanderbilt.edu · [taylortjohnson.com](https://www.taylortjohnson.com/)"
+  - "Ben Wooding — Postdoctoral Scholar, Institute for Software Integrated Systems · ben.wooding@vanderbilt.edu · [woodingben.com](https://woodingben.com/)"
 institute: "Vanderbilt University"
 date: "Day 4 of 4"
 ---
@@ -529,7 +531,7 @@ Three commands, easiest to strongest. `:check` randomly samples inputs (no solve
 ## The counter in Cryptol (fifth encoding)
 
 ```cryptol
-type State = (Bit, [4])           // (mode, x): False=OFF, True=ON
+type State = (Bit, [4])           // (mode, x): [4] = 0..15, headroom to ask "x = 11?"
 
 step : State -> Bit -> State
 step s press = ...                 // four guards, mirrors counter.c
