@@ -119,13 +119,13 @@ The pipeline. The key realization for students: CBMC is not magic, it is automat
   <line x1="700" y1="76" x2="728" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
   <rect x="10" y="48" width="150" height="56" rx="10" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
   <text x="85" y="81" text-anchor="middle" font-size="15" fill="#1c1c1c">C source</text>
-  <rect x="190" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="190" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="265" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">goto-program</text>
   <text x="265" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">uniform control flow</text>
-  <rect x="370" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="370" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="445" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">unwound ×k</text>
   <text x="445" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">loops unrolled</text>
-  <rect x="550" y="48" width="150" height="56" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="550" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="625" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">SSA + bit-blast</text>
   <text x="625" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">bit-precise eqns</text>
   <rect x="730" y="48" width="150" height="56" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
@@ -160,23 +160,23 @@ $$\underbrace{I(s_0)}_{\text{start state}} \ \wedge\ \underbrace{\bigwedge_{i=0}
   <line x1="12" y1="58" x2="40" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
   <text x="24" y="48" text-anchor="middle" font-size="12" fill="#5b6168">I</text>
   <line x1="130" y1="58" x2="176" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="153" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <text x="153" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
   <line x1="266" y1="58" x2="312" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="289" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <text x="289" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
   <line x1="458" y1="58" x2="504" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="481" y="48" text-anchor="middle" font-size="12.5" fill="#146a96">T</text>
+  <text x="481" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
   <rect x="42" y="36" width="88" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="86" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₀</text>
-  <rect x="178" y="36" width="88" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="178" y="36" width="88" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="222" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₁</text>
-  <rect x="314" y="36" width="88" height="44" rx="9" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="314" y="36" width="88" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="358" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₂</text>
   <text x="432" y="64" text-anchor="middle" font-size="22" fill="#5b6168">⋯</text>
   <rect x="506" y="36" width="88" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
   <text x="550" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s_k</text>
-  <text x="86" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
-  <text x="222" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
-  <text x="358" y="100" text-anchor="middle" font-size="11.5" fill="#146a96">¬P?</text>
+  <text x="86" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
+  <text x="222" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
+  <text x="358" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
   <text x="550" y="100" text-anchor="middle" font-size="11.5" fill="#922b21">¬P ✓ (bug)</text>
 </svg>
 *Caption: bounded model checking unrolls the transition relation $k$ times and asks whether the property can fail at any step.*
@@ -581,7 +581,7 @@ SAW is the bridge from spec to real code. You compile the C to LLVM bitcode, and
 
 <svg viewBox="0 0 720 224" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="saw-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
-  <rect x="28" y="32" width="246" height="66" rx="10" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="28" y="32" width="246" height="66" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="151" y="58" text-anchor="middle" font-size="14" fill="#1c1c1c">C implementation</text>
   <text x="151" y="78" text-anchor="middle" font-size="10.5" fill="#5b6168">clang → LLVM bitcode → symbolic exec</text>
   <rect x="446" y="32" width="246" height="66" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
@@ -760,13 +760,13 @@ Each ReLU neuron is **piecewise-linear** — two linear pieces with a kink at 0:
   <text x="170" y="30" text-anchor="middle" font-size="13" fill="#1c1c1c">ReLU(z) = max(0, z)</text>
   <line x1="55" y1="165" x2="295" y2="165" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
   <line x1="135" y1="180" x2="135" y2="52" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
-  <polyline points="60,165 135,165 250,78" fill="none" stroke="#2b9fd4" stroke-width="2.6"/>
+  <polyline points="60,165 135,165 250,78" fill="none" stroke="#B49248" stroke-width="2.6"/>
   <text x="300" y="170" text-anchor="middle" font-size="12" fill="#5b6168">z</text>
   <text x="170" y="200" text-anchor="middle" font-size="11.5" fill="#5b6168">two linear pieces, one kink</text>
-  <rect x="392" y="74" width="70" height="70" rx="6" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <rect x="392" y="74" width="70" height="70" rx="6" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <text x="427" y="162" text-anchor="middle" font-size="11" fill="#5b6168">input region</text>
   <line x1="470" y1="108" x2="528" y2="108" stroke="#5b6168" stroke-width="1.8" marker-end="url(#relu-ah)"/>
-  <text x="499" y="98" text-anchor="middle" font-size="10.5" fill="#146a96">k ReLUs</text>
+  <text x="499" y="98" text-anchor="middle" font-size="10.5" fill="#946E24">k ReLUs</text>
   <polygon points="620,60 633,88 664,92 641,113 647,143 620,128 593,143 599,113 576,92 607,88" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
   <text x="620" y="170" text-anchor="middle" font-size="11.5" fill="#922b21">≤ 2ᵏ linear pieces</text>
   <text x="620" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">(non-convex)</text>
@@ -832,12 +832,12 @@ The blow-up is real — so the *representation* of the set is everything. NNV us
 
 <svg viewBox="0 0 520 290" style="display:block;margin:0.3em auto;max-width:50%;height:auto" font-family="Inter, system-ui, sans-serif">
   <polygon points="370,120 300,212 160,212 90,120 160,28 300,28" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.8"/>
-  <polygon points="330,120 286,184 174,184 130,120 174,56 286,56" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="2"/>
+  <polygon points="330,120 286,184 174,184 130,120 174,56 286,56" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <polygon points="230,80 286,118 264,176 196,176 174,118" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="230" y="128" text-anchor="middle" font-size="12.5" fill="#1c1c1c">star set</text>
   <rect x="40" y="244" width="16" height="16" rx="3" fill="#faf7f0" stroke="#B49248" stroke-width="1.6"/>
   <text x="64" y="257" font-size="12" fill="#1c1c1c">star set — tightest (least conservative)</text>
-  <rect x="40" y="266" width="16" height="16" rx="3" fill="#e7f3fb" stroke="#2b9fd4" stroke-width="1.6"/>
+  <rect x="40" y="266" width="16" height="16" rx="3" fill="#f6eeda" stroke="#B49248" stroke-width="1.6"/>
   <text x="64" y="279" font-size="12" fill="#1c1c1c">abstract domain — looser</text>
   <rect x="300" y="244" width="16" height="16" rx="3" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.6"/>
   <text x="324" y="257" font-size="12" fill="#1c1c1c">zonotope — loosest</text>
