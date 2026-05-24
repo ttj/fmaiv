@@ -94,8 +94,10 @@ def CounterTS : TransitionSystem CounterState where
     else if ((s.mode = .on) ∧ ((s.press = true) ∨ (s.x ≥ 10))) then s'.x = 0
     else s'.x = s.x)
 
-/-- The strengthened invariant: `x ≤ 10` conjoined with `mode = off → x = 0`.
-    Neither holds inductively on its own; the conjunction does. -/
+/-- The bundled invariant: `x ≤ 10` conjoined with `mode = off → x = 0`. Each
+    conjunct is already inductive on its own for this counter (see the header
+    note); we bundle them so one inductive argument discharges all three
+    INVARSPECs via `invariant_strengthening`. -/
 def counterInv (s : CounterState) : Prop :=
   s.x ≤ 10 ∧ (s.mode = .off → s.x = 0)
 

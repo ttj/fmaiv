@@ -37,10 +37,14 @@ In one page, answer:
    and *why that number*? (Hint: how many steps to drive `x` from 0 to 10, and
    what does `--unwind 26` give you?)
 
-2. **The inductive insight.** In Lean, `x ≤ 10` is **not** inductive on its own —
-   you must strengthen it with `mode = off → x = 0`. Where do the *other* three
-   tools get away **without** that strengthening? (Hint: who reasons about
-   single transitions, and who explores concrete reachable states?)
+2. **The inductive insight.** Lean (Day 3) proves the property by *induction over
+   transitions*, so it needs an **inductive** invariant — one preserved by every
+   single step. For this counter `x ≤ 10` happens to be inductive on its own (the
+   `x < 10` guard makes `x' = x + 1 ≤ 10` fall out directly), but in general you
+   must **strengthen** a property to make it inductive — the genuinely-forced case
+   is the two-counter example in the Day-3 slides. Which of the other three tools
+   make you supply an inductive invariant at all, and which don't? (Hint: who
+   reasons about single transitions, and who explores concrete reachable states?)
 
 3. **Soundness vs. completeness.** Which of the five verdicts above is a proof
    for all inputs, and which could miss a bug that appears just past the bound?

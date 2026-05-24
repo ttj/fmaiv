@@ -14,6 +14,7 @@ on:
       - "notebooks/**"
       - "scripts/check_examples.sh"
       - "scripts/run_notebooks.sh"
+      - "scripts/smv2lean/**"
       - ".github/workflows/examples.yml"
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - "notebooks/**"
       - "scripts/check_examples.sh"
       - "scripts/run_notebooks.sh"
+      - "scripts/smv2lean/**"
       - ".github/workflows/examples.yml"
   workflow_dispatch: {}
 
@@ -105,3 +107,20 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             apt-get update -qq && apt-get install -y -qq python3 python3-pip git curl ca-certificates >/dev/null
             bash scripts/run_notebooks.sh notebooks/${{ matrix.nb }}.ipynb'
+
+  # Smoke-test the SMV->Lean translator (Day-3 "translate-then-prove" tool). It is
+  # student-facing (notebooks/README points at scripts/smv2lean/to_lean.sh) but
+  # has no other CI; a grammar/dependency break would otherwise surface only when
+  # a student runs it.
+  smv2lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Translate an SMV model to Lean and assert output
+        run: |
+          pip install -r scripts/smv2lean/requirements.txt
+          python scripts/smv2lean/smv2lean.py day02/examples/peterson.smv /tmp/peterson.lean
+          test -s /tmp/peterson.lean && echo "smv2lean produced a non-empty Lean file"
