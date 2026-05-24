@@ -46,7 +46,7 @@ day04/
 │   ├── loop_invariant_demo.c  ← bounded-loop CBMC taster (bridge to Day-3 induction) (+ _starter)
 │   ├── array_max / binsearch  ← more CBMC examples (`.c` + `_check.c` + `_starter.c`)
 │   ├── caesar / xor_cipher    ← more Cryptol examples (`.cry` + `_starter.cry`)
-│   └── nn/                     ← FRONTIER: neural-network robustness (auto_LiRPA): robustness.py, _starter, robustness.ipynb, requirements.txt, README.md
+│   └── nn/                     ← FRONTIER: neural-network robustness (auto_LiRPA): robustness.py, _starter, requirements.txt, README.md  (Colab notebooks are in notebooks/)
 └── assignments/day04.md
 ```
 
@@ -107,7 +107,7 @@ If you would rather install the tools directly on the host, the parent [`README.
 
 The Day-4 "frontier" hands-on: certify whether a classifier's prediction can change within an L-infinity ball around an input — the same "can the bad thing happen?" question as the rest of the week, now for a neural network. Engine: **auto_LiRPA** (the CROWN bound-propagation library under α,β-CROWN), **CPU-only** (no GPU; runs in ~1s). This is separate from the CBMC/SAW Docker image above.
 
-- **Zero install:** open [`examples/nn/robustness.ipynb`](examples/nn/robustness.ipynb) in Colab (badge at the top of the notebook).
+- **Zero install:** open [`05_day4_nn_robustness.ipynb`](../notebooks/05_day4_nn_robustness.ipynb) (or [`06_day4_nn_mnist.ipynb`](../notebooks/06_day4_nn_mnist.ipynb)) in Colab (badge at the top of the notebook).
 - **Codespace:** the deps are preinstalled (devcontainer `onCreateCommand`) — just `python examples/nn/robustness.py`.
 - **Local:**
   ```bash
