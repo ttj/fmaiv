@@ -79,24 +79,35 @@ def certified_margin(lirpa_model, x0, true_cls, eps):
 
 
 # ---- 4. PGD: actually try to FIND an adversarial example (a falsifier) --------
-def pgd_finds_adversary(model, x0, true_cls, eps, steps=100, lr=0.02):
+def pgd_finds_adversary(model, x0, true_cls, eps, steps=100, restarts=8):
+    """Falsifier: random-restart projected gradient descent that looks for an input
+    in the L-inf eps-ball whose prediction flips. It is sound only as a *search* —
+    finding one PROVES non-robustness; failing to find one proves nothing (PGD is
+    incomplete, which is exactly why we also need the certified bound above)."""
     other = 1 - true_cls
-    delta = torch.zeros_like(x0, requires_grad=True)
-    for _ in range(steps):
-        margin = (model(x0 + delta)[0, true_cls] - model(x0 + delta)[0, other])
-        grad = torch.autograd.grad(margin, delta)[0]
-        delta = (delta - lr * grad.sign()).clamp(-eps, eps).detach().requires_grad_(True)
-    with torch.no_grad():
-        return model(x0 + delta).argmax(1).item() != true_cls
+    if eps == 0:
+        return False
+    step = 2.5 * eps / steps                       # step size scaled to the radius
+    for _ in range(restarts):
+        delta = ((torch.rand_like(x0) * 2 - 1) * eps).requires_grad_(True)  # random start in the box
+        for _ in range(steps):
+            margin = model(x0 + delta)[0, true_cls] - model(x0 + delta)[0, other]
+            grad = torch.autograd.grad(margin, delta)[0]
+            delta = (delta - step * grad.sign()).clamp(-eps, eps).detach().requires_grad_(True)
+        with torch.no_grad():
+            if model(x0 + delta).argmax(1).item() != true_cls:
+                return True
+    return False
 
 
 if __name__ == "__main__":
     X, y = make_data()
     model = train(MLP(), X, y).eval()
 
-    # Pick a NEAR-boundary correctly-classified point: small (but not razor-thin)
-    # clean margin, so it certifies for a band of small eps and then breaks — that
-    # transition from "certified" to "adversarial found" is the whole lesson.
+    # Pick a correctly-classified point with a MODERATE clean margin, so it certifies
+    # for a band of small eps, then CROWN's bound gives up (incompleteness) while the
+    # point is still robust, and only at larger eps does a real adversarial example
+    # appear — that progression (certified -> not-certified -> falsified) is the lesson.
     with torch.no_grad():
         logits = model(X)
         correct = logits.argmax(1) == y
@@ -104,7 +115,7 @@ if __name__ == "__main__":
         other_logit = logits.gather(1, (1 - y).view(-1, 1)).squeeze(1)
         margins = torch.where(correct, true_logit - other_logit,
                               torch.full_like(true_logit, float("inf")))
-        target = 1.5   # aim for a modest margin, not the absolute closest point
+        target = 3.5   # a moderate margin: certifies for small eps, breaks only later
         idx = int((margins - target).abs().argmin())
     x0 = X[idx:idx + 1]
     true_cls = y[idx].item()
@@ -117,7 +128,7 @@ if __name__ == "__main__":
     clean_margin = None
     certified_upto = 0.0
     adv_at = None
-    for eps in [0.0, 0.05, 0.1, 0.2, 0.3, 0.5]:
+    for eps in [0.0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9]:
         m = certified_margin(lirpa_model, x0, true_cls, eps)
         if clean_margin is None:
             clean_margin = m
