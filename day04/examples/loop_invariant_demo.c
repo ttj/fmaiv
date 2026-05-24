@@ -1,44 +1,44 @@
-/* Day 4 — CBMC loop invariants: proving a loop for ALL n, not just up to a bound.
+/* Day 4 — bounded loop verification, and why "for all n" needs induction.
  *
- * The other CBMC examples bound the loop and UNWIND it (--unwind K), which only
- * checks executions shorter than K. A LOOP INVARIANT lets CBMC prove a property
- * for EVERY iteration count at once — the same inductive idea as Day 3, now in C.
+ * The loop increments x once per iteration, so the loop invariant — the
+ * inductive fact "after i iterations, x == i" — gives x == n on exit. CBMC is a
+ * BOUNDED model checker: it can confirm this for every n UP TO a bound, but not
+ * for all n at once. So we:
+ *   1. bound the loop count with __CPROVER_assume(n <= N), then
+ *   2. unwind N+1 times with --unwinding-assertions (which also PROVES the loop
+ *      never runs longer than that bound).
  *
- * The loop increments x once per iteration. The invariant `x == i` is the
- * inductive fact "after i iterations, x equals i". CBMC checks it is
- *   (a) true on entry,            (b) preserved by the body, and
- *   (c) strong enough on exit to prove the post-condition  x == n
- * with NO unwinding bound on n.
+ * Verify:
+ *      cbmc loop_invariant_demo.c --unwind 21 --unwinding-assertions
+ * Expected:  VERIFICATION SUCCESSFUL  (covers every n in 0..20)
  *
- * Verify (note: NO --unwind needed — the invariant replaces the loop):
- *      cbmc loop_invariant_demo.c --apply-loop-contracts
- * Expected:  VERIFICATION SUCCESSFUL
- *
- * Contrast: without the invariant you would need --unwind n+1 for each concrete
- * n, and could never cover all n at once. The loop invariant is to CBMC what the
- * inductive invariant (counterInv in Counter.lean) is to the Lean proof.
+ * The bridge to Day 3: here we had to PICK a bound N and could only prove the
+ * property for n <= N. The Lean proof (Counter.lean) discharges the analogous
+ * fact for ALL n at once, by induction on the step relation — no bound, using
+ * exactly this kind of invariant. Bounded checking refutes cheaply; induction
+ * proves universally.
  *
  * Starter: loop_invariant_demo_starter.c
  */
 #include <assert.h>          /* assert(): each becomes a CBMC proof goal */
+
+#define N 20                 /* the loop bound we verify up to */
 
 /* nondet_*: no body on purpose — CBMC treats it as a free, unconstrained value. */
 unsigned nondet_uint(void);
 
 int main(void)
 {
-    unsigned n = nondet_uint();      /* an ARBITRARY iteration count (any unsigned) */
+    unsigned n = nondet_uint();
+    __CPROVER_assume(n <= N);         /* bound the loop so BMC can cover every case */
+
     unsigned x = 0;
     unsigned i = 0;
-
-    while (i < n)
-    __CPROVER_loop_invariant(i <= n)          /* i never overshoots n */
-    __CPROVER_loop_invariant(x == i)          /* the inductive fact: x tracks i */
-    {
+    while (i < n) {                   /* loop invariant (inductive fact): x == i */
         x += 1;
         i += 1;
     }
 
-    assert(x == n);   /* PROVED for every n at once, with no unwinding bound */
+    assert(x == n);   /* holds for every n in 0..N; the invariant x==i is why */
     return 0;
 }

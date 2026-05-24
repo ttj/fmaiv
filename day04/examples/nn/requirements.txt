@@ -10,4 +10,4 @@
 # On Google Colab, torch is already installed, so just:  pip install auto_LiRPA
 #
 torch
-auto_LiRPA
+auto_LiRPA==0.7.0

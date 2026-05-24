@@ -22,7 +22,7 @@
   // wheel ~200 MB, NOT the ~2.5 GB CUDA build — so the base image stays lean and
   // these install per-Codespace instead). Ubuntu 24.04 is PEP 668 "externally
   // managed", hence --break-system-packages.
-  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel && pip install --break-system-packages --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir auto_LiRPA",
+  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel && pip install --break-system-packages --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir auto_LiRPA==0.7.0",
 
   "customizations": {
     "vscode": {

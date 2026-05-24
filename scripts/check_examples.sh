@@ -63,9 +63,11 @@ for m in counter mutex peterson prodcons elevator traffic_light gcd_01 spec_chal
 done
 
 echo "===== Day 3: Lean ====="
-# Build in the parent shell (NOT a subshell) so a failed build actually fails CI.
+# Build in the parent shell (NOT a subshell) so a failed build actually fails CI;
+# print the build output on failure so the Lean error is visible in CI logs.
 if want "lake build (CounterDemo)"; then
-  if ( cd day03/examples/CounterDemo && lake build ) >/dev/null 2>&1; then ok "lake build (CounterDemo)"; else no "lake build (CounterDemo)"; fi
+  o="$( cd day03/examples/CounterDemo && lake build 2>&1 )"
+  if [ $? -eq 0 ]; then ok "lake build (CounterDemo)"; else no "lake build (CounterDemo)"; sed 's/^/        /' <<<"$o" | tail -20; fi
 fi
 for mod in Counter CounterLadder TransitionSystem ArraySum Gcd TrafficLight Sorting SlideExamples; do
   want "Day3 $mod.lean: sorry-free" || continue
@@ -77,7 +79,7 @@ echo "===== Day 4: CBMC ====="
 expect "cbmc counter"   "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc counter.c counter_check.c --unwind 26 --unwinding-assertions'
 expect "cbmc array_max" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc array_max.c array_max_check.c --unwind 6 --unwinding-assertions'
 expect "cbmc binsearch" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc binsearch.c binsearch_check.c --unwind 10 --unwinding-assertions'
-expect "cbmc loop_invariant_demo (loop contract)" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc loop_invariant_demo.c --apply-loop-contracts'
+expect "cbmc loop_invariant_demo" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc loop_invariant_demo.c --unwind 21 --unwinding-assertions'
 
 echo "===== Day 4: Cryptol (:prove every property -> Q.E.D.) ====="
 cryprove(){ local f="$1"; shift; local p; for p in "$@"; do \

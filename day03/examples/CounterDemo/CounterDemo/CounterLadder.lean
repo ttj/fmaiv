@@ -16,7 +16,7 @@
     rung5  cases            — split on the mode (off / on)
     rung6  CAPSTONE         — assemble the base case from the rungs above
 
-  Starter (with each rung stubbed `sorry`): CounterLadderStarter.lean
+  Starter (with each rung left as a stub to fill): CounterLadderStarter.lean
   Next climb after this: the inductive STEP, `counterInv_step` in Counter.lean.
 -/
 import CounterDemo.Counter

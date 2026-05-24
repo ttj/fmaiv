@@ -96,20 +96,20 @@ The `*_starter.{cry,c}` files are stubs: Cryptol returns a **Counterexample**
 and CBMC reports **VERIFICATION FAILED** until you implement them (verify your
 version against the same property/harness).
 
-### CBMC loop invariants — proving for all `n` (bridge to Day 3)
+### Bounded loops, and why "for all `n`" needs induction (bridge to Day 3)
 
-The harnesses above *unwind* loops up to a bound. A **loop invariant** instead
-proves the loop for **every** iteration count at once — the inductive idea from
-Day 3, now in C. See [`loop_invariant_demo.c`](../examples/loop_invariant_demo.c)
+CBMC is a *bounded* checker. See [`loop_invariant_demo.c`](../examples/loop_invariant_demo.c)
 (starter: [`loop_invariant_demo_starter.c`](../examples/loop_invariant_demo_starter.c)):
 
 ```bash
-cbmc loop_invariant_demo.c --apply-loop-contracts     # SUCCESSFUL, no --unwind
+cbmc loop_invariant_demo.c --unwind 21 --unwinding-assertions   # SUCCESSFUL (n in 0..20)
 ```
 
-The invariant `x == i` is what lets CBMC conclude `x == n` for unbounded `n` —
-exactly what `counterInv` does for the Lean proof. The starter blanks that one
-invariant; without it CBMC cannot prove the post-condition.
+The loop invariant `x == i` is the inductive fact that makes `x == n` true. CBMC
+confirms it for every `n` *up to* the bound `N` (we `__CPROVER_assume(n <= N)`
+and unwind `N+1`). The starter omits that bound — `--unwinding-assertions` then
+*fails*, because `n` is unbounded. Proving the same fact for **all** `n` at once,
+with no bound, is exactly what the Day-3 Lean proof does by induction.
 
 ## Frontier: neural-network robustness (`examples/nn/`)
 
