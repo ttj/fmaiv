@@ -17,7 +17,8 @@ download. It runs in about a second.
 **Codespace / local:**
 
 ```bash
-# CPU wheel of PyTorch (~200 MB, not the ~2.5 GB CUDA build), then auto_LiRPA:
+# CPU wheel of PyTorch (~200 MB, not the ~2.5 GB CUDA build), then auto_LiRPA
+# (installed from GitHub — PyPI's auto_LiRPA is an ancient 0.2/0.3):
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 python robustness.py

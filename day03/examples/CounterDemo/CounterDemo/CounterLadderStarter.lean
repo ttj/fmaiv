@@ -35,9 +35,10 @@ theorem rung4_modus_ponens (s : CounterState)
     (h : s.mode = .off → s.x = 0) (hoff : s.mode = .off) : s.x = 0 := by
   sorry   -- `exact h hoff`
 
--- RUNG 5 — `cases hm : s.mode with | off => .. | on => ..` splits on the mode.
+-- RUNG 5 — `cases s.mode with | off => .. | on => ..` splits on the mode and
+-- replaces s.mode with the concrete value in the goal.
 theorem rung5_cases (s : CounterState) : s.mode = .off ∨ s.mode = .on := by
-  sorry   -- cases on s.mode; in each branch `exact Or.inl hm` / `Or.inr hm`
+  sorry   -- `cases s.mode with` ; each branch closes with `exact Or.inl rfl` / `Or.inr rfl`
 
 -- RUNG 6 — CAPSTONE. Every initial state satisfies the strengthened invariant
 -- (this is `counterInv_init`). Assemble it from the rungs above.

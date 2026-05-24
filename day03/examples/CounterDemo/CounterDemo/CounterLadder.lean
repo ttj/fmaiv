@@ -46,12 +46,15 @@ theorem rung4_modus_ponens (s : CounterState)
     (h : s.mode = .off → s.x = 0) (hoff : s.mode = .off) : s.x = 0 := by
   exact h hoff
 
--- RUNG 5 — `cases hm : s.mode with` splits the proof into one branch per value
--- of the mode, recording the choice as `hm` (e.g. `hm : s.mode = off`).
+-- RUNG 5 — `cases s.mode with | off => .. | on => ..` splits into one branch per
+-- mode value, replacing `s.mode` with that value in the goal — so each disjunct
+-- becomes `off = off` / `on = on`, closed by `rfl`. (The full proofs use the
+-- variant `cases hm : s.mode` to also record `hm : s.mode = off` for rewriting
+-- other hypotheses; see Counter.lean.)
 theorem rung5_cases (s : CounterState) : s.mode = .off ∨ s.mode = .on := by
-  cases hm : s.mode with
-  | off => exact Or.inl hm
-  | on  => exact Or.inr hm
+  cases s.mode with
+  | off => exact Or.inl rfl
+  | on  => exact Or.inr rfl
 
 -- RUNG 6 — CAPSTONE. Every initial state satisfies the strengthened invariant.
 -- This IS `counterInv_init` (Counter.lean), now assembled from the rungs:
