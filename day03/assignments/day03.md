@@ -6,11 +6,14 @@
 
 ## Part A — Warm-up (15 min)
 
-> **New to Lean?** Start with the guided tactic ladder
+> **New to Lean?** Two on-ramps. First, the set-theory intro
+> [`DiscreteMathStarter.lean`](../examples/CounterDemo/CounterDemo/DiscreteMathStarter.lean)
+> (solution `DiscreteMath.lean`): prove subset transitivity, De Morgan, and ∩-over-∪
+> distribution with the core tactics on a friendly domain. Then the counter-specific
 > [`CounterLadderStarter.lean`](../examples/CounterDemo/CounterDemo/CounterLadderStarter.lean)
-> (solution: `CounterLadder.lean`). Six short rungs — `omega`, `h.1`, `constructor`,
-> modus ponens, `cases`, then the counter's base case — each isolating one tactic.
-> Build just it with `lake build CounterDemo.CounterLadderStarter`. Climb it before Part B.
+> (solution `CounterLadder.lean`): six rungs — `omega`, `h.1`, `constructor`, modus
+> ponens, `cases`, then the counter's base case. Build either with
+> `lake build CounterDemo.<Name>`. Climb both before Part B.
 
 1. From `examples/CounterDemo`, run `lake build`. It builds cleanly — every solution module is fully proved. (The exercise files, `*Starter.lean`, build with `sorry` warnings until you complete them.)
 2. Open `CounterDemo/Counter.lean` in VS Code with the Lean 4 extension installed. Place your cursor at the end of `counterInv_init` and inspect the proof state. Do the same inside one of the cases of `counterInv_step`.
@@ -32,7 +35,7 @@ In `CounterDemo/Counter.lean`, change the counter bound from **10 to 25** — it
 
 ### B.3 — A new system from scratch
 
-Translate one of the SMV files from Day 2 — `traffic_light.smv`, `mutex.smv`, or `gcd_01.smv` — into Lean by hand (the upstream `leansmv` project has a translator script you can look at for reference, but writing it by hand is more educational). Prove one INVARSPEC of your choice.
+Translate one of the SMV files from Day 2 — `traffic_light.smv`, `mutex.smv`, or `gcd_01.smv` — into Lean, then prove one INVARSPEC of your choice. **Two worked examples of exactly this workflow ship with the course**: [`NuXMV/Gcd.lean`](../examples/CounterDemo/CounterDemo/NuXMV/Gcd.lean) and [`NuXMV/Mutex.lean`](../examples/CounterDemo/CounterDemo/NuXMV/Mutex.lean) are the *translator's raw output* (a `TransitionSystem` plus one `sorry` stub per `INVARSPEC`), with the proofs filled in beside them in `GcdProofs.lean` / `MutexProofs.lean`. You can auto-translate a model with the vendored [`scripts/smv2lean/`](../../scripts/smv2lean/) (`pip install -r requirements.txt; python smv2lean.py model.smv`) and then discharge the stubs — or write the translation by hand, which is more educational.
 
 This is the most ambitious option. Plan for 60+ minutes and expect to ask Claude for help.
 
@@ -67,13 +70,17 @@ whose proofs are `sorry`. The solution modules build with **no** `sorry`.
 
 | Module | What it shows |
 |---|---|
+| `DiscreteMath.lean` | a gentle intro: set theory in Lean (subset transitivity, De Morgan, ∩-over-∪) |
 | `ArraySum.lean` | induction over a list; a loop invariant (accumulator = `acc + sum rest`) |
 | `Sorting.lean` | insertion sort proved to produce a sorted list (+ length preserved) |
 | `Gcd.lean` | Euclid's GCD; termination via a **ranking function** (`termination_by` / `decreasing_by`) |
 | `TrafficLight.lean` | the Day-2 traffic light as a transition system; mutual-exclusion-of-green proved as an inductive invariant |
+| `ProgramVerif/Imp.lean`, `Examples.lean` | the **IMP** imperative language: big-step semantics and Hoare-style reasoning about programs |
+| `NuXMV/Gcd.lean`, `Mutex.lean` (+ `*Proofs.lean`) | SMV models auto-translated to Lean by `smv2lean`; each `INVARSPEC` stub proved by hand in `*Proofs.lean` |
 
-Starters: `ArraySumStarter.lean`, `GcdStarter.lean`, `TrafficLightStarter.lean`,
-`SortingStarter.lean`.
+Starters: `DiscreteMathStarter.lean`, `ArraySumStarter.lean`, `GcdStarter.lean`,
+`TrafficLightStarter.lean`, `SortingStarter.lean` (and the `NuXMV/{Gcd,Mutex}.lean`
+stubs act as starters — fill their `sorry`s, with `*Proofs.lean` as the answer key).
 
 ```bash
 cd examples/CounterDemo
