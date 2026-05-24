@@ -1,0 +1,54 @@
+name: build-autograde-image
+
+# Builds the FMAIV autograding container and pushes it to
+# ghcr.io/verivital/fmaiv-autograde. Every Classroom assignment's grading job
+# runs inside this image.
+#
+# All tools in the image are open source / freely redistributable (Z3, Lean,
+# CBMC, Cryptol, SAW, NuSMV, smvis), so the GHCR package can be made PUBLIC and
+# every student repo can pull it with no secrets and no access config. No
+# license-gated binaries and no vendored files are needed at build time.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "autograding/Dockerfile"
+      - "autograding/scripts/**"
+      - ".github/workflows/build-autograde-image.yml"
+  workflow_dispatch: {}
+
+env:
+  IMAGE: ghcr.io/verivital/fmaiv-autograde
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write         # to push to GHCR
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: autograding
+          file: autograding/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Reminder about package visibility
+        run: |
+          echo "Image pushed. Set the GHCR package 'fmaiv-autograde' to PUBLIC"
+          echo "(org Packages -> fmaiv-autograde -> Package settings -> Change"
+          echo "visibility -> Public) so student grading jobs can pull it."
