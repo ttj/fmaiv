@@ -118,7 +118,7 @@ network: within an L-infinity ball of radius `eps` around an input, can the
 prediction change? [`examples/nn/`](../examples/nn/) certifies it with
 **auto_LiRPA** (the CROWN engine under α,β-CROWN, the VNN-COMP winner), CPU-only:
 
-- Zero-install: open [`robustness.ipynb`](../examples/nn/robustness.ipynb) in Colab.
+- Zero-install: open [`05_day4_nn_robustness.ipynb`](../../notebooks/05_day4_nn_robustness.ipynb) in Colab.
 - Codespace/local: `pip install -r examples/nn/requirements.txt; python examples/nn/robustness.py`
   (the starter `robustness_starter.py` blanks the `compute_bounds` call).
 
