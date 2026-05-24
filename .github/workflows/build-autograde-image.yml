@@ -1,13 +1,20 @@
 name: build-autograde-image
 
-# Builds the FMAIV autograding container and pushes it to
-# ghcr.io/verivital/fmaiv-autograde. Every Classroom assignment's grading job
-# runs inside this image.
+# Builds the FMAIV autograde image (ghcr.io/verivital/fmaiv-autograde) that
+# Codespaces (.devcontainer) and CI (examples.yml check/notebooks jobs) run on.
+# All tools are open source / freely redistributable (Z3, Lean, CBMC, Cryptol,
+# SAW, NuSMV, smvis), so the GHCR package can be PUBLIC -- no secrets to pull it.
 #
-# All tools in the image are open source / freely redistributable (Z3, Lean,
-# CBMC, Cryptol, SAW, NuSMV, smvis), so the GHCR package can be made PUBLIC and
-# every student repo can pull it with no secrets and no access config. No
-# license-gated binaries and no vendored files are needed at build time.
+# PUBLISHING NOTE (cross-org): this repo is ttj/fmaiv (owner `ttj`) but the image
+# lives under the `verivital` org. A repo's default GITHUB_TOKEN can only push
+# packages owned by its OWN owner, so it CANNOT push to verivital/* -- you get
+# "denied: permission_denied: The requested installation does not exist".
+# So we BUILD on every change (to keep the image reproducible from the repo) and
+# PUSH only when a cross-org credential is provided: add a repo secret
+#   GHCR_PAT = a Personal Access Token with `write:packages` on the verivital org.
+# Without it the job still runs green (build-only) and the existing :latest is
+# untouched. (Alternative: host the image at ghcr.io/ttj/ and the default token
+# would suffice -- but then update .devcontainer + examples.yml + docs to match.)
 
 on:
   push:
@@ -26,29 +33,45 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write         # to push to GHCR
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
+      # Push only if a cross-org PAT is configured (see header); build either way.
+      - name: Decide whether to publish
+        id: cfg
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+        run: |
+          if [ -n "$GHCR_PAT" ]; then echo "push=true" >> "$GITHUB_OUTPUT"; else echo "push=false" >> "$GITHUB_OUTPUT"; fi
+
       - name: Log in to GHCR
+        if: steps.cfg.outputs.push == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
-      - name: Build and push
+      - name: Build (and push when GHCR_PAT is set)
         uses: docker/build-push-action@v6
         with:
           context: autograding
           file: autograding/Dockerfile
-          push: true
+          push: ${{ steps.cfg.outputs.push }}
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
 
-      - name: Reminder about package visibility
+      - name: Result
         run: |
-          echo "Image pushed. Set the GHCR package 'fmaiv-autograde' to PUBLIC"
-          echo "(org Packages -> fmaiv-autograde -> Package settings -> Change"
-          echo "visibility -> Public) so student grading jobs can pull it."
+          if [ "${{ steps.cfg.outputs.push }}" = "true" ]; then
+            echo "Built and pushed ${IMAGE}:latest."
+            echo "Ensure the GHCR package is PUBLIC so student/CI jobs can pull it"
+            echo "(org Packages -> fmaiv-autograde -> Package settings -> visibility -> Public)."
+          else
+            echo "Built only (no GHCR_PAT secret set)."
+            echo "The image is reproducible from the repo but not published from CI."
+            echo "To publish to the verivital org, add a repo secret GHCR_PAT"
+            echo "(a PAT with write:packages on verivital) -- see the workflow header."
+          fi
