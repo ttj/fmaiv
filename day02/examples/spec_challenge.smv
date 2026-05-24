@@ -26,20 +26,20 @@ ASSIGN
   esac;
 
 -- (1) "Whenever the arbiter is waiting, it is eventually granted."  HOLDS.
-LTLSPEC G (state = waiting -> F state = granted);
+LTLSPEC G ((state = waiting) -> F (state = granted));
 
 -- (2) "The granted state is reachable."  HOLDS.
-CTLSPEC EF state = granted;
+CTLSPEC EF (state = granted);
 
 -- (3) "Once granted, the arbiter eventually returns to idle."  HOLDS.
-LTLSPEC G (state = granted -> F state = idle);
+LTLSPEC G ((state = granted) -> F (state = idle));
 
 -- (4) "The arbiter never jumps straight from idle to granted (it must wait
 --      first)."  HOLDS. Note the X (next): the bad pattern is idle now AND
 --      granted next.
-LTLSPEC G !(state = idle & X state = granted);
+LTLSPEC G !((state = idle) & X (state = granted));
 
 -- (5) "Eventually the arbiter is idle forever."  DELIBERATELY FALSE — a client
 --     that keeps requesting forces the idle/waiting/granted cycle to repeat, so
 --     nuXmv returns a lasso counterexample.
-LTLSPEC F G state = idle;
+LTLSPEC F G (state = idle);
