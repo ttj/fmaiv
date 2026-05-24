@@ -18,3 +18,8 @@ import CounterDemo.ProgramVerif.Imp
 import CounterDemo.ProgramVerif.Examples
 import CounterDemo.NuXMV.GcdProofs
 import CounterDemo.NuXMV.MutexProofs
+-- More Day-2 models translated to Lean by scripts/smv2lean (Elevator is a worked
+-- example with a proof; Peterson and Prodcons are translate-then-prove starters).
+import CounterDemo.NuXMV.ElevatorProofs
+import CounterDemo.NuXMV.Peterson
+import CounterDemo.NuXMV.Prodcons
