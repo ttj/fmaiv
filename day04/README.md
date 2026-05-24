@@ -13,7 +13,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Break | ~10 min | |
 | L2 — Cryptol + SAW | ~50 min | A bit-precise functional DSL for specifying algorithms; equivalence checking against C implementations via LLVM bitcode and SMT. Hands-on: `counter.cry` (the fifth encoding of the counter), `popcount.cry` / `popcount.c` with `:prove popcount_kernighan_eq`, and the `popcount.saw` C ↔ Cryptol equivalence proof. |
 | Break | ~10 min | |
-| L3 — The frontier | ~50 min | Neural-network verification (α,β-CROWN, NNV); industrial deployments at AWS, Microsoft, Galois; what comes next. Time to start the take-home mini-project and for Q&A. |
+| L3 — The frontier | ~50 min | Neural-network verification (α,β-CROWN, NNV) with a **hands-on** `auto_LiRPA` robustness example (`examples/nn/`, CPU-only / Colab); industrial deployments at AWS, Microsoft, Galois; what comes next. Time to start the take-home mini-project and for Q&A. |
 | Wrap | ~10 min | Recap of the four days and intro to the take-home mini-project. |
 
 **Take-home mini-project** (see `assignments/day04.md`).
@@ -42,7 +42,11 @@ day04/
 │   ├── counter.cry            ← the running example, fifth encoding (Cryptol)
 │   ├── popcount.cry           ← Cryptol spec (two definitions + equivalence)
 │   ├── popcount.c             ← three C popcount implementations
-│   └── popcount.saw           ← SAW script proving C ↔ Cryptol equivalence
+│   ├── popcount.saw           ← SAW script proving C ↔ Cryptol equivalence
+│   ├── loop_invariant_demo.c  ← bounded-loop CBMC taster (bridge to Day-3 induction) (+ _starter)
+│   ├── array_max / binsearch  ← more CBMC examples (`.c` + `_check.c` + `_starter.c`)
+│   ├── caesar / xor_cipher    ← more Cryptol examples (`.cry` + `_starter.cry`)
+│   └── nn/                     ← FRONTIER: neural-network robustness (auto_LiRPA): robustness.py, _starter, robustness.ipynb, requirements.txt, README.md
 └── assignments/day04.md
 ```
 
@@ -98,3 +102,17 @@ docker compose run --rm day04 \
 ## Running — native (if you really want to)
 
 If you would rather install the tools directly on the host, the parent [`README.md`](../README.md) has install pointers for CBMC, Cryptol, and SAW per OS. Docker is still strongly preferred — version drift between SAW and the host LLVM is the single most common reason verification fails.
+
+## Frontier: neural-network robustness (`examples/nn/`)
+
+The Day-4 "frontier" hands-on: certify whether a classifier's prediction can change within an L-infinity ball around an input — the same "can the bad thing happen?" question as the rest of the week, now for a neural network. Engine: **auto_LiRPA** (the CROWN bound-propagation library under α,β-CROWN), **CPU-only** (no GPU; runs in ~1s). This is separate from the CBMC/SAW Docker image above.
+
+- **Zero install:** open [`examples/nn/robustness.ipynb`](examples/nn/robustness.ipynb) in Colab (badge at the top of the notebook).
+- **Codespace:** the deps are preinstalled (devcontainer `onCreateCommand`) — just `python examples/nn/robustness.py`.
+- **Local:**
+  ```bash
+  pip install -r examples/nn/requirements.txt   # torch (CPU wheel ~200 MB) + auto_LiRPA
+  python examples/nn/robustness.py
+  ```
+
+You'll see a certified robustness margin (`CERTIFIED ROBUST` at small `eps`), then — past the certified band — a PGD search finding a real adversarial example: the soundness-vs-completeness story for NN verification. The `robustness_starter.py` blanks the `compute_bounds` call. See [`examples/nn/README.md`](examples/nn/README.md) for details and the link to our AAAI'26 VNN-COMP tutorial.

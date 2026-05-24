@@ -34,21 +34,24 @@ day02/
 ├── README.md
 ├── slides/day02.md
 ├── examples/
-│   ├── counter.smv              ← running example (from verivital/smvis)
+│   ├── counter.smv              ← running example (adapted from verivital/smvis as a sampler)
 │   ├── traffic_light.smv        ← cyclic four-phase controller
 │   ├── mutex.smv                ← two-process mutual exclusion
-│   └── gcd_01.smv               ← Euclid's algorithm as a transition system
+│   ├── gcd_01.smv               ← Euclid's algorithm as a transition system
+│   ├── elevator / peterson / prodcons   ← more models (each `.smv` + a `_starter.smv`)
+│   ├── spec_challenge.smv       ← formalize-English-into-specs exercise (+ `_starter`)
+│   └── bmc_depth.smv            ← a bug at depth 12, for a BMC bound hunt
 └── assignments/day02.md
 ```
 
-All `.smv` examples are taken verbatim from <https://github.com/verivital/smvis/tree/main/examples> where they are exercised by the project's CI.
+The core models (`counter`, `traffic_light`, `mutex`, `gcd_01`) are adapted from <https://github.com/verivital/smvis/tree/main/examples> (`counter.smv` in particular is rewritten as a pass/fail sampler with annotated specs); `elevator`, `peterson`, `prodcons`, `spec_challenge`, and `bmc_depth` are course additions (each spec annotated `HOLDS` or `DELIBERATELY FALSE`). All are verified by [`scripts/check_examples.sh`](../scripts/check_examples.sh).
 
 ## Running an example
 
-After installing nuXmv (see top-level `README.md`):
+Online (Codespace/CI) or any finite-state model — use the preinstalled `NuSMV` (same SMV language and `is true/false` verdicts):
 
 ```bash
-nuXmv counter.smv
+NuSMV day02/examples/counter.smv      # with nuXmv installed, `nuXmv counter.smv` is identical
 ```
 
 `counter.smv` carries several `INVARSPEC`, `LTLSPEC`, and `CTLSPEC` clauses, all checked automatically in batch mode. They are deliberately mixed: of the five invariants, three hold (e.g. `x <= count_max`) and two fail (`x < count_max` and `x <= count_max / 2`), so a run shows both `true` verdicts and counterexample traces. For an interactive session:

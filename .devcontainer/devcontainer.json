@@ -38,5 +38,5 @@
     "8888": { "label": "JupyterLab", "onAutoForward": "openBrowser" }
   },
 
-  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis. Open notebooks/ (.ipynb) or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
+  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis + torch/auto_LiRPA (Day-4 NN). Open notebooks/*.ipynb or day04/examples/nn/robustness.ipynb, or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
 }
