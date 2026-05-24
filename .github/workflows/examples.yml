@@ -2,19 +2,25 @@ name: examples
 
 # Verify every day's worked examples by actually running the tools on them
 # (z3, NuSMV, Lean/lake, CBMC, Cryptol, SAW) inside the course image, which has
-# all of them preinstalled. Mirrors `scripts/check_examples.sh`.
+# all of them preinstalled. Mirrors `scripts/check_examples.sh`. We also execute
+# the online runner notebooks end-to-end so Colab/Codespace stays in lockstep
+# with the repo.
 
 on:
   push:
     branches: [main]
     paths:
       - "day0*/examples/**"
+      - "notebooks/**"
       - "scripts/check_examples.sh"
+      - "scripts/run_notebooks.sh"
       - ".github/workflows/examples.yml"
   pull_request:
     paths:
       - "day0*/examples/**"
+      - "notebooks/**"
       - "scripts/check_examples.sh"
+      - "scripts/run_notebooks.sh"
       - ".github/workflows/examples.yml"
   workflow_dispatch: {}
 
@@ -33,9 +39,27 @@ jobs:
             ghcr.io/verivital/fmaiv-autograde:latest \
             bash scripts/check_examples.sh
 
-  # The Day-4 neural-network example needs PyTorch, which we deliberately keep
-  # OUT of the course image (it would add ~GBs to every pull). Test it here in a
-  # standalone CPU job instead, so the grading image stays lean.
+  # Execute the Day 1-4 runner notebooks headlessly in the same course image.
+  # They find the checked-out repo (no clone) and run the real example files, so
+  # this proves the notebooks work end-to-end exactly as a student would see them.
+  notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Execute Day 1-4 runner notebooks in the course image
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work \
+            ghcr.io/verivital/fmaiv-autograde:latest \
+            bash scripts/run_notebooks.sh \
+              notebooks/01_day1_logic_sat_smt.ipynb \
+              notebooks/02_day2_model_checking.ipynb \
+              notebooks/03_day3_theorem_proving.ipynb \
+              notebooks/04_day4_program_verif.ipynb
+
+  # The Day-4 neural-network examples need PyTorch, which we deliberately keep
+  # OUT of the course image (it would add ~GBs to every pull). Test them here in
+  # a standalone CPU job instead, so the grading image stays lean. Runs both the
+  # script form and the two NN notebooks (robustness 2-D toy + MNIST).
   nn:
     runs-on: ubuntu-latest
     steps:
@@ -43,10 +67,16 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install CPU PyTorch + auto_LiRPA
+      - name: Install CPU PyTorch + torchvision + matplotlib + auto_LiRPA
         run: |
           python -m pip install --upgrade pip
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install matplotlib
           pip install git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615
-      - name: Certify the NN robustness example
+      - name: Certify the NN robustness example (script form)
         run: python day04/examples/nn/robustness.py
+      - name: Execute the NN notebooks (robustness 2-D toy + MNIST)
+        run: |
+          bash scripts/run_notebooks.sh \
+            notebooks/05_day4_nn_robustness.ipynb \
+            notebooks/06_day4_nn_mnist.ipynb

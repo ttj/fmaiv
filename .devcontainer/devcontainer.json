@@ -22,7 +22,7 @@
   // wheel ~200 MB, NOT the ~2.5 GB CUDA build — so the base image stays lean and
   // these install per-Codespace instead). Ubuntu 24.04 is PEP 668 "externally
   // managed", hence --break-system-packages.
-  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel && pip install --break-system-packages --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615",
+  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel nbconvert matplotlib && pip install --break-system-packages --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615",
 
   "customizations": {
     "vscode": {
@@ -38,5 +38,5 @@
     "8888": { "label": "JupyterLab", "onAutoForward": "openBrowser" }
   },
 
-  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis + torch/auto_LiRPA (Day-4 NN). Open notebooks/*.ipynb or day04/examples/nn/robustness.ipynb, or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
+  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis + torch/torchvision/auto_LiRPA (Day-4 NN). Open notebooks/*.ipynb (one per day), or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
 }
