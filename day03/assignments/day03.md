@@ -22,7 +22,7 @@ Open `CounterDemo/Counter.lean` and prove a new invariant of the counter. Reason
 
 ### B.2 — Modify the counter
 
-In `CounterDemo/Counter.lean`, change `count_max` from 10 to 25 (it is a single integer literal repeated; see comments). Re-state and re-prove `CounterTS_inv1_proved` with the new bound. Most of `Counter.lean` will need small adjustments; use Claude Code to suggest them.
+In `CounterDemo/Counter.lean`, change the counter bound from **10 to 25** — it appears as the literal `10` in a few places (the invariant `x ≤ 10`, the step guard `x < 10`, and the matching proofs; the file's comments point them out). Re-state and re-prove `CounterTS_inv1_proved` with the new bound. Most of `Counter.lean` will need small adjustments; use Claude Code to suggest them.
 
 ### B.3 — A new system from scratch
 
