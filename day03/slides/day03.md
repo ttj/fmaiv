@@ -803,18 +803,18 @@ The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is
 
 ---
 
-## Single invariants aren't inductive
+## Bundling the counter's invariants
 
-We want `x ≤ 10`. But `x ≤ 10` alone is **not** preserved by every step in isolation.
+For *our* counter, `x ≤ 10` is already inductive on its own — the increment is guarded by `x < 10`, so `x' = x + 1 ≤ 10` falls out directly. (Not every property is so lucky — see the next slide.)
 
-The fix: **strengthen** to a conjunction that *is* inductive:
+We still **bundle** the three safety properties into one invariant and prove it once:
 
 $$\Phi(s) \equiv (s.x \le 10) \ \wedge\ (s.\text{mode} = \text{off} \to s.x = 0)$$
 
-($\Phi$ — capital "phi" — names the strengthened invariant; $\equiv$ means "is defined as"; $\wedge$ is "and".)
+then read each INVARSPEC off $\Phi$ via `invariant_strengthening` — one induction, three guarantees. ($\Phi$ — capital "phi" — names the bundled invariant; $\wedge$ is "and".)
 
 ::: notes
-This is the central insight of the day, foreshadowed all week. "x ≤ 10" is true of all reachable states but is not by-itself inductive: from an arbitrary state with x = 10 you cannot conclude the successor satisfies it without also knowing the mode/x relationship. The cure is strengthening — find a stronger Φ that IS inductive and implies what you want. Discovering the right strengthening is the creative core of invariant proofs (and exactly where AI help is hit-or-miss).
+Honest framing (this counter is a *lucky* case): `x ≤ 10` is inductive by itself because the only increment is guarded by `x < 10` (so `x'=x+1 ≤ 10`), and the mode/x facts are individually inductive too — we even ship a one-screen Lean proof of `x ≤ 10` alone. We prove the conjunction Φ anyway because it's a clean habit: one inductive argument, then read off all three INVARSPECs by weakening (`x > 0 → mode = on` is just the contrapositive of `mode = off → x = 0`). The DEEP lesson — that the property you want often is NOT inductive and MUST be strengthened — needs a sharper example, on the very next slide, where the failure is a concrete underflow on an unreachable state.
 :::
 
 ---
@@ -1152,12 +1152,12 @@ The AI-proving landscape the brief requests, assembled from the transcript's own
 ## Live demo: AI-assisted repair
 
 1. Open [`Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean); weaken `counterInv` to drop the second conjunct.
-2. `lake build` → `counterInv_step` now **fails** (the off-case can't close).
+2. `lake build` → the existing `counterInv_step` script **breaks** (its off-case used that conjunct).
 3. Ask Claude Code to repair it.
-4. Read what it proposes — does it re-add the right conjunct, or hallucinate a tactic?
+4. Read what it proposes — does it re-add the conjunct, or find the simpler argument that `x ≤ 10` needs on its own?
 
 ::: notes
-The live demo. Breaking the strengthening (dropping the mode=off → x=0 conjunct) makes the step proof fail in the off branch, because you lose the fact that keeps x at 0. Asking the AI to fix it is instructive: a good model re-discovers that you need the dropped conjunct (i.e. it re-strengthens); a weaker attempt flails with tactic tweaks that don't address the missing invariant. Either way the kernel tells you immediately whether the suggestion works.
+The live demo, framed honestly. Dropping the `mode = off → x = 0` conjunct breaks the *existing proof script* — it destructures the invariant into two parts and the off-case feeds the second to `omega`. The proposition `x ≤ 10` is still perfectly provable on its own (the `x < 10` guard makes it inductive), so a strong model can EITHER re-add the conjunct OR rewrite the step proof to not need it — both are correct, and the kernel accepts either. A weaker attempt flails with tactic tweaks that don't typecheck. The real "you MUST strengthen" lesson lives in the two-counter underflow example earlier; this demo is about the AI-repair loop and reading the elaborator's error. Either way the kernel tells you immediately whether the suggestion works.
 :::
 
 ---

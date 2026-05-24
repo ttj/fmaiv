@@ -819,7 +819,7 @@ What we will verify, all week:
 - $x > 0 \to \text{mode} = \text{on}$ (consistency)
 
 ::: notes
-Same little system we'll see every day. Five tools, four pillars, one example. Pick the easiest non-trivial reactive system you can. The counter is small enough to fit on a slide, large enough that the model checker won't enumerate it instantly, and structured enough that the inductive invariant is illuminating (you have to strengthen "x ≤ 10" with "mode = off → x = 0" to make it inductive — that's the Day 3 insight, foreshadowed today).
+Same little system we'll see every day. Five tools, four pillars, one example. Pick the easiest non-trivial reactive system you can. The counter is small enough to fit on a slide, large enough that the model checker won't enumerate it instantly, and structured enough that the inductive-invariant method is illuminating on Day 3 (we bundle its three safety facts into one invariant and prove it by induction; the case where strengthening is genuinely *forced* is a separate two-counter example).
 :::
 
 ---
@@ -911,7 +911,7 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
 This **unrolls** the symbolic machine above: `x` becomes part of the state. The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
 
 ::: notes
-The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is why the inductive invariant needs strengthening: `x ≤ 10` alone doesn't capture that `off` forces `x = 0`.
+The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is the running example for the inductive-invariant method on Day 3 (here `x ≤ 10` is already inductive thanks to the `x < 10` guard; the deeper "strengthen a too-weak invariant" lesson uses a separate two-counter example).
 :::
 
 ---
