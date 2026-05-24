@@ -779,7 +779,7 @@ This is the conceptual capstone of the bridge built over the last several slides
 
 ## The counter as a Lean system
 
-From [`CounterDemo/Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean) (auto-translated from [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv)):
+From [`CounterDemo/Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean) (auto-translated from [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv) by [`smv2lean`](https://github.com/ttj/fmaiv/blob/main/scripts/smv2lean)):
 
 ```lean
 inductive ModeVal | off | on
@@ -795,8 +795,10 @@ def CounterTS : TransitionSystem CounterState where
 
 Same four guards as the SMV `next(...)` and the Z3 `step()`.
 
+The same `smv2lean` turns **any** Day-2 model into a Lean transition system: `NuXMV/{Gcd, Mutex, Elevator}` ship *with proofs*; `Peterson`, `Prodcons` are translated and left to prove.
+
 ::: notes
-The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by a translator — emphasizing that the *same* model flows through every tool; only the syntax changes.
+The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by `scripts/smv2lean` — emphasizing that the *same* model flows through every tool; only the syntax changes. The translator is reusable: `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` drops a ready-to-prove Lean module into the project, which is exactly the Day-3 assignment's "translate-and-prove" track. Beyond the counter, the Day-3 project also ships a gentle set-theory intro (`DiscreteMath.lean`) as a Lean on-ramp and an IMP imperative-language formalization with Hoare-style reasoning (`ProgramVerif/`).
 :::
 
 ---
@@ -1277,16 +1279,18 @@ Self-contained, runs in the room. The deliverable is one new proved corollary pl
 
 ## Homework (ungraded, for depth)
 
+**New to Lean?** Warm up first on the [`DiscreteMath`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/DiscreteMathStarter.lean) set-theory starter and the [`CounterLadder`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/CounterLadderStarter.lean) tactic ladder.
+
 Pick **one** (see [`assignments/day03.md`](../assignments/day03.md)):
 
 - Prove the **combined** invariant `(x ≤ 10) ∧ (mode = off → x = 0) ∧ (x > 0 → mode = on)` is inductive.
 - Change the bound `10` to `25` (it appears in the `next` guards and in `counterInv`) and re-prove `CounterTS_inv1` (use Claude Code for the edits).
-- Translate [`traffic_light.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv) into Lean by hand and prove one invariant.
+- Translate a Day-2 model into Lean — `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` (or by hand) — and prove one invariant. (`Peterson`, `Prodcons` are already translated and waiting.)
 
 Use Claude Code as a partner; note one thing it got right and one it got wrong.
 
 ::: notes
-Three tracks of escalating ambition. The third (translate-and-prove a fresh system) is the most realistic test of the whole skill. The "note one right / one wrong from the AI" requirement makes students practice the calibration we discussed — recognizing when to trust the assistant. Not graded; compare at the start of Day 4.
+Three tracks of escalating ambition. The third (translate-and-prove a fresh system) is the most realistic test of the whole skill — and `smv2lean` makes the translation one command, so the time goes into the proof. The "note one right / one wrong from the AI" requirement makes students practice the calibration we discussed — recognizing when to trust the assistant. Not graded; compare at the start of Day 4. Point Lean newcomers at the DiscreteMath set-theory starter and the CounterLadder tactic ladder as the gentlest on-ramps.
 :::
 
 ---

@@ -200,7 +200,7 @@ In SMV, `&` = and, `|` = or, `!` = not; a `case` picks the **first** guard that 
 This is the same counter, line for line — and the same four guards as the Z3 `step()` from Day 1.
 
 ::: notes
-Walk the case statement: top-to-bottom, first matching guard wins, TRUE is the catch-all. Point out that this is exactly the four-clause case analysis from Day 1's z3_counter_bounded.py, just in SMV syntax. The next(mode) and next(x) clauses together define the transition relation. The same case analysis will reappear in Lean (Day 3) and C/Cryptol (Day 4) — five encodings, one system.
+Walk the case statement: top-to-bottom, first matching guard wins, TRUE is the catch-all. Point out that this is exactly the four-clause case analysis from Day 1's z3_counter_bounded.py, just in SMV syntax. The next(mode) and next(x) clauses together define the transition relation. The same case analysis will reappear in Lean (Day 3) and C/Cryptol (Day 4) — five encodings, one system. On Day 3, `smv2lean` even auto-translates this very `.smv` into its Lean transition system.
 :::
 
 ---
