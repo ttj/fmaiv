@@ -13,10 +13,11 @@
 #   05,06 -> torch/torchvision/auto_LiRPA.
 set -euo pipefail
 
-# Install nbconvert (idempotent). Try PEP-668 override first (course image), then
-# fall back to a normal install (setup-python / venv).
-pip install --break-system-packages -q nbconvert nbclient ipykernel 2>/dev/null \
-  || pip install -q nbconvert nbclient ipykernel
+# Install nbconvert (idempotent). Use `python3 -m pip` (pip may not be on PATH in a
+# bare container). Try the PEP-668 override first (course image / Ubuntu 24.04),
+# then fall back to a normal install (setup-python / venv / Ubuntu 22.04).
+python3 -m pip install --break-system-packages -q nbconvert nbclient ipykernel 2>/dev/null \
+  || python3 -m pip install -q nbconvert nbclient ipykernel
 python3 -m ipykernel install --user >/dev/null 2>&1 || true
 
 fail=0

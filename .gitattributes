@@ -1,0 +1,4 @@
+# Shell scripts must always check out with LF endings, even on Windows
+# (autocrlf), so they run correctly in Linux containers, GitHub Codespaces,
+# Google Colab, and CI. CRLF breaks the shebang and `set -o pipefail`.
+*.sh text eol=lf
