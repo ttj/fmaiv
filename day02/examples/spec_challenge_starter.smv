@@ -1,0 +1,45 @@
+-- Spec-from-English challenge (request/grant arbiter) — STARTER.
+--
+-- The MODEL below is complete. Your job is to turn each English sentence into a
+-- temporal-logic spec and add it at the bottom, then run nuXmv/NuSMV and check
+-- the verdict against the "expected" note. Replace each TODO with one spec line.
+--
+-- Reference for the operators: ! not, & and, | or, -> implies. Temporal:
+--   G p  = "always p"             F p  = "eventually p"        X p = "p in the next step"
+--   EF p = "p reachable on some path"      AG p = "p on all paths, always"
+-- Spec keywords: INVARSPEC <bool>;   LTLSPEC <ltl>;   CTLSPEC <ctl>;
+-- Worked solution: spec_challenge.smv
+MODULE main
+VAR
+  state : {idle, waiting, granted};   -- the arbiter's phase
+  req   : boolean;                    -- FREE INPUT: a client request, re-chosen each step
+
+ASSIGN
+  init(state) := idle;
+  next(state) := case
+    state = idle & req  : waiting;
+    state = idle & !req : idle;
+    state = waiting     : granted;
+    state = granted     : idle;
+    TRUE                : state;
+  esac;
+
+-- Formalize each sentence as ONE spec (delete the TODO, write the spec line):
+
+-- (1) "Whenever the arbiter is waiting, it is eventually granted."
+--     Expected verdict: true.
+-- TODO: LTLSPEC ...
+
+-- (2) "The granted state is reachable."   Expected: true.
+-- TODO: CTLSPEC ...
+
+-- (3) "Once granted, the arbiter eventually returns to idle."   Expected: true.
+-- TODO: LTLSPEC ...
+
+-- (4) "The arbiter never jumps straight from idle to granted (it must wait
+--      first)."   Hint: use X (next). Expected: true.
+-- TODO: LTLSPEC ...
+
+-- (5) "Eventually the arbiter is idle forever."   Expected: FALSE — find the
+--      counterexample run nuXmv reports and explain it in one sentence.
+-- TODO: LTLSPEC ...

@@ -17,9 +17,12 @@
     "ghcr.io/devcontainers/features/sshd:1": {}
   },
 
-  // Add a Jupyter kernel + JupyterLab on top of the grading image. Ubuntu 24.04
-  // is PEP 668 "externally managed", hence --break-system-packages.
-  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel",
+  // Add a Jupyter kernel + JupyterLab on top of the grading image, plus the
+  // CPU-only deps for the Day-4 neural-network robustness example (torch CPU
+  // wheel ~200 MB, NOT the ~2.5 GB CUDA build — so the base image stays lean and
+  // these install per-Codespace instead). Ubuntu 24.04 is PEP 668 "externally
+  // managed", hence --break-system-packages.
+  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel && pip install --break-system-packages --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir auto_LiRPA",
 
   "customizations": {
     "vscode": {

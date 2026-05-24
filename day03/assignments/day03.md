@@ -6,6 +6,12 @@
 
 ## Part A — Warm-up (15 min)
 
+> **New to Lean?** Start with the guided tactic ladder
+> [`CounterLadderStarter.lean`](../examples/CounterDemo/CounterDemo/CounterLadderStarter.lean)
+> (solution: `CounterLadder.lean`). Six short rungs — `omega`, `h.1`, `constructor`,
+> modus ponens, `cases`, then the counter's base case — each isolating one tactic.
+> Build just it with `lake build CounterDemo.CounterLadderStarter`. Climb it before Part B.
+
 1. From `examples/CounterDemo`, run `lake build`. It builds cleanly — every solution module is fully proved. (The exercise files, `*Starter.lean`, build with `sorry` warnings until you complete them.)
 2. Open `CounterDemo/Counter.lean` in VS Code with the Lean 4 extension installed. Place your cursor at the end of `counterInv_init` and inspect the proof state. Do the same inside one of the cases of `counterInv_step`.
 3. Read the comments at the top of `Counter.lean` until you can explain the strengthening pattern to a neighbor.
@@ -29,6 +35,21 @@ In `CounterDemo/Counter.lean`, change the counter bound from **10 to 25** — it
 Translate one of the SMV files from Day 2 — `traffic_light.smv`, `mutex.smv`, or `gcd_01.smv` — into Lean by hand (the upstream `leansmv` project has a translator script you can look at for reference, but writing it by hand is more educational). Prove one INVARSPEC of your choice.
 
 This is the most ambitious option. Plan for 60+ minutes and expect to ask Claude for help.
+
+## Part C — Break the proof (15 min)
+
+Days 1, 2, and 4 each end with a deliberate bug whose counterexample you read.
+The Day-3 analogue is a **wrong invariant**: open
+[`CounterBroken.lean`](../examples/CounterDemo/CounterDemo/CounterBroken.lean) and
+try to prove the counter satisfies `x ≤ 5`. It does not. Replace the `sorry` in
+`badInv_step` with the same case tree as `counterInv_step` and watch exactly
+where it breaks (the increment branch leaves `s.x + 1 ≤ 5` with only `s.x ≤ 5` —
+`omega` fails). Then answer, in the file's comment:
+
+1. Which branch gets stuck (mode / press / `x < 10`)?
+2. The shortest press sequence from the initial state that reaches `x = 6 > 5`.
+3. Why the real invariant `counterInv` (bound 10, plus the `mode = off → x = 0`
+   strengthening) goes through where `x ≤ 5` cannot.
 
 ## Working with Claude Code
 

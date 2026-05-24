@@ -1,0 +1,47 @@
+-- Bounded-buffer producer/consumer — STARTER (fill in the TODOs).
+--
+-- This is the fill-in-the-blank version of prodcons.smv. The SAFETY part is
+-- complete (the buffer never overflows or underflows). Two things are missing:
+--   (1) the two FAIRNESS conditions, and
+--   (2) the two LIVENESS specs (LTLSPEC) at the bottom.
+--
+-- Do them in this order so you SEE why fairness is needed:
+--   a. Add the two LTLSPECs first, run, and watch them FAIL — nuXmv hands you a
+--      run where (say) the consumer never acts, so the buffer can stay full.
+--   b. Then add the two FAIRNESS lines and re-run: now the specs HOLD, because
+--      unfair runs (one party starved forever) are excluded.
+--
+-- "Concurrency without process": who-acts-next is a single free variable `act`
+-- the model re-chooses every step. Operators: ! = not, & = and, | = or, -> = implies.
+-- Worked solution: prodcons.smv
+MODULE main          -- the single top-level component; "main" is the entry point
+DEFINE CAP := 3;     -- a named constant (a textual abbreviation, NOT a variable)
+VAR
+  buf : 0..3;                 -- count of items in the buffer; range matches CAP
+  act : {prod, cons, idle};   -- FREE INPUT: no init/next, so the model picks one
+                              -- of these three fresh each step (the "scheduler")
+
+ASSIGN
+  init(buf) := 0;                       -- start with an empty buffer
+  -- next(buf): first true guard wins; TRUE = otherwise. (Given — safety is done.)
+  next(buf) := case
+    act = prod & buf < CAP : buf + 1;   -- produce only with room (no overflow)
+    act = cons & buf > 0   : buf - 1;   -- consume only when non-empty (no underflow)
+    TRUE                   : buf;       -- idle / blocked: unchanged
+  esac;
+
+-- TODO (1): add the two FAIRNESS conditions so the producer and the consumer
+-- each act infinitely often. FAIRNESS c keeps only runs in which c is true
+-- infinitely often. Without these, the liveness specs below FAIL.
+--   FAIRNESS act = prod;
+--   FAIRNESS act = cons;
+
+-- INVARSPEC = safety: must be true in every reachable state. (Given — these HOLD.)
+INVARSPEC buf <= CAP;     -- never overflows
+INVARSPEC buf >= 0;       -- never underflows
+
+-- TODO (2): add the two LIVENESS specs. G F p reads "infinitely often p"
+-- (G = always, F = eventually). With the fairness above they HOLD: a fair
+-- consumer keeps making room, a fair producer keeps adding an item.
+--   LTLSPEC G F (buf < CAP);   -- there is always room again, eventually
+--   LTLSPEC G F (buf > 0);     -- there is always an item again, eventually

@@ -58,7 +58,7 @@ scheduler variable — no deprecated `process` blocks.
 |---|---|---|---|
 | Elevator | a simple safety property (doors closed while moving) | `elevator.smv` | `elevator_starter.smv` |
 | Peterson's mutex | concurrent mutual exclusion + no-starvation under fairness | `peterson.smv` | `peterson_starter.smv` |
-| Producer/consumer | bounded-buffer safety + liveness | `prodcons.smv` | — |
+| Producer/consumer | bounded-buffer safety + liveness | `prodcons.smv` | `prodcons_starter.smv` |
 
 ```bash
 nuXmv peterson.smv      # or:  NuSMV peterson.smv
@@ -67,7 +67,23 @@ nuXmv peterson.smv      # or:  NuSMV peterson.smv
 Each solution's specs are annotated `(HOLDS)` or `DELIBERATELY FALSE`, so a
 single run shows you both a proof and a counterexample. In
 `peterson_starter.smv` the L3 wait conditions are missing, so mutual exclusion
-*fails* — add them (and the no-starvation LTL specs) to make it pass.
+*fails* — add them (and the no-starvation LTL specs) to make it pass. In
+`prodcons_starter.smv` the fairness conditions and liveness specs are missing —
+add them and watch the liveness specs go from `false` to `true`.
+
+## Two more exercises (`examples/`)
+
+- **Spec from English** — [`spec_challenge_starter.smv`](../examples/spec_challenge_starter.smv)
+  (solution: [`spec_challenge.smv`](../examples/spec_challenge.smv)). A request/grant
+  arbiter is given; you turn five English sentences into `INVARSPEC` / `LTLSPEC` /
+  `CTLSPEC` formulas and check each verdict against the "expected" note. One uses
+  `X` (next); one is deliberately false. Formalizing the property correctly is
+  usually the hard part of model checking — practice it here.
+- **BMC bound hunt** — [`bmc_depth.smv`](../examples/bmc_depth.smv). A bug that lives
+  at exactly depth 12. Use nuXmv's bounded model checking (`go_bmc ;
+  check_invar_bmc -k N`) to find the smallest `k` that exposes it. The lesson:
+  a *passing* BMC run at depth `k` is not a proof unless `k` reaches the system's
+  diameter — the flip side of the Day-3 induction that covers all depths at once.
 
 ## What to submit
 

@@ -1,0 +1,13 @@
+# Dependencies for the Day-4 neural-network robustness example.
+#
+# CPU-only — no GPU required. The example is a tiny 2-D MLP that certifies in
+# about a second on a CPU. To get the small CPU wheel of PyTorch (~200 MB)
+# instead of the large CUDA build (~2.5 GB), install torch from the CPU index:
+#
+#     pip install torch --index-url https://download.pytorch.org/whl/cpu
+#     pip install -r requirements.txt
+#
+# On Google Colab, torch is already installed, so just:  pip install auto_LiRPA
+#
+torch
+auto_LiRPA
