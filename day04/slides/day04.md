@@ -55,9 +55,9 @@ L1: programs as transition systems, CBMC on the counter in C. L2: Cryptol as a s
 By the end of today you will be able to:
 
 - Frame a C program as a transition system on memory states.
-- Write a **CBMC** harness with nondeterministic inputs and read its counterexample.
+- Write a **CBMC** (C Bounded Model Checker) harness with nondeterministic inputs and read its counterexample.
 - Write a small **Cryptol** spec and discharge a property with `:prove`.
-- Explain how **SAW** proves a C implementation equivalent to a Cryptol spec.
+- Explain how **SAW** (Software Analysis Workbench) proves a C implementation equivalent to a Cryptol spec.
 - Locate the field's frontier: NN verification, and where FM is deployed in industry.
 
 ::: notes
@@ -720,7 +720,7 @@ $$f(x) = W_L\,\sigma(\cdots \sigma(W_1 x + b_1)\cdots) + b_L$$
 
 - $W_i$ = a **weight matrix**, $b_i$ = a **bias vector** — just numbers fixed at training time.
 - Each layer = **matrix multiply, add bias, apply $\sigma$** (the *activation*). Repeat for $L$ layers.
-- $\sigma$ is usually **ReLU**: $\sigma(z) = \max(0, z)$ — "pass positives through, zero out negatives."
+- $\sigma$ is usually **ReLU** (rectified linear unit): $\sigma(z) = \max(0, z)$ — "pass positives through, zero out negatives."
 - For digit recognition: $n = 256$ pixels in, $m = 10$ class scores out; the answer is the **argmax** (the highest-scoring class).
 
 So verifying a network = reasoning about a (big, non-linear) function — the same object we have reasoned about all week.

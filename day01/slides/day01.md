@@ -305,7 +305,7 @@ A 64-bit floating-point horizontal velocity overflowed when converted to a 16-bi
 
 - The bug was in code reused from Ariane 4, where the upper bound on horizontal velocity was lower.
 - The Ariane 4 envelope made the conversion safe; nobody re-checked it for Ariane 5.
-- Verifying the conversion safety is a one-line SMT query: `(assert (<= horizontal_velocity 32767))`.
+- Catching it is an overflow/range question — *does the 64-bit horizontal velocity always fit in a signed 16-bit integer across Ariane 5's actual flight envelope?* Range analysis and abstract interpretation (later, Astrée at Airbus) are built to decide exactly this; the reused Ariane 4 argument was simply never re-validated for the faster vehicle.
 
 ::: notes
 Ariane 5 is the founding bug-story for arithmetic verification. The immediate corrective actions were range-protecting the conversions plus revised review and test processes (per the Lions inquiry board); more broadly, abstract interpretation — notably Astrée, from Patrick Cousot's group — later became the flagship static-analysis tool for Airbus fly-by-wire software (Astrée postdates Ariane 501, so it was not the 1996 remedy). The bug would have been caught by a single integer-range assertion checked at compile time — about ten seconds of an SMT solver's time today. Source: ESA Ariane 501 Inquiry Board (Lions) report, 1996 — https://www.esa.int/Newsroom/Press_Releases/Ariane_501_-_Presentation_of_Inquiry_Board_report (full report: http://sunnyday.mit.edu/nasa-class/Ariane5-report.html).
@@ -367,9 +367,24 @@ MCAS is the contemporary version of Therac-25 — same pattern: software replaci
 
 ---
 
-## The point is not that humans are bad
+## Formal methods catch these too — sometimes first
 
-The point is that **certain classes of question** — overflow, race, deadlock, off-by-one, missing case in a switch — are exactly the questions a machine can answer mechanically.
+The flip side of the disaster stories: formal methods finding the deep bug that testing misses.
+
+- **Deep Space 1 Remote Agent** (NASA, 1999) — SPIN model checking of the spacecraft's autonomy software found **five** concurrency bugs the team agreed testing would never have caught. Months later the *same kind* of bug — a missing critical section racing two threads into a **deadlock** — actually froze the craft 96 million km from Earth. Model checking had flagged exactly that failure class beforehand.
+- **Astrée + Airbus** — abstract interpretation **proved the absence of run-time errors** (overflow, divide-by-zero, out-of-bounds) across the A340/A380 fly-by-wire primary control software: hundreds of thousands of lines of floating-point C, tuned down to **zero false alarms**.
+
+Deep interleaving-dependent races and arithmetic overflow are precisely the bugs testing almost never reaches — and exactly what this week's tools target.
+
+::: notes
+The success counterpoint to the five failures, and the bridge to "why learn these tools." Two paradigms, both sampled this week. Deep Space 1: SPIN model checking found 5 concurrency errors pre-flight; on 1999-05-18 a missing critical section deadlocked the Remote Agent Experiment ~96 million km out — the same data-race class the model checking had identified — and it had to be diagnosed and restarted from the ground. Model checking finds deep, interleaving-specific bugs that are essentially unreachable by testing. Astrée: sound abstract interpretation *proves* whole classes of run-time error cannot occur, deployed on Airbus fly-by-wire (A340, then A380), engineered to zero false alarms — the "prove absence, not find presence" paradigm. Sources: Havelund, Lowry & Penix, "Formal Analysis of a Spacecraft Controller using SPIN" (IEEE TSE 2001) — https://www.semanticscholar.org/paper/Formal-Analysis-of-a-Space-Craft-Controller-Using-Havelund-Lowry/a06bf55a3bee974e6abd559583cfe789129a3beb ; Cousot et al., "Static Analysis and Verification of Aerospace Software by Abstract Interpretation," and the Astrée analyzer — https://www.astree.ens.fr/ .
+:::
+
+---
+
+## These systems are complex — getting it all right is hard
+
+Modern safety-critical systems are too large and intricate for anyone to get *everything* right by inspection. But **certain classes of question** — overflow, race, deadlock, off-by-one, missing case in a switch — are exactly the ones a machine can answer mechanically.
 
 - Therac-25 → race conditions → CTL liveness properties checked by a model checker.
 - Ariane 5 → integer overflow → CBMC's default overflow check.
@@ -958,7 +973,7 @@ We could verify by hand because the *reachable* state space is finite and small.
 
 - **All states** (infinite): every $(\text{mode}, x)$ pair you could write down ($x \in \mathbb{N}$).
 - **Reachable** (12): what the system can actually get to from $(\text{off}, 0)$.
-- **Reachable in $\le N$ steps**: what bounded model checking explores — it grows toward the reachable boundary as $N$ rises.
+- **Reachable in $\le N$ steps**: what bounded model checking (BMC) explores — it grows toward the reachable boundary as $N$ rises.
 - **Bad** ($x = 11$): sits *outside* reachable, so no trace ever hits it — BMC keeps returning UNSAT; Day 2 *proves* it can never happen.
 
 ::: notes
@@ -1225,7 +1240,7 @@ Four key engineering choices, each circa 1996–2003:
 
 1. **CDCL** — learn from every conflict; the search shrinks as you go.
 2. **Watched literals** — propagate without scanning every clause.
-3. **VSIDS branching** — prefer literals that recently appeared in conflicts.
+3. **VSIDS branching** (Variable State Independent Decaying Sum) — prefer literals that recently appeared in conflicts.
 4. **Restart policies** — abandon the search tree periodically, keep learned clauses.
 
 Result: SAT competition benchmarks went from "100 variables, sometimes" in 1990 to "millions of variables, routinely" in 2025.
@@ -1526,6 +1541,107 @@ This is the single most important idea in the SMT half of the day: declarative, 
 
 ---
 
+## Sudoku, under the hood: the pure-SAT encoding
+
+<svg viewBox="0 0 268 268" style="display:block;margin:0.2em auto;max-width:30%;height:auto" font-family="Inter, system-ui, sans-serif">
+<rect x="0" y="0" width="268" height="268" fill="#ffffff"/>
+<rect x="8" y="8" width="28" height="28" fill="#faf5e9"/>
+<rect x="36" y="8" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="8" width="28" height="28" fill="#faf5e9"/>
+<rect x="8" y="36" width="28" height="28" fill="#faf5e9"/>
+<rect x="92" y="36" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="36" width="28" height="28" fill="#faf5e9"/>
+<rect x="148" y="36" width="28" height="28" fill="#faf5e9"/>
+<rect x="36" y="64" width="28" height="28" fill="#faf5e9"/>
+<rect x="64" y="64" width="28" height="28" fill="#faf5e9"/>
+<rect x="204" y="64" width="28" height="28" fill="#faf5e9"/>
+<rect x="8" y="92" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="92" width="28" height="28" fill="#faf5e9"/>
+<rect x="232" y="92" width="28" height="28" fill="#faf5e9"/>
+<rect x="8" y="120" width="28" height="28" fill="#faf5e9"/>
+<rect x="92" y="120" width="28" height="28" fill="#faf5e9"/>
+<rect x="148" y="120" width="28" height="28" fill="#faf5e9"/>
+<rect x="232" y="120" width="28" height="28" fill="#faf5e9"/>
+<rect x="8" y="148" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="148" width="28" height="28" fill="#faf5e9"/>
+<rect x="232" y="148" width="28" height="28" fill="#faf5e9"/>
+<rect x="36" y="176" width="28" height="28" fill="#faf5e9"/>
+<rect x="176" y="176" width="28" height="28" fill="#faf5e9"/>
+<rect x="204" y="176" width="28" height="28" fill="#faf5e9"/>
+<rect x="92" y="204" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="204" width="28" height="28" fill="#faf5e9"/>
+<rect x="148" y="204" width="28" height="28" fill="#faf5e9"/>
+<rect x="232" y="204" width="28" height="28" fill="#faf5e9"/>
+<rect x="120" y="232" width="28" height="28" fill="#faf5e9"/>
+<rect x="204" y="232" width="28" height="28" fill="#faf5e9"/>
+<rect x="232" y="232" width="28" height="28" fill="#faf5e9"/>
+<line x1="36" y1="8" x2="36" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="36" x2="260" y2="36" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="64" y1="8" x2="64" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="64" x2="260" y2="64" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="120" y1="8" x2="120" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="120" x2="260" y2="120" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="148" y1="8" x2="148" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="148" x2="260" y2="148" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="204" y1="8" x2="204" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="204" x2="260" y2="204" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="232" y1="8" x2="232" y2="260" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="232" x2="260" y2="232" stroke="#c9bfa6" stroke-width="1"/>
+<line x1="8" y1="8" x2="8" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="8" y1="8" x2="260" y2="8" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="92" y1="8" x2="92" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="8" y1="92" x2="260" y2="92" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="176" y1="8" x2="176" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="8" y1="176" x2="260" y2="176" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="260" y1="8" x2="260" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
+<line x1="8" y1="260" x2="260" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
+<text x="22" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="50" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="134" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="22" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="106" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="134" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="162" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="50" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="78" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="218" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="22" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="134" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="246" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="22" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
+<text x="106" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="162" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="246" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="22" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="134" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
+<text x="246" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="50" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="190" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
+<text x="218" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="106" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
+<text x="134" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="162" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="246" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="134" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="218" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="246" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+</svg>
+
+The `Distinct` version is SMT *sugar*. In **pure SAT** there are no integers — only Booleans (this is the classic Rosen encoding, and what bit-blasting produces under the hood):
+
+- **One Boolean per (cell, value):** $p(i,j,n)$ = "row $i$, col $j$ holds $n$" — $9\cdot 9\cdot 9 = 729$ variables.
+- **Givens:** a unit clause $p(i,j,n)$ for each shaded clue.
+- **Every row / column / block contains every $n$:** one disjunction $\bigvee$ over the nine positions, per value $n$ (the block clauses are the fiddly ones).
+- **No cell holds two numbers:** $\neg p(i,j,n) \vee \neg p(i,j,n')$ for every $n \neq n'$.
+
+Same puzzle, two levels: **81 integers + `Distinct`** (SMT, previous slide) vs **729 Booleans + clauses** (SAT). SMT just hides the bit-level encoding behind a theory.
+
+::: notes
+This is the "what is `Distinct` actually doing?" slide, and it ties Sudoku back to the SAT half of the block (and to Cook–Levin — Sudoku-as-SAT is a concrete NP-complete reduction). The boolean encoding is Rosen's (*Discrete Mathematics and Its Applications*): 729 variables p(i,j,n). Note the elegant part — you don't separately assert "each cell has at least one number"; it falls out of "every row has every number" plus "no cell has two," by pigeonhole (nine numbers into nine cells of a row). The block constraint is the one students find tricky to index (3*i0+i, 3*j0+j). The takeaway is the SAT/SMT relationship: SMT theories are a productivity layer over the Boolean machinery — `Distinct` over 9 integers compiles down to exactly these at-most-one clauses once bit-blasted. The shaded cells in the figure are the givens; a SAT/SMT solver fills the rest in milliseconds.
+:::
+
+---
+
 ## Bounded model checking: from SAT to system verification
 
 The pattern for asking "can the counter reach $x = 11$ in $\le N$ steps?":
@@ -1816,7 +1932,7 @@ References slide. Each one is on the curated repo-level reference list; we won't
 
 GitHub repo: [github.com/ttj/fmaiv](https://github.com/ttj/fmaiv) (public). Slides also published at [ttj.github.io/fmaiv](https://ttj.github.io/fmaiv/).
 
-Slack / Discord / email for questions between sessions.
+Questions between sessions are welcome — reach out anytime.
 
 ::: notes
 Logistics. The repo has all of today's `.py` files, the slides, and the next session's pre-class materials. Day 2 opens with a short recap and a "did anyone get stuck on homework?" check-in, then dives into nuXmv.

@@ -73,8 +73,8 @@ Set expectations up front so nobody is confused when the tool they install is ca
 By the end of today you will be able to:
 
 - Model a reactive system as a synchronous transition system and write it in SMV.
-- Read and write **CTL** and **LTL** properties, and say which can express what.
-- Explain the trade-offs among explicit-state, symbolic (BDD), and bounded model checking.
+- Read and write **CTL** (computation tree logic) and **LTL** (linear temporal logic) properties, and say which can express what.
+- Explain the trade-offs among explicit-state, symbolic (BDD, binary decision diagram), and bounded model checking.
 - Run **nuXmv** on an SMV file and read an `INVARSPEC` / `LTLSPEC` / `CTLSPEC` verdict — including a counterexample trace.
 
 ::: notes
