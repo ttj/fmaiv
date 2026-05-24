@@ -80,3 +80,28 @@ jobs:
           bash scripts/run_notebooks.sh \
             notebooks/05_day4_nn_robustness.ipynb \
             notebooks/06_day4_nn_mnist.ipynb
+
+  # Colab-style coverage. The `check`/`notebooks` jobs run in the course image
+  # where every tool is PREINSTALLED, so they never exercise the notebooks'
+  # install branches. This job runs each runner notebook in a CLEAN Ubuntu 22.04
+  # (root, nothing preinstalled -- like Google Colab), so the install paths
+  # (pip z3-solver, NuSMV/Lean/CBMC downloads, and the Cryptol/SAW tarball with
+  # FMAIV_INSTALL_CRYPTOL_SAW=1) are actually tested end-to-end.
+  colab:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        nb:
+          - 01_day1_logic_sat_smt
+          - 02_day2_model_checking
+          - 03_day3_theorem_proving
+          - 04_day4_program_verif
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run ${{ matrix.nb }} in a clean Ubuntu 22.04 (Colab-like) container
+        run: |
+          docker run --rm -e FMAIV_INSTALL_CRYPTOL_SAW=1 -v "$PWD:/work" -w /work ubuntu:22.04 bash -c '
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -qq && apt-get install -y -qq python3 python3-pip git curl ca-certificates >/dev/null
+            bash scripts/run_notebooks.sh notebooks/${{ matrix.nb }}.ipynb'
