@@ -11,9 +11,9 @@
     • A `TransitionSystem` value (`<name>TS`) capturing the SMV
       `init` and `next` clauses. Nondeterministic SMV inputs
       become existentially-quantified variables in `next`.
-    • For each `INVARSPEC` in the SMV, a Lean `theorem` STUB whose
-      body is `sorry`. These stubs are placeholders — the real
-      proofs (where we have them) live in `CounterDemo.NuXMV.ElevatorProofs`.
+    • For each `INVARSPEC` in the SMV, a COMMENTED Lean `theorem`
+      stub (so this file stays sorry-free). Uncomment one and prove
+      it; completed proofs live in `CounterDemo.NuXMV.ElevatorProofs`.
 
   Do NOT hand-edit this file: it will be overwritten by the next
   run of `smv2lean.py`. Add proofs in the corresponding
@@ -48,15 +48,17 @@ def ElevatorTS : TransitionSystem ElevatorState where
     (if (s.door = .open) then s'.moving = false
     else (s'.moving = false ∨ s'.moving = true))
 
--- INVARSPEC (from elevator.smv): (moving -> (door = closed))
-theorem ElevatorTS_inv1 :
-    Invariant ElevatorTS (fun s => ((s.moving = true) → (s.door = .closed))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.ElevatorProofs.
-  sorry
+-- INVARSPEC 1 (from elevator.smv): (moving -> (door = closed))
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.ElevatorProofs.
+-- theorem ElevatorTS_inv1 :
+--     Invariant ElevatorTS (fun s => ((s.moving = true) → (s.door = .closed))) := by
+--   sorry
 
--- INVARSPEC (from elevator.smv): (door = closed)
-theorem ElevatorTS_inv2 :
-    Invariant ElevatorTS (fun s => (s.door = .closed)) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.ElevatorProofs.
-  sorry
+-- INVARSPEC 2 (from elevator.smv): (door = closed)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.ElevatorProofs.
+-- theorem ElevatorTS_inv2 :
+--     Invariant ElevatorTS (fun s => (s.door = .closed)) := by
+--   sorry
 

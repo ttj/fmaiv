@@ -779,7 +779,7 @@ This is the conceptual capstone of the bridge built over the last several slides
 
 ## The counter as a Lean system
 
-From [`CounterDemo/Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean) (auto-translated from [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv)):
+From [`CounterDemo/Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean) (auto-translated from [`counter.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/counter.smv) by [`smv2lean`](https://github.com/ttj/fmaiv/blob/main/scripts/smv2lean)):
 
 ```lean
 inductive ModeVal | off | on
@@ -795,24 +795,26 @@ def CounterTS : TransitionSystem CounterState where
 
 Same four guards as the SMV `next(...)` and the Z3 `step()`.
 
+The same `smv2lean` turns **any** Day-2 model into a Lean transition system: `NuXMV/{Gcd, Mutex, Elevator}` ship *with proofs*; `Peterson`, `Prodcons` are translated samplers — prove the true INVARSPECs, refute the deliberately-false ones.
+
 ::: notes
-The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by a translator — emphasizing that the *same* model flows through every tool; only the syntax changes.
+The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by `scripts/smv2lean` — emphasizing that the *same* model flows through every tool; only the syntax changes. The translator is reusable: `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` drops a ready-to-prove Lean module into the project, which is exactly the Day-3 assignment's "translate-and-prove" track. Beyond the counter, the Day-3 project also ships a gentle set-theory intro (`DiscreteMath.lean`) as a Lean on-ramp and an IMP imperative-language formalization with Hoare-style reasoning (`ProgramVerif/`).
 :::
 
 ---
 
-## Single invariants aren't inductive
+## Bundling the counter's invariants
 
-We want `x ≤ 10`. But `x ≤ 10` alone is **not** preserved by every step in isolation.
+For *our* counter, `x ≤ 10` is already inductive on its own — the increment is guarded by `x < 10`, so `x' = x + 1 ≤ 10` falls out directly. (Not every property is so lucky — see the next slide.)
 
-The fix: **strengthen** to a conjunction that *is* inductive:
+We still **bundle** the three safety properties into one invariant and prove it once:
 
 $$\Phi(s) \equiv (s.x \le 10) \ \wedge\ (s.\text{mode} = \text{off} \to s.x = 0)$$
 
-($\Phi$ — capital "phi" — names the strengthened invariant; $\equiv$ means "is defined as"; $\wedge$ is "and".)
+then read each INVARSPEC off $\Phi$ via `invariant_strengthening` — one induction, three guarantees. ($\Phi$ — capital "phi" — names the bundled invariant; $\wedge$ is "and".)
 
 ::: notes
-This is the central insight of the day, foreshadowed all week. "x ≤ 10" is true of all reachable states but is not by-itself inductive: from an arbitrary state with x = 10 you cannot conclude the successor satisfies it without also knowing the mode/x relationship. The cure is strengthening — find a stronger Φ that IS inductive and implies what you want. Discovering the right strengthening is the creative core of invariant proofs (and exactly where AI help is hit-or-miss).
+Honest framing (this counter is a *lucky* case): `x ≤ 10` is inductive by itself because the only increment is guarded by `x < 10` (so `x'=x+1 ≤ 10`), and the mode/x facts are individually inductive too — we even ship a one-screen Lean proof of `x ≤ 10` alone. We prove the conjunction Φ anyway because it's a clean habit: one inductive argument, then read off all three INVARSPECs by weakening (`x > 0 → mode = on` is just the contrapositive of `mode = off → x = 0`). The DEEP lesson — that the property you want often is NOT inductive and MUST be strengthened — needs a sharper example, on the very next slide, where the failure is a concrete underflow on an unreachable state.
 :::
 
 ---
@@ -1031,10 +1033,13 @@ Critical gotcha. A green build is NOT proof — Lean treats sorry as a warning s
 Safety = "nothing bad happens" (what we just proved). **Liveness** = "something good *eventually* happens" — proved with a **ranking function**: a `Nat`-valued measure that strictly *decreases* every step.
 
 ```lean
--- Gcd.lean: Euclid's algorithm terminates because (a + b) strictly drops
-def gcd (a b : Nat) : Nat := ...
-  termination_by a + b      -- the measure that must shrink
-  decreasing_by omega       -- proof that it shrinks on each recursive call
+-- Gcd.lean: Euclid's algorithm terminates because the first argument strictly drops
+def gcd (a b : Nat) : Nat :=
+  match a, b with
+  | 0,   b => b
+  | a+1, b => gcd (b % (a+1)) (a+1)              -- recurse on (b mod a+1, a+1)
+  termination_by a                               -- the measure that must shrink
+  decreasing_by exact Nat.mod_lt b (Nat.succ_pos a)  -- b % (a+1) < a+1
 ```
 
 A measure bounded below by 0 can't decrease forever ⇒ the loop must stop. (This is the discrete cousin of a Lyapunov function.)
@@ -1047,18 +1052,17 @@ The example project ships ranking-function machinery (TransitionSystem.lean's Is
 
 ## A second worked invariant: GCD correctness
 
-Euclid's algorithm subtracts the smaller from the larger until they meet:
+Euclid's algorithm replaces the pair `(a, b)` with `(b mod a, a)` until the first hits 0:
 
 ```text
-init:  x := m,  y := n
-step:  while x > 0 ∧ y > 0:  if x > y then x := x − y  else  y := y − x
+gcd a b  =  if a = 0 then b else gcd (b mod a) a
 ```
 
-What makes it *correct*? The **conserved quantity**: `gcd(x, y)` never changes across a step.
+What makes it *correct*? The **conserved quantity**: the `gcd` of the pair never changes across a step.
 
-$$\text{Inv}(x,y)\ \equiv\ \gcd(x, y) = \gcd(m, n)$$
+$$\text{Inv}(a,b)\ \equiv\ \gcd(a, b) = \gcd(m, n)$$
 
-This is an **inductive** invariant: `gcd(x−y, y) = gcd(x, y)` (and symmetrically), so each step preserves it. When the loop ends (one variable hits 0), `gcd(x,0)=x` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
+This is an **inductive** invariant: `gcd(b mod a, a) = gcd(a, b)`, so each step preserves it. When the first argument hits 0, `gcd(0, b) = b` reads off the answer. Same recipe as the counter — find the relationship the program *maintains*, prove it's preserved.
 
 ::: notes
 I close the inductive-invariants lecture on exactly this GCD example, so include it as a second, non-counter instance — and note it's the *invariant* (correctness) angle, complementary to the previous slide's *termination* (ranking-function) angle on the very same algorithm. The core lesson, in the transcript's words: even though x and y change every step, the running gcd stays fixed, and that conserved quantity IS the inductive invariant — it "captures the core logic of the program." This reinforces the strengthening mindset (find the maintained relationship) on a system students recognize as genuinely useful, and it pairs naturally with the termination slide: invariant ⇒ partial correctness, ranking function ⇒ termination, together ⇒ total correctness.
@@ -1150,12 +1154,12 @@ The AI-proving landscape the brief requests, assembled from the transcript's own
 ## Live demo: AI-assisted repair
 
 1. Open [`Counter.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/Counter.lean); weaken `counterInv` to drop the second conjunct.
-2. `lake build` → `counterInv_step` now **fails** (the off-case can't close).
+2. `lake build` → the existing `counterInv_step` script **breaks** (its off-case used that conjunct).
 3. Ask Claude Code to repair it.
-4. Read what it proposes — does it re-add the right conjunct, or hallucinate a tactic?
+4. Read what it proposes — does it re-add the conjunct, or find the simpler argument that `x ≤ 10` needs on its own?
 
 ::: notes
-The live demo. Breaking the strengthening (dropping the mode=off → x=0 conjunct) makes the step proof fail in the off branch, because you lose the fact that keeps x at 0. Asking the AI to fix it is instructive: a good model re-discovers that you need the dropped conjunct (i.e. it re-strengthens); a weaker attempt flails with tactic tweaks that don't address the missing invariant. Either way the kernel tells you immediately whether the suggestion works.
+The live demo, framed honestly. Dropping the `mode = off → x = 0` conjunct breaks the *existing proof script* — it destructures the invariant into two parts and the off-case feeds the second to `omega`. The proposition `x ≤ 10` is still perfectly provable on its own (the `x < 10` guard makes it inductive), so a strong model can EITHER re-add the conjunct OR rewrite the step proof to not need it — both are correct, and the kernel accepts either. A weaker attempt flails with tactic tweaks that don't typecheck. The real "you MUST strengthen" lesson lives in the two-counter underflow example earlier; this demo is about the AI-repair loop and reading the elaborator's error. Either way the kernel tells you immediately whether the suggestion works.
 :::
 
 ---
@@ -1277,16 +1281,18 @@ Self-contained, runs in the room. The deliverable is one new proved corollary pl
 
 ## Homework (ungraded, for depth)
 
+**New to Lean?** Warm up first on the [`DiscreteMath`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/DiscreteMathStarter.lean) set-theory starter and the [`CounterLadder`](https://github.com/ttj/fmaiv/blob/main/day03/examples/CounterDemo/CounterDemo/CounterLadderStarter.lean) tactic ladder.
+
 Pick **one** (see [`assignments/day03.md`](../assignments/day03.md)):
 
 - Prove the **combined** invariant `(x ≤ 10) ∧ (mode = off → x = 0) ∧ (x > 0 → mode = on)` is inductive.
 - Change the bound `10` to `25` (it appears in the `next` guards and in `counterInv`) and re-prove `CounterTS_inv1` (use Claude Code for the edits).
-- Translate [`traffic_light.smv`](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light.smv) into Lean by hand and prove one invariant.
+- Translate a Day-2 model into Lean — `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` (or by hand) — and prove one invariant. (`Peterson`, `Prodcons` are pre-translated; like the Day-2 samplers, some INVARSPECs hold and some are deliberately false.)
 
 Use Claude Code as a partner; note one thing it got right and one it got wrong.
 
 ::: notes
-Three tracks of escalating ambition. The third (translate-and-prove a fresh system) is the most realistic test of the whole skill. The "note one right / one wrong from the AI" requirement makes students practice the calibration we discussed — recognizing when to trust the assistant. Not graded; compare at the start of Day 4.
+Three tracks of escalating ambition. The third (translate-and-prove a fresh system) is the most realistic test of the whole skill — and `smv2lean` makes the translation one command, so the time goes into the proof. The "note one right / one wrong from the AI" requirement makes students practice the calibration we discussed — recognizing when to trust the assistant. Not graded; compare at the start of Day 4. Point Lean newcomers at the DiscreteMath set-theory starter and the CounterLadder tactic ladder as the gentlest on-ramps.
 :::
 
 ---

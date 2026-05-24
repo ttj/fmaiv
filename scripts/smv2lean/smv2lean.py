@@ -273,9 +273,9 @@ class SmvToLean:
         self._emit("    • A `TransitionSystem` value (`<name>TS`) capturing the SMV")
         self._emit("      `init` and `next` clauses. Nondeterministic SMV inputs")
         self._emit("      become existentially-quantified variables in `next`.")
-        self._emit("    • For each `INVARSPEC` in the SMV, a Lean `theorem` STUB whose")
-        self._emit("      body is `sorry`. These stubs are placeholders — the real")
-        self._emit(f"      proofs (where we have them) live in `{proofs_module}`.")
+        self._emit("    • For each `INVARSPEC` in the SMV, a COMMENTED Lean `theorem`")
+        self._emit("      stub (so this file stays sorry-free). Uncomment one and prove")
+        self._emit(f"      it; completed proofs live in `{proofs_module}`.")
         self._emit("")
         self._emit("  Do NOT hand-edit this file: it will be overwritten by the next")
         self._emit("  run of `smv2lean.py`. Add proofs in the corresponding")
@@ -365,21 +365,25 @@ class SmvToLean:
 
         self._emit("")
 
-        # INVARSPEC theorems — each emitted as a `sorry`-stubbed Lean theorem.
-        # The `sorry` is a placeholder; if we have a real proof, it lives in
-        # the matching `<Name>Proofs.lean` file.
+        # INVARSPEC theorems — emitted as COMMENTED stubs, NOT `sorry`-typed
+        # theorems. This keeps the generated file sorry-free (so a project that
+        # imports it stays sorry-free) and never asserts a deliberately-false
+        # sampler spec via `sorry`. To do the exercise, uncomment one and prove
+        # it; if it is a deliberately-false spec, prove its negation instead
+        # (`example : ¬ Invariant … := …`). Completed proofs live in the
+        # matching `<Name>Proofs.lean`.
         spec_count = 0
         for spec in self.model.specs:
             if spec.kind == "INVARSPEC":
                 spec_count += 1
                 prop_str = self._spec_expr_to_lean(spec.expr, "s")
-                self._emit(f"-- INVARSPEC (from {src_basename}): "
+                self._emit(f"-- INVARSPEC {spec_count} (from {src_basename}): "
                            f"{self._spec_to_comment(spec.expr)}")
-                self._emit(f"theorem {ts_name}_inv{spec_count} :")
-                self._emit(f"    Invariant {ts_name} (fun s => {prop_str}) := by")
-                self._emit(f"  -- placeholder; real proof (if any) is in "
-                           f"{proofs_module}.")
-                self._emit(f"  sorry")
+                self._emit(f"--   Exercise: uncomment and prove (or, if false, prove its negation);")
+                self._emit(f"--   completed proofs go in {proofs_module}.")
+                self._emit(f"-- theorem {ts_name}_inv{spec_count} :")
+                self._emit(f"--     Invariant {ts_name} (fun s => {prop_str}) := by")
+                self._emit(f"--   sorry")
                 self._emit("")
 
         return "\n".join(self.lines)

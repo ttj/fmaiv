@@ -15,9 +15,14 @@
       inv1 :  x ≤ 10
       inv2 :  mode = off → x = 0
       inv3 :  x > 0    → mode = on
-  The key idea (the Day-3 insight): `x ≤ 10` alone is NOT inductive — you must
-  strengthen it with `mode = off → x = 0`. We prove the strengthened invariant
-  inductive, then read each INVARSPEC off it via `invariant_strengthening`.
+  Note on inductiveness: for THIS counter `x ≤ 10` is actually inductive on its
+  own — the increment is guarded by `x < 10`, so `x' = x + 1 ≤ 10` falls out
+  directly (and inv2/inv3 are individually inductive too). We still prove the
+  bundled invariant `counterInv = x ≤ 10 ∧ (mode = off → x = 0)` and read each
+  INVARSPEC off it via `invariant_strengthening` — one inductive argument yields
+  all three. The strengthening *technique* (find a stronger inductive Ψ that
+  implies your property) is essential in general; the case where it is genuinely
+  FORCED is the two-counter underflow example in the Day-3 slides, not this one.
 
   Note: the other two specs in counter.smv — `x < 10` and `x ≤ 5` — are NOT
   invariants (x reaches exactly 10), which is why NuSMV reports them false and

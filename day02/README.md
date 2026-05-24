@@ -13,7 +13,7 @@ About three hours of lecture and live, hands-on work in three blocks, plus a tak
 | Break | ~10 min | |
 | L2 — Temporal logic: CTL & LTL | ~50 min | Path quantifiers and modal operators. CTL (`AG`, `EF`, `AF`, `EG`) and LTL (`G`, `F`, `X`, `U`). Quick check: match the English property to the formula. |
 | Break | ~10 min | |
-| L3 — Algorithms & live nuXmv | ~50 min | Explicit-state, symbolic (BDD), and bounded (SAT) model checking, and when each is the right tool. Hands-on: run `nuXmv counter.smv`, read the verdicts, introduce a bug in `next(x)` and watch nuXmv produce a counterexample. Tour `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`. |
+| L3 — Algorithms & live nuXmv | ~50 min | Explicit-state, symbolic (BDD), and bounded (SAT) model checking, and when each is the right tool. Hands-on: run `nuXmv counter.smv` (online/CI: `NuSMV counter.smv` — same verdicts), read them, introduce a bug in `next(x)` and watch the counterexample. Tour `traffic_light.smv`, `mutex.smv`, `gcd_01.smv`. |
 | Wrap | ~10 min | Recap and intro to the take-home mini-project. |
 
 **Take-home mini-project** (see `assignments/day02.md`).

@@ -132,11 +132,11 @@ The same AI that hits IMO gold also writes vulnerable code. The reason is the sa
 ## This season alone: AI crosses two thresholds
 
 - **Finding flaws at scale.** Anthropic's **Project Glasswing** (2026) turned a frontier model loose on critical software and surfaced **thousands of zero-day vulnerabilities** across every major OS and browser — including a **27-year-old** bug in OpenBSD and a **16-year-old** bug in FFmpeg that fuzzers had executed **five million times** and still missed. (anthropic.com/glasswing)
-- **Proving new theorems.** In **May 2026** an **OpenAI** reasoning model autonomously produced a proof that **refutes the long-conjectured near-linear bound** on Erdős's 1946 unit-distance problem — a fixed polynomial improvement (exponent δ later pinned to 0.014 by **Will Sawin**) — one of the first times AI has independently advanced a central open problem in a subfield. (openai.com)
+- **Proving new theorems.** In **May 2026** an **OpenAI** reasoning model autonomously produced a proof that **rules out the long-conjectured near-linear ($n^{1+o(1)}$) form of the bound** on Erdős's 1946 unit-distance problem — a fixed polynomial improvement (exponent δ later pinned to 0.014 by **Will Sawin**) — one of the first times AI has independently advanced a central open problem in a subfield. (openai.com)
 - **The lesson.** Testing ran that FFmpeg line five million times and learned nothing; *reasoning about the code* found the bug. When AI both writes and breaks software, **proof — not more testing — tells you which side you are on.**
 
 ::: notes
-The "this is happening now" slide — concrete, datable, two-sided. Glasswing (Anthropic, spring 2026): a frontier model used for *defensive* security found thousands of real zero-days, the vivid examples being a 27-year-old OpenBSD flaw and a 16-year-old FFmpeg flaw that automated testing had executed about five million times without catching — a living restatement of Dijkstra's "testing shows the presence, not the absence, of bugs." OpenAI's Erdős result (May 20, 2026): a general-purpose reasoning model — not a math-specific system — produced a genuinely novel proof importing algebraic number theory into discrete geometry, disproving the long-standing form of the unit-distance conjecture, with Will Sawin refining the exponent to 0.014. Together they bracket the moment: AI is now superhuman at both *destroying* (finding flaws) and *creating* (new mathematics), and in both directions the scarce resource is a machine-checkable guarantee — the entire subject of this week. Sources: anthropic.com/glasswing and NPR (Apr 2026); openai.com "model disproves discrete geometry conjecture," TechCrunch and Scientific American (May 2026).
+The "this is happening now" slide — concrete, datable, two-sided. Glasswing (Anthropic, spring 2026): a frontier model used for *defensive* security found thousands of real zero-days, the vivid examples being a 27-year-old OpenBSD flaw and a 16-year-old FFmpeg flaw that automated testing had executed about five million times without catching — a living restatement of Dijkstra's "testing shows the presence, not the absence, of bugs." OpenAI's Erdős result (May 20, 2026): a general-purpose reasoning model — not a math-specific system — produced a genuinely novel proof importing algebraic number theory into discrete geometry, ruling out the near-linear ($n^{1+o(1)}$) form long conjectured for the unit-distance problem, with Will Sawin refining the exponent to 0.014. Together they bracket the moment: AI is now superhuman at both *destroying* (finding flaws) and *creating* (new mathematics), and in both directions the scarce resource is a machine-checkable guarantee — the entire subject of this week. Sources: anthropic.com/glasswing and NPR (Apr 2026); openai.com "model disproves discrete geometry conjecture," TechCrunch and Scientific American (May 2026).
 :::
 
 ---
@@ -187,7 +187,7 @@ This very deck is an agentic-engineering artifact:
 
 - **Pulled** the source CS 6315 material from the LMS — 14 weeks of slides **and** lecture-video transcripts.
 - **Analyzed and repurposed** it into this 4-day arc with an AI agent; **added** new material (the AI × FM framing, the figures you're seeing, the neural-network frontier).
-- **Verified everything**: every Z3 query runs, every Lean proof builds with no `sorry`, every SMV / CBMC / Cryptol example checks — the agent *proposed*, the tools *disposed*.
+- **Verified everything**: every Z3 query runs, every Lean *solution* module builds with no `sorry` (the starters carry intended ones), every SMV / CBMC / Cryptol example checks — the agent *proposed*, the tools *disposed*.
 
 That last step is the whole difference between vibe coding and engineering — and it's the muscle the next four days build.
 
@@ -819,7 +819,7 @@ What we will verify, all week:
 - $x > 0 \to \text{mode} = \text{on}$ (consistency)
 
 ::: notes
-Same little system we'll see every day. Five tools, four pillars, one example. Pick the easiest non-trivial reactive system you can. The counter is small enough to fit on a slide, large enough that the model checker won't enumerate it instantly, and structured enough that the inductive invariant is illuminating (you have to strengthen "x ≤ 10" with "mode = off → x = 0" to make it inductive — that's the Day 3 insight, foreshadowed today).
+Same little system we'll see every day. Five tools, four pillars, one example. Pick the easiest non-trivial reactive system you can. The counter is small enough to fit on a slide, large enough that the model checker won't enumerate it instantly, and structured enough that the inductive-invariant method is illuminating on Day 3 (we bundle its three safety facts into one invariant and prove it by induction; the case where strengthening is genuinely *forced* is a separate two-counter example).
 :::
 
 ---
@@ -911,7 +911,7 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
 This **unrolls** the symbolic machine above: `x` becomes part of the state. The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
 
 ::: notes
-The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is why the inductive invariant needs strengthening: `x ≤ 10` alone doesn't capture that `off` forces `x = 0`.
+The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is the running example for the inductive-invariant method on Day 3 (here `x ≤ 10` is already inductive thanks to the `x < 10` guard; the deeper "strengthen a too-weak invariant" lesson uses a separate two-counter example).
 :::
 
 ---

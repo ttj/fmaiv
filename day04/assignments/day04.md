@@ -146,6 +146,6 @@ If time allows, pick one of the following and write a single paragraph:
 
 - Day 1's bounded SMT was running implicitly inside CBMC the whole time today.
 - Day 2's transition systems are programs once you let the program counter be part of the state.
-- Day 3's inductive invariants are exactly what Cryptol's `:prove` discharges, but for finite-width bit vectors and via SMT instead of by hand.
+- Day 3's invariants, re-expressed for finite-width bit vectors: Cryptol's `:prove` discharges them by **exhaustive SMT over all inputs** (bit-blasting), not by hand-written induction — sound here precisely because the state is finite.
 
 The week you have just had is approximately the toolchain of any formal-methods engineer working in 2026: SMT for foundations, model checking for finite reactive systems, theorem proving for the mathematical and parametric content, source-level checkers for the actual code.

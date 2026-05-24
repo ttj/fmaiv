@@ -63,7 +63,7 @@ The slides say **nuXmv**; the course autograder runs **NuSMV 2.6.0**. They share
 We *mention* the nuXmv-only features but never require them.
 
 ::: notes
-Set expectations up front so nobody is confused when the tool they install is called NuSMV. The two are command-line-compatible for everything we do: same `.smv` files, same `INVARSPEC/CTLSPEC/LTLSPEC`, same verdict text. nuXmv adds IC3/PDR and infinite-state SMT-based checking on top; we point those out but the homework and autograder only use NuSMV features. Note neither tool has an explicit-state engine — that's SPIN's world (see the algorithms slide).
+Set expectations up front so nobody is confused when the tool they install is called NuSMV. The two are command-line-compatible for everything we do: same `.smv` files, same `INVARSPEC/CTLSPEC/LTLSPEC`, same verdict text. nuXmv adds IC3/PDR and infinite-state SMT-based checking on top; we point those out but the homework and autograder only use NuSMV features. Note both are symbolic-first (BDD + SAT engines); explicit-state enumeration is SPIN's domain (see the algorithms slide).
 :::
 
 ---
@@ -200,7 +200,7 @@ In SMV, `&` = and, `|` = or, `!` = not; a `case` picks the **first** guard that 
 This is the same counter, line for line — and the same four guards as the Z3 `step()` from Day 1.
 
 ::: notes
-Walk the case statement: top-to-bottom, first matching guard wins, TRUE is the catch-all. Point out that this is exactly the four-clause case analysis from Day 1's z3_counter_bounded.py, just in SMV syntax. The next(mode) and next(x) clauses together define the transition relation. The same case analysis will reappear in Lean (Day 3) and C/Cryptol (Day 4) — five encodings, one system.
+Walk the case statement: top-to-bottom, first matching guard wins, TRUE is the catch-all. Point out that this is exactly the four-clause case analysis from Day 1's z3_counter_bounded.py, just in SMV syntax. The next(mode) and next(x) clauses together define the transition relation. The same case analysis will reappear in Lean (Day 3) and C/Cryptol (Day 4) — five encodings, one system. On Day 3, `smv2lean` even auto-translates this very `.smv` into its Lean transition system.
 :::
 
 ---

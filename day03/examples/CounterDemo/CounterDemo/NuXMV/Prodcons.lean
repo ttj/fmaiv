@@ -11,9 +11,9 @@
     • A `TransitionSystem` value (`<name>TS`) capturing the SMV
       `init` and `next` clauses. Nondeterministic SMV inputs
       become existentially-quantified variables in `next`.
-    • For each `INVARSPEC` in the SMV, a Lean `theorem` STUB whose
-      body is `sorry`. These stubs are placeholders — the real
-      proofs (where we have them) live in `CounterDemo.NuXMV.ProdconsProofs`.
+    • For each `INVARSPEC` in the SMV, a COMMENTED Lean `theorem`
+      stub (so this file stays sorry-free). Uncomment one and prove
+      it; completed proofs live in `CounterDemo.NuXMV.ProdconsProofs`.
 
   Do NOT hand-edit this file: it will be overwritten by the next
   run of `smv2lean.py`. Add proofs in the corresponding
@@ -43,21 +43,24 @@ def ProdconsTS : TransitionSystem ProdconsState where
     else if ((s.act = .cons) ∧ (s.buf > 0)) then s'.buf = (s.buf - 1)
     else s'.buf = s.buf)
 
--- INVARSPEC (from prodcons.smv): (buf <= CAP)
-theorem ProdconsTS_inv1 :
-    Invariant ProdconsTS (fun s => (s.buf ≤ 3)) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.ProdconsProofs.
-  sorry
+-- INVARSPEC 1 (from prodcons.smv): (buf <= CAP)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.ProdconsProofs.
+-- theorem ProdconsTS_inv1 :
+--     Invariant ProdconsTS (fun s => (s.buf ≤ 3)) := by
+--   sorry
 
--- INVARSPEC (from prodcons.smv): (buf >= 0)
-theorem ProdconsTS_inv2 :
-    Invariant ProdconsTS (fun s => (s.buf ≥ 0)) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.ProdconsProofs.
-  sorry
+-- INVARSPEC 2 (from prodcons.smv): (buf >= 0)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.ProdconsProofs.
+-- theorem ProdconsTS_inv2 :
+--     Invariant ProdconsTS (fun s => (s.buf ≥ 0)) := by
+--   sorry
 
--- INVARSPEC (from prodcons.smv): (buf != CAP)
-theorem ProdconsTS_inv3 :
-    Invariant ProdconsTS (fun s => (s.buf ≠ 3)) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.ProdconsProofs.
-  sorry
+-- INVARSPEC 3 (from prodcons.smv): (buf != CAP)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.ProdconsProofs.
+-- theorem ProdconsTS_inv3 :
+--     Invariant ProdconsTS (fun s => (s.buf ≠ 3)) := by
+--   sorry
 
