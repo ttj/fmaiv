@@ -91,7 +91,7 @@ python3 day04/examples/nn/robustness.py               # certifies an L-inf robus
 public Codespaces image or installed in Colab. Two options:
 
 - **smvis web app** — run nuXmv (spec checking, state/BDD visualization) in the
-  browser, and upload your own `.smv` files: <https://smvis-378135919048.us-central1.run.app>
+  browser, and upload your own `.smv` files: <https://bit.ly/fmaiv_smvis>
 - **In a notebook** — add nuXmv from the course's *private* teaching image (org
   members only). In the devcontainer, base a small `.devcontainer/Dockerfile` on
   the private image, or `docker cp`/mount the binary, then point `smvis` at it via

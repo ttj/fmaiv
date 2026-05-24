@@ -127,7 +127,7 @@ certify and a PGD search finds a real adversarial example — the soundness vs.
 completeness story, now for learned models. For full-scale MNIST/CIFAR
 verification, see our [AAAI'26 VNN-COMP tutorial](https://vnn-comp.github.io/#aaai2026).
 
-## Capstone — one property, four tools
+## Capstone — one property, four tools (five encodings)
 
 To tie the week together, the [capstone](../../capstone/) walks the running
 counter (`x ≤ 10`) through Z3, nuXmv, Lean, and CBMC/Cryptol and asks you to

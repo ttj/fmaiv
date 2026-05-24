@@ -7,7 +7,7 @@
 # framework import retargeted to `CounterDemo.TransitionSystem`. ModuleName
 # defaults to the capitalized model basename (elevator.smv -> Elevator).
 #
-# The result is a transition system with one `sorry`-stub theorem per INVARSPEC:
+# The result is a transition system with one commented theorem stub per INVARSPEC:
 # a ready-made "translate-then-prove" exercise that ties a Day-2 model to a Day-3
 # Lean proof. Put the completed proofs in a sibling `<ModuleName>Proofs.lean`.
 #

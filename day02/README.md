@@ -34,7 +34,7 @@ day02/
 ├── README.md
 ├── slides/day02.md
 ├── examples/
-│   ├── counter.smv              ← running example (from verivital/smvis)
+│   ├── counter.smv              ← running example (adapted from verivital/smvis as a sampler)
 │   ├── traffic_light.smv        ← cyclic four-phase controller
 │   ├── mutex.smv                ← two-process mutual exclusion
 │   ├── gcd_01.smv               ← Euclid's algorithm as a transition system
@@ -44,7 +44,7 @@ day02/
 └── assignments/day02.md
 ```
 
-The core models (`counter`, `traffic_light`, `mutex`, `gcd_01`) are taken from <https://github.com/verivital/smvis/tree/main/examples>, where they are exercised by that project's CI; `elevator`, `peterson`, `prodcons`, `spec_challenge`, and `bmc_depth` are course additions (each spec annotated `HOLDS` or `DELIBERATELY FALSE`). All are verified by [`scripts/check_examples.sh`](../scripts/check_examples.sh).
+The core models (`counter`, `traffic_light`, `mutex`, `gcd_01`) are adapted from <https://github.com/verivital/smvis/tree/main/examples> (`counter.smv` in particular is rewritten as a pass/fail sampler with annotated specs); `elevator`, `peterson`, `prodcons`, `spec_challenge`, and `bmc_depth` are course additions (each spec annotated `HOLDS` or `DELIBERATELY FALSE`). All are verified by [`scripts/check_examples.sh`](../scripts/check_examples.sh).
 
 ## Running an example
 

@@ -3,7 +3,7 @@
 Vendored from [ttj/leansmv](https://github.com/ttj/leansmv). Parses a NuXMV/NuSMV
 `.smv` model and emits a Lean 4 transition system that instantiates the
 `TransitionSystem` framework (the same one in `day03/examples/CounterDemo/CounterDemo/TransitionSystem.lean`),
-with a `sorry` stub theorem for each `INVARSPEC`. You then prove the stubs by hand.
+with each `INVARSPEC` written as a **commented** theorem stub (so the generated file stays sorry-free). You uncomment one and prove it.
 
 This is exactly how the Day-3 examples `NuXMV/Gcd.lean` and `NuXMV/Mutex.lean`
 were produced (the completed proofs live in `*Proofs.lean`).
@@ -18,8 +18,8 @@ pip install -r requirements.txt          # lark (once)
 scripts/smv2lean/to_lean.sh day02/examples/peterson.smv     # -> day03/.../NuXMV/Peterson.lean
 ```
 
-The result is a transition system with one `sorry`-stub theorem per `INVARSPEC`:
-a ready-made "translate-then-prove" exercise. Add the proofs in a sibling
+The result is a transition system with one **commented** theorem stub per
+`INVARSPEC` (the file stays sorry-free): a ready-made "translate-then-prove" exercise. Add the proofs in a sibling
 `NuXMV/<Name>Proofs.lean` (see `NuXMV/Gcd.lean`+`GcdProofs.lean`, `Mutex`+`MutexProofs`,
 and `Elevator`+`ElevatorProofs` for worked examples). This is the engine behind the
 Day-3 assignment's "translate an SMV model into Lean" track (B.3).
