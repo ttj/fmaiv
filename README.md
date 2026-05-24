@@ -145,7 +145,7 @@ Light reading to ground the course material. None of these are required reading;
   - The tool paper for nuXmv, the symbolic model checker we use on Day 2.
 
 - **J. Lewis and B. Martin.** *Cryptol: High Assurance, Retargetable Crypto Development and Validation.* In *IEEE Military Communications Conference (MILCOM 2003)*, vol. 2, pp. 820–825, 2003. <https://doi.org/10.1109/MILCOM.2003.1290218>
-  - The original Cryptol paper from Galois and the NSA, introducing it as a domain-specific language (DSL) for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
+  - The original Cryptol paper from Galois (developed for the U.S. NSA), introducing it as a domain-specific language (DSL) for bit-precise specification and verification. We use Cryptol with SAW on Day 4.
 
 - **smvis** — interactive SMV / NuSMV model visualizer (state graphs and BDDs). **Run it in your browser:** <https://bit.ly/fmaiv_smvis> · source: <https://github.com/verivital/smvis>
   - Used on Day 2 to run NuSMV with no install and to visualize the example models, state graphs, and BDDs interactively; the Day 2 `.smv` examples are drawn from its example set.
@@ -184,7 +184,7 @@ Background for the Day 4 frontier segment. The two books are the best self-study
 - **C. Liu, T. Arnon, C. Lazarus, C. Strong, C. Barrett, and M. J. Kochenderfer.** *Algorithms for Verifying Deep Neural Networks.* Foundations and Trends in Optimization, 4(3–4), 2021. <https://arxiv.org/abs/1903.06758>
   - The comprehensive technical survey of the algorithms.
 - **G. Katz, C. Barrett, D. Dill, K. Julian, and M. Kochenderfer.** *Reluplex: An Efficient SMT Solver for Verifying Deep Neural Networks.* CAV 2017. <https://arxiv.org/abs/1702.01135>
-  - The origin point; proves exact ReLU robustness is NP-complete.
+  - The origin point; proves that finding an adversarial example for a ReLU network is NP-complete (so verifying robustness — its complement — is co-NP-complete).
 - **H.-D. Tran et al.** *Star-Based Reachability Analysis of Deep Neural Networks* (FM 2019), *ImageStars* (CAV 2020), and **NNV 2.0** (CAV 2023). Tool: <https://github.com/verivital/nnv>
   - Our reachability-based verifier (star sets); the basis for Day 4's reachability framing.
 - **VNN-COMP** annual competition — reports for 2025 (<https://arxiv.org/abs/2512.19007>) and 2024 (<https://arxiv.org/abs/2412.19985>); hub <https://vnn-comp.github.io/>. α,β-CROWN (<https://github.com/Verified-Intelligence/alpha-beta-CROWN>) has won every year 2021–2025. Our **AAAI'26 VNN-COMP tutorial** (slides + Google Colab notebooks) is at <https://vnn-comp.github.io/#aaai2026>; the AAAI-2022 tutorial **neural-network-verification.com** is another strong hands-on companion.

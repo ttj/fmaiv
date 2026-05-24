@@ -25,7 +25,7 @@ Annotations use a *they do / we do* convention: what the other resource emphasiz
 
 ### 1b. Summer / winter schools
 
-- **SRI Summer School on Formal Techniques (SSFT)** — SRI CSL (Shankar, Graham-Lengrand, et al.). Annual; 15th edition May 23–29, 2026. <https://ssft-sri.github.io/> (archive e.g. SSFT'22: <https://fm.csl.sri.com/SSFT22/>)
+- **SRI Summer School on Formal Techniques (SSFT)** — SRI CSL (Shankar, Graham-Lengrand, et al.). Annual; 15th edition May 23–29, 2026. <https://ssft-sri.github.io/>
   - **The closest sibling overall.** "Speaking Logic" background course + multi-day lectures on SMT, PVS theorem proving, model checking, symbolic execution, probabilistic reasoning; slides + videos archived. 2026 lineup includes Verus (Rust verification), Tamarin (crypto protocols), PVS, and LLM-driven compilation. *They do:* PVS, crypto-protocol and distributed-systems verification, week-long depth. *We do:* Lean 4 (vs PVS/Coq), an integrated CBMC+Cryptol+SAW Day 4, explicit AI-agentic thesis; 4 days vs 1–2 weeks.
 - **Marktoberdorf Summer School 2026** — TU München / international faculty. Aug 2026. <https://sites.google.com/view/marktoberdorf2026/talks>
   - **Most thesis-aligned program found.** Includes Leonardo de Moura, "Lean 4 for Program Verification in the Age of AI"; John Mitchell, "Evaluating Agentic AI Systems"; Filliâtre (deductive verification), Grumberg (CHC), Müller (Viper/separation logic), Barthe (probabilistic), Protzenko (Rust). *They do:* probabilistic verification, CHC, separation logic, **agentic-AI evaluation methodology** (where this school is arguably ahead of our own thesis). *We do:* the full SAT→SMT→MC→TP→program-verification pipeline hands-on plus NN verification, as one integrated arc.
@@ -124,7 +124,7 @@ Source list behind Day 1's "The wider landscape: what this week samples" slide. 
 - **Testing & fuzzing** — symbolic execution: **KLEE** (Cadar, Dunbar, Engler, OSDI 2008); whitebox fuzzing: **SAGE** (Godefroid, Levin, Molnar — Microsoft); property-based testing: **QuickCheck** (Claessen & Hughes, ICFP 2000); continuous fuzzing at scale: Google **OSS-Fuzz**, **AFL++** (Fioraldi et al., WOOT 2020).
 - **Runtime verification** — Bartocci, Falcone, Francalanza, Reger (eds.). *Lectures on Runtime Verification.* LNCS 10457, Springer 2018.
 - **Model-based design** — **Simulink/Stateflow** (MathWorks); **SCADE** (ANSYS/Esterel), built on the synchronous language **Lustre** (Halbwachs, Caspi, Raymond, Pilaud, *Proc. IEEE* 1991). Certified under **DO-178C** with its formal-methods (**DO-333**) and model-based (**DO-331**) supplements.
-- **Deductive verification** — **Frama-C/ACSL** <https://frama-c.com/>; **Why3** <https://why3.lri.fr/>; **Dafny** (Leino, LPAR 2010); **Viper** (Müller, Schwerhoff, Summers, VMCAI 2016); **Verus** (verifies Rust).
+- **Deductive verification** — **Frama-C/ACSL** <https://frama-c.com/>; **Why3** <https://why3.org/>; **Dafny** (Leino, LPAR 2010); **Viper** (Müller, Schwerhoff, Summers, VMCAI 2016); **Verus** (verifies Rust).
 - **Type & refinement systems** — **LiquidHaskell** (Vazou et al.); **F\*** <https://www.fstar-lang.org/>; **Rust** ownership types as lightweight static guarantees.
 - **Translation validation / equivalence checking** — Pnueli, Siegel, Singerman. *Translation Validation.* TACAS 1998.
 - **Program synthesis** (the dual of verification) — **SyGuS** (Syntax-Guided Synthesis) <https://sygus.org/>; **Rosette** (Torlak & Bodik) solver-aided programming.
@@ -179,7 +179,7 @@ Source list behind Day 1's three agentic-coding slides and the "verification is 
 Recorded for citation completeness. "Used" = cited above or in slides/README; "examined" = consulted and judged; "discarded" = checked but not used (reason noted).
 
 ### Verified resolving and used / examined
-- SSFT: <https://ssft-sri.github.io/> · <https://fm.csl.sri.com/SSFT22/> · SSFT16/17/19/20/21 archives under fm.csl.sri.com
+- SSFT: <https://ssft-sri.github.io/> · SSFT16/17/19/20/21 archives under fm.csl.sri.com
 - Marktoberdorf: <https://sites.google.com/view/marktoberdorf2026/talks> · 2024 talks · <https://events.model.in.tum.de/mod23/lectures.html> · <https://eapls.org/news/events/marktoberdorf-summer-school-2026-hj5qk/>
 - OPLSS: <https://www.cs.uoregon.edu/research/summerschool/summer25/> (+ schedule, topics) · <https://www.youtube.com/@OPLSS>
 - SAT/SMT/AR school: <https://sat-smt-ar-school.gitlab.io/www/> · <https://sat-smt-ar-school.gitlab.io/www/2025/> · <https://sicsa.ac.uk/event/sat-smt-ar-summer-school-2025/>
