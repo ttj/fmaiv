@@ -1,20 +1,16 @@
 name: build-autograde-image
 
-# Builds the FMAIV autograde image (ghcr.io/verivital/fmaiv-autograde) that
-# Codespaces (.devcontainer) and CI (examples.yml check/notebooks jobs) run on.
-# All tools are open source / freely redistributable (Z3, Lean, CBMC, Cryptol,
-# SAW, NuSMV, smvis), so the GHCR package can be PUBLIC -- no secrets to pull it.
+# Builds the FMAIV autograde image (ghcr.io/ttj/fmaiv-autograde) that Codespaces
+# (.devcontainer) and CI (examples.yml check/notebooks jobs) run on. All tools are
+# open source / freely redistributable (Z3, Lean, CBMC, Cryptol, SAW, NuSMV, smvis),
+# so the GHCR package can be PUBLIC -- students and CI pull it with no secrets.
 #
-# PUBLISHING NOTE (cross-org): this repo is ttj/fmaiv (owner `ttj`) but the image
-# lives under the `verivital` org. A repo's default GITHUB_TOKEN can only push
-# packages owned by its OWN owner, so it CANNOT push to verivital/* -- you get
-# "denied: permission_denied: The requested installation does not exist".
-# So we BUILD on every change (to keep the image reproducible from the repo) and
-# PUSH only when a cross-org credential is provided: add a repo secret
-#   GHCR_PAT = a Personal Access Token with `write:packages` on the verivital org.
-# Without it the job still runs green (build-only) and the existing :latest is
-# untouched. (Alternative: host the image at ghcr.io/ttj/ and the default token
-# would suffice -- but then update .devcontainer + examples.yml + docs to match.)
+# The image is hosted under the SAME owner as this repo (ttj), so the default
+# GITHUB_TOKEN can push it -- no PAT needed. Requires repo Settings -> Actions ->
+# General -> Workflow permissions = "Read and write". After the FIRST push, set the
+# ghcr.io/ttj/fmaiv-autograde package visibility to PUBLIC (github.com/ttj?tab=
+# packages -> fmaiv-autograde -> Package settings -> Change visibility) so it pulls
+# anonymously in Codespaces/CI/student repos.
 
 on:
   push:
@@ -26,7 +22,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  IMAGE: ghcr.io/verivital/fmaiv-autograde
+  IMAGE: ghcr.io/ttj/fmaiv-autograde
 
 jobs:
   build:
@@ -37,41 +33,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Push only if a cross-org PAT is configured (see header); build either way.
-      - name: Decide whether to publish
-        id: cfg
-        env:
-          GHCR_PAT: ${{ secrets.GHCR_PAT }}
-        run: |
-          if [ -n "$GHCR_PAT" ]; then echo "push=true" >> "$GITHUB_OUTPUT"; else echo "push=false" >> "$GITHUB_OUTPUT"; fi
-
       - name: Log in to GHCR
-        if: steps.cfg.outputs.push == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (and push when GHCR_PAT is set)
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: autograding
           file: autograding/Dockerfile
-          push: ${{ steps.cfg.outputs.push }}
+          push: true
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
 
-      - name: Result
+      - name: Reminder
         run: |
-          if [ "${{ steps.cfg.outputs.push }}" = "true" ]; then
-            echo "Built and pushed ${IMAGE}:latest."
-            echo "Ensure the GHCR package is PUBLIC so student/CI jobs can pull it"
-            echo "(org Packages -> fmaiv-autograde -> Package settings -> visibility -> Public)."
-          else
-            echo "Built only (no GHCR_PAT secret set)."
-            echo "The image is reproducible from the repo but not published from CI."
-            echo "To publish to the verivital org, add a repo secret GHCR_PAT"
-            echo "(a PAT with write:packages on verivital) -- see the workflow header."
-          fi
+          echo "Pushed ${IMAGE}:latest."
+          echo "If this is the first push, set the package PUBLIC:"
+          echo "  github.com/ttj?tab=packages -> fmaiv-autograde -> Package settings"
+          echo "  -> Change visibility -> Public   (so Codespaces/CI pull it anonymously)."
