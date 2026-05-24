@@ -48,7 +48,7 @@ day03/
 │           ├── Gcd.lean                  ← Euclid's GCD; termination via a ranking function
 │           ├── TrafficLight.lean         ← traffic-light transition system + safety invariant
 │           ├── ProgramVerif/             ← the IMP language: big-step semantics + Hoare-style examples (Imp, Examples)
-│           ├── NuXMV/                     ← Day-2 SMV models translated to Lean: Gcd, Mutex, Elevator (worked, with *Proofs); Peterson, Prodcons (translate-then-prove stubs)
+│           ├── NuXMV/                     ← Day-2 SMV models translated to Lean: Gcd, Mutex, Elevator (worked, with *Proofs); Peterson, Prodcons (stubs — samplers mixing true/false INVARSPECs to prove or refute)
 │           └── *Starter.lean             ← starter version of several modules (proofs stubbed with `sorry`)
 └── assignments/day03.md
 ```

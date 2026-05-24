@@ -795,7 +795,7 @@ def CounterTS : TransitionSystem CounterState where
 
 Same four guards as the SMV `next(...)` and the Z3 `step()`.
 
-The same `smv2lean` turns **any** Day-2 model into a Lean transition system: `NuXMV/{Gcd, Mutex, Elevator}` ship *with proofs*; `Peterson`, `Prodcons` are translated and left to prove.
+The same `smv2lean` turns **any** Day-2 model into a Lean transition system: `NuXMV/{Gcd, Mutex, Elevator}` ship *with proofs*; `Peterson`, `Prodcons` are translated samplers — prove the true INVARSPECs, refute the deliberately-false ones.
 
 ::: notes
 The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by `scripts/smv2lean` — emphasizing that the *same* model flows through every tool; only the syntax changes. The translator is reusable: `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` drops a ready-to-prove Lean module into the project, which is exactly the Day-3 assignment's "translate-and-prove" track. Beyond the counter, the Day-3 project also ships a gentle set-theory intro (`DiscreteMath.lean`) as a Lean on-ramp and an IMP imperative-language formalization with Hoare-style reasoning (`ProgramVerif/`).
@@ -1285,7 +1285,7 @@ Pick **one** (see [`assignments/day03.md`](../assignments/day03.md)):
 
 - Prove the **combined** invariant `(x ≤ 10) ∧ (mode = off → x = 0) ∧ (x > 0 → mode = on)` is inductive.
 - Change the bound `10` to `25` (it appears in the `next` guards and in `counterInv`) and re-prove `CounterTS_inv1` (use Claude Code for the edits).
-- Translate a Day-2 model into Lean — `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` (or by hand) — and prove one invariant. (`Peterson`, `Prodcons` are already translated and waiting.)
+- Translate a Day-2 model into Lean — `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` (or by hand) — and prove one invariant. (`Peterson`, `Prodcons` are pre-translated; like the Day-2 samplers, some INVARSPECs hold and some are deliberately false.)
 
 Use Claude Code as a partner; note one thing it got right and one it got wrong.
 
