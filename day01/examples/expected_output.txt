@@ -1,5 +1,6 @@
-Expected output of Day 1 examples (with z3-solver 4.15.x).
-Use this to verify your setup before class.
+Expected output of Day 1 examples (snapshot with z3-solver 4.15.x; your Z3
+version line may differ on a newer release). Use this to sanity-check your setup
+before class. The authoritative, CI-run checks are in scripts/check_examples.sh.
 
 === z3_smoke.py ===
 Z3 version: 4.15.3

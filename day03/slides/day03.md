@@ -12,6 +12,8 @@ date: "Day 3 of 4"
 
 ## Lean 4, inductive invariants, and AI-assisted proof {.section}
 
+**Run it live (no install):** [Codespaces](https://codespaces.new/ttj/fmaiv) (full toolset) or Colab — today's notebook [`03_day3_theorem_proving`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/03_day3_theorem_proving.ipynb). All materials: <https://github.com/ttj/fmaiv>
+
 ::: notes
 Day 2's model checker enumerated the counter's finite reachable set and proved the invariant for all behaviors. Today we prove the same invariant a different way — by induction on the transition relation, in Lean 4 — and that method works where model checking can't: unbounded data, parametric systems, and genuine mathematics. We also use AI (Claude Code) as a proof-drafting partner, with the Lean kernel as the arbiter. Same counter, new kind of guarantee: a machine-checked proof term, not an enumeration.
 :::

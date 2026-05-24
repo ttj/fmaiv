@@ -5,7 +5,9 @@
 #     docker compose run --rm day04 ./verify.sh
 #
 # Exits non-zero on the first failure so a participant can tell at a glance
-# whether their container is set up correctly.
+# whether their container is set up correctly. These checks mirror the Day-4
+# section of scripts/check_examples.sh (the CI source of truth) — keep the flags
+# (e.g. cbmc --unwind 26) in sync if you change them there.
 
 set -euo pipefail
 
