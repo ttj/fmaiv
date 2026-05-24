@@ -11,9 +11,9 @@
     • A `TransitionSystem` value (`<name>TS`) capturing the SMV
       `init` and `next` clauses. Nondeterministic SMV inputs
       become existentially-quantified variables in `next`.
-    • For each `INVARSPEC` in the SMV, a Lean `theorem` STUB whose
-      body is `sorry`. These stubs are placeholders — the real
-      proofs (where we have them) live in `CounterDemo.NuXMV.PetersonProofs`.
+    • For each `INVARSPEC` in the SMV, a COMMENTED Lean `theorem`
+      stub (so this file stays sorry-free). Uncomment one and prove
+      it; completed proofs live in `CounterDemo.NuXMV.PetersonProofs`.
 
   Do NOT hand-edit this file: it will be overwritten by the next
   run of `smv2lean.py`. Add proofs in the corresponding
@@ -67,27 +67,31 @@ def PetersonTS : TransitionSystem PetersonState where
     else if ((s.run = 2) ∧ (s.pc2 = 2)) then s'.turn = 1
     else s'.turn = s.turn)
 
--- INVARSPEC (from peterson.smv): !(((pc1 = 4) & (pc2 = 4)))
-theorem PetersonTS_inv1 :
-    Invariant PetersonTS (fun s => (¬((s.pc1 = 4) ∧ (s.pc2 = 4)))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.PetersonProofs.
-  sorry
+-- INVARSPEC 1 (from peterson.smv): !(((pc1 = 4) & (pc2 = 4)))
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.PetersonProofs.
+-- theorem PetersonTS_inv1 :
+--     Invariant PetersonTS (fun s => (¬((s.pc1 = 4) ∧ (s.pc2 = 4)))) := by
+--   sorry
 
--- INVARSPEC (from peterson.smv): ((pc1 = 4) -> flag1)
-theorem PetersonTS_inv2 :
-    Invariant PetersonTS (fun s => ((s.pc1 = 4) → (s.flag1 = true))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.PetersonProofs.
-  sorry
+-- INVARSPEC 2 (from peterson.smv): ((pc1 = 4) -> flag1)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.PetersonProofs.
+-- theorem PetersonTS_inv2 :
+--     Invariant PetersonTS (fun s => ((s.pc1 = 4) → (s.flag1 = true))) := by
+--   sorry
 
--- INVARSPEC (from peterson.smv): ((pc2 = 4) -> flag2)
-theorem PetersonTS_inv3 :
-    Invariant PetersonTS (fun s => ((s.pc2 = 4) → (s.flag2 = true))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.PetersonProofs.
-  sorry
+-- INVARSPEC 3 (from peterson.smv): ((pc2 = 4) -> flag2)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.PetersonProofs.
+-- theorem PetersonTS_inv3 :
+--     Invariant PetersonTS (fun s => ((s.pc2 = 4) → (s.flag2 = true))) := by
+--   sorry
 
--- INVARSPEC (from peterson.smv): (pc1 != 4)
-theorem PetersonTS_inv4 :
-    Invariant PetersonTS (fun s => (s.pc1 ≠ 4)) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.PetersonProofs.
-  sorry
+-- INVARSPEC 4 (from peterson.smv): (pc1 != 4)
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.PetersonProofs.
+-- theorem PetersonTS_inv4 :
+--     Invariant PetersonTS (fun s => (s.pc1 ≠ 4)) := by
+--   sorry
 

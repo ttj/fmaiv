@@ -187,7 +187,7 @@ This very deck is an agentic-engineering artifact:
 
 - **Pulled** the source CS 6315 material from the LMS — 14 weeks of slides **and** lecture-video transcripts.
 - **Analyzed and repurposed** it into this 4-day arc with an AI agent; **added** new material (the AI × FM framing, the figures you're seeing, the neural-network frontier).
-- **Verified everything**: every Z3 query runs, every Lean proof builds with no `sorry`, every SMV / CBMC / Cryptol example checks — the agent *proposed*, the tools *disposed*.
+- **Verified everything**: every Z3 query runs, every Lean *solution* module builds with no `sorry` (the starters carry intended ones), every SMV / CBMC / Cryptol example checks — the agent *proposed*, the tools *disposed*.
 
 That last step is the whole difference between vibe coding and engineering — and it's the muscle the next four days build.
 

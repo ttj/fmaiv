@@ -42,7 +42,7 @@ pip install -r scripts/smv2lean/requirements.txt        # lark (once)
 scripts/smv2lean/to_lean.sh day02/examples/traffic_light.smv   # -> NuXMV/Traffic_light.lean
 ```
 
-The output is a `TransitionSystem` with one `sorry` stub per `INVARSPEC` — fill them in. **Worked examples of exactly this workflow ship with the course**: [`NuXMV/Gcd`](../examples/CounterDemo/CounterDemo/NuXMV/Gcd.lean), [`Mutex`](../examples/CounterDemo/CounterDemo/NuXMV/Mutex.lean), and [`Elevator`](../examples/CounterDemo/CounterDemo/NuXMV/Elevator.lean) have their proofs filled in beside them in `*Proofs.lean` (Elevator even shows a *true* safety invariant and a *deliberately false* one, like the counter). [`NuXMV/Peterson`](../examples/CounterDemo/CounterDemo/NuXMV/Peterson.lean) and [`Prodcons`](../examples/CounterDemo/CounterDemo/NuXMV/Prodcons.lean) are pre-translated stubs. Like the Day-2 samplers (and Elevator), they mix true and deliberately-false INVARSPECs: **prove** the ones that hold (e.g. Peterson's mutual exclusion `¬(pc1=4 ∧ pc2=4)`, Prodcons's `buf ≤ CAP`) and **refute** the false ones (Peterson's `pc1 ≠ 4`, Prodcons's `buf ≠ CAP`) by exhibiting the counterexample state, exactly as `ElevatorProofs.lean` does for `inv2`. Or write the translation by hand, which is more educational.
+The output is a `TransitionSystem` (sorry-free) with each `INVARSPEC` written as a **commented** theorem stub — uncomment one and prove it. **Worked examples of exactly this workflow ship with the course**: [`NuXMV/Gcd`](../examples/CounterDemo/CounterDemo/NuXMV/Gcd.lean), [`Mutex`](../examples/CounterDemo/CounterDemo/NuXMV/Mutex.lean), and [`Elevator`](../examples/CounterDemo/CounterDemo/NuXMV/Elevator.lean) have their proofs filled in beside them in `*Proofs.lean` (Elevator even shows a *true* safety invariant and a *deliberately false* one, like the counter). [`NuXMV/Peterson`](../examples/CounterDemo/CounterDemo/NuXMV/Peterson.lean) and [`Prodcons`](../examples/CounterDemo/CounterDemo/NuXMV/Prodcons.lean) are pre-translated stubs. Like the Day-2 samplers (and Elevator), they mix true and deliberately-false INVARSPECs: **prove** the ones that hold (e.g. Peterson's mutual exclusion `¬(pc1=4 ∧ pc2=4)`, Prodcons's `buf ≤ CAP`) and **refute** the false ones (Peterson's `pc1 ≠ 4`, Prodcons's `buf ≠ CAP`) by exhibiting the counterexample state, exactly as `ElevatorProofs.lean` does for `inv2`. Or write the translation by hand, which is more educational.
 
 This is the most ambitious option. Plan for 60+ minutes and expect to ask Claude for help.
 
@@ -87,7 +87,7 @@ whose proofs are `sorry`. The solution modules build with **no** `sorry`.
 
 Starters: `DiscreteMathStarter.lean`, `ArraySumStarter.lean`, `GcdStarter.lean`,
 `TrafficLightStarter.lean`, `SortingStarter.lean` (and the `NuXMV/{Gcd,Mutex}.lean`
-stubs act as starters — fill their `sorry`s, with `*Proofs.lean` as the answer key).
+commented INVARSPEC stubs act as starters — uncomment and prove them, with `*Proofs.lean` as the answer key).
 
 ```bash
 cd examples/CounterDemo

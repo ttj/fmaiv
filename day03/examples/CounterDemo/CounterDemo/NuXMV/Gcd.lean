@@ -11,9 +11,9 @@
     • A `TransitionSystem` value (`<name>TS`) capturing the SMV
       `init` and `next` clauses. Nondeterministic SMV inputs
       become existentially-quantified variables in `next`.
-    • For each `INVARSPEC` in the SMV, a Lean `theorem` STUB whose
-      body is `sorry`. These stubs are placeholders — the real
-      proofs (where we have them) live in `CounterDemo.NuXMV.GcdProofs`.
+    • For each `INVARSPEC` in the SMV, a COMMENTED Lean `theorem`
+      stub (so this file stays sorry-free). Uncomment one and prove
+      it; completed proofs live in `CounterDemo.NuXMV.GcdProofs`.
 
   Do NOT hand-edit this file: it will be overwritten by the next
   run of `smv2lean.py`. Add proofs in the corresponding
@@ -54,21 +54,24 @@ def GcdTS : TransitionSystem GcdState where
     else if (s.pc = .l5) then s'.pc = .l5
     else s'.pc = s.pc)
 
--- INVARSPEC (from gcd.smv): ((a > 0) & (b > 0))
-theorem GcdTS_inv1 :
-    Invariant GcdTS (fun s => ((s.a > 0) ∧ (s.b > 0))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.GcdProofs.
-  sorry
+-- INVARSPEC 1 (from gcd.smv): ((a > 0) & (b > 0))
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.GcdProofs.
+-- theorem GcdTS_inv1 :
+--     Invariant GcdTS (fun s => ((s.a > 0) ∧ (s.b > 0))) := by
+--   sorry
 
--- INVARSPEC (from gcd.smv): ((a >= 0) & (b >= 0))
-theorem GcdTS_inv2 :
-    Invariant GcdTS (fun s => ((s.a ≥ 0) ∧ (s.b ≥ 0))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.GcdProofs.
-  sorry
+-- INVARSPEC 2 (from gcd.smv): ((a >= 0) & (b >= 0))
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.GcdProofs.
+-- theorem GcdTS_inv2 :
+--     Invariant GcdTS (fun s => ((s.a ≥ 0) ∧ (s.b ≥ 0))) := by
+--   sorry
 
--- INVARSPEC (from gcd.smv): ((a = 0) & (b = 0))
-theorem GcdTS_inv3 :
-    Invariant GcdTS (fun s => ((s.a = 0) ∧ (s.b = 0))) := by
-  -- placeholder; real proof (if any) is in CounterDemo.NuXMV.GcdProofs.
-  sorry
+-- INVARSPEC 3 (from gcd.smv): ((a = 0) & (b = 0))
+--   Exercise: uncomment and prove (or, if false, prove its negation);
+--   completed proofs go in CounterDemo.NuXMV.GcdProofs.
+-- theorem GcdTS_inv3 :
+--     Invariant GcdTS (fun s => ((s.a = 0) ∧ (s.b = 0))) := by
+--   sorry
 
