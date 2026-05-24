@@ -118,14 +118,15 @@ network: within an L-infinity ball of radius `eps` around an input, can the
 prediction change? [`examples/nn/`](../examples/nn/) certifies it with
 **auto_LiRPA** (the CROWN engine under α,β-CROWN, the VNN-COMP winner), CPU-only:
 
-- Zero-install: open [`05_day4_nn_robustness.ipynb`](../../notebooks/05_day4_nn_robustness.ipynb) in Colab.
+- Zero-install: open [`05_day4_nn_robustness.ipynb`](../../notebooks/05_day4_nn_robustness.ipynb) (the 2-D toy) or [`06_day4_nn_mnist.ipynb`](../../notebooks/06_day4_nn_mnist.ipynb) (multi-class MNIST) in Colab.
 - Codespace/local: `pip install -r examples/nn/requirements.txt; python examples/nn/robustness.py`
   (the starter `robustness_starter.py` blanks the `compute_bounds` call).
 
 You will see a *certified* band of small `eps`, then a region where CROWN cannot
 certify and a PGD search finds a real adversarial example — the soundness vs.
-completeness story, now for learned models. For full-scale MNIST/CIFAR
-verification, see our [AAAI'26 VNN-COMP tutorial](https://vnn-comp.github.io/#aaai2026).
+completeness story, now for learned models. The multi-class MNIST notebook above
+scales this to 10 classes (IBP vs CROWN vs α-CROWN tightness); for full-scale
+MNIST/CIFAR verification, see our [AAAI'26 VNN-COMP tutorial](https://vnn-comp.github.io/#aaai2026).
 
 ## Capstone — one property, four tools (five encodings)
 

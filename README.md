@@ -276,7 +276,7 @@ The four days live under [`day01/`](day01/) … [`day04/`](day04/), each contain
 Each exercise example ships with a `*_starter` to complete, and every worked example is checked end-to-end by [`scripts/check_examples.sh`](scripts/check_examples.sh) (run in CI on each push). Students can self-check one exercise with `bash scripts/check_examples.sh --only <name>` (or `--list` to see them all). These are bash scripts — on Windows, run them in the Codespace, WSL, or Git Bash.
 
 - **Capstone** — [`capstone/`](capstone/) threads the running counter (`x ≤ 10`) through all four tools / five encodings (Z3 → nuXmv → Lean → CBMC → Cryptol) and asks you to compare bounded vs. unbounded vs. inductive vs. bit-precise verification.
-- **Frontier (Day 4)** — [`day04/examples/nn/`](day04/examples/nn/) certifies neural-network robustness with auto_LiRPA (CPU-only; Colab notebook included).
+- **Frontier (Day 4)** — [`day04/examples/nn/`](day04/examples/nn/) certifies neural-network robustness with auto_LiRPA (CPU-only). Two Colab notebooks: [`05_day4_nn_robustness`](notebooks/05_day4_nn_robustness.ipynb) (2-D toy) and [`06_day4_nn_mnist`](notebooks/06_day4_nn_mnist.ipynb) (multi-class MNIST).
 
 ## Instructors
 
