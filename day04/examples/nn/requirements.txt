@@ -1,15 +1,19 @@
-# Dependencies for the Day-4 neural-network robustness example.
+# Dependencies for the Day-4 neural-network examples (robustness + MNIST).
 #
-# CPU-only — no GPU required. The example is a tiny 2-D MLP that certifies in
-# about a second on a CPU. To get the small CPU wheel of PyTorch (~200 MB)
-# instead of the large CUDA build (~2.5 GB), install torch from the CPU index:
+# CPU-only — no GPU required. The examples are tiny MLPs that certify in about a
+# second on a CPU. To get the small CPU wheels of PyTorch (~200 MB) instead of
+# the large CUDA build (~2.5 GB), install torch/torchvision from the CPU index:
 #
-#     pip install torch --index-url https://download.pytorch.org/whl/cpu
+#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 #     pip install -r requirements.txt
 #
-# auto_LiRPA's maintained release (0.7.x) is on GitHub, not PyPI (PyPI is stuck
-# at an ancient 0.2/0.3). We install it from a pinned commit for reproducibility.
-# On Google Colab, torch is already installed, so just run the git install line.
+# torchvision is used only by the MNIST notebook (06_day4_nn_mnist) for the
+# dataset; robustness.py needs only torch. auto_LiRPA's maintained release
+# (0.7.x) is on GitHub, not PyPI (PyPI is stuck at an ancient 0.2/0.3), so we
+# install it from a pinned commit for reproducibility. On Google Colab, torch and
+# torchvision are already installed, so just run the git install line.
 #
 torch
+torchvision
+matplotlib   # the Day-4 NN notebooks (05/06) plot with matplotlib; robustness.py itself does not
 auto_LiRPA @ git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615
