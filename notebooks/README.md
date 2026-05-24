@@ -12,7 +12,7 @@ file is right there in the repo. There are two ways in; see
 
 Click the badge (or **Code ▸ Codespaces ▸ Create codespace on main**). You get a
 container built from the course image with **everything preinstalled**:
-`z3` (CLI + Python), `cbmc`, `cryptol`, `saw`, `NuSMV`, `lean`, and `smvis`.
+`z3` (command-line + Python), `cbmc`, `cryptol`, `saw`, `NuSMV`, `lean`, and `smvis`.
 
 - Open any notebook in `notebooks/` and run it (the VS Code Jupyter extension is
   preconfigured), **or** run `jupyter lab` in the terminal for a full JupyterLab tab.

@@ -31,7 +31,7 @@ Welcome. By the end of today every participant will have typed a Z3 query, forma
 | Wrap + exercise | ~10 min | One-line recaps; homework pointer |
 
 ::: notes
-Three roughly-equal teaching blocks with two breaks. The first break is the longer one — coffee, hallway conversations. Each block ends with a tool you can poke at: after L1 you've seen a Z3 query, after L2 a transition system, after L3 bounded model checking work and fail.
+Three roughly-equal teaching blocks with two breaks. The first break is the longer one — coffee, hallway conversations. Each block ends with a tool you can experiment with: after L1 you've seen a Z3 query, after L2 a transition system, after L3 bounded model checking work and fail.
 :::
 
 ---
@@ -95,7 +95,7 @@ This is the framing slide for the whole week. The story is: AI is doing the easy
 
 ## Why now? The economics of cheap generation
 
-- **Compute is flooding in.** Global AI investment now runs, as an order-of-magnitude framing, at something like NASA's *entire annual budget every one-to-three weeks*; Sutton's "bitter lesson" says the methods that win are the ones that ride more compute — so generation keeps getting cheaper and better.
+- **Compute investment is rising sharply.** Global AI investment now runs, as an order-of-magnitude framing, at something like NASA's *entire annual budget every one-to-three weeks*; Sutton's "bitter lesson" says the methods that win are the ones that ride more compute — so generation keeps getting cheaper and better.
 - **The flip side the hype skips:** for many concrete tasks a *small* or *neuro-symbolic* solution beats a frontier LLM — cheaper, faster, often more accurate (NVIDIA, *Small Language Models are the Future of Agentic AI*, arXiv 2506.02153). On **image-based string/arithmetic acceptance**, **our** neuro-symbolic finite/pushdown automata reached **70–100%** accuracy where GPT/Claude/Gemini-class VLMs scored **≤50%** (and ~0% on multi-operator arithmetic) — at roughly **1000× lower latency** and a few dollars of compute (Sasaki, Lopez & Johnson, *Neurosymbolic Finite and Pushdown Automata*, NeuS 2025).
 - **Both arrows point at verification.** Cheap generation buries us in artifacts to check — and the cost-effective, *small* artifacts are exactly the ones formal methods can still scale to.
 
@@ -634,7 +634,7 @@ For a propositional formula $\varphi$:
 |---|---|---|
 | **Satisfiability** | exists $v$ with $v \models \varphi$ | NP-complete (Cook 1971) |
 | **Validity** | every $v$ satisfies $\varphi$ | co-NP-complete |
-| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | co-NP-complete (check $\Gamma \cup \{\neg\varphi\}$ unsat, for finite $\Gamma$) |
+| **Entailment** | $\Gamma \models \varphi$ ($\Gamma$ a set of premises) — every $v$ that satisfies all of $\Gamma$ satisfies $\varphi$ | co-NP-complete (finite $\Gamma$; check $\Gamma \cup \{\neg\varphi\}$ unsat) |
 
 Everything reduces to satisfiability:
 
@@ -719,7 +719,7 @@ means "formula $\varphi$ is true in structure $\mathcal{M}$".
 What saves us: **decidable fragments**.
 
 ::: notes
-The undecidability result is what motivates the move to SMT — instead of trying to decide satisfiability over arbitrary structures, we fix the structure (the integers, the real numbers, bit-vectors of fixed width) and decide satisfiability *over that one structure*. That's the trick.
+The undecidability result is what motivates the move to SMT — instead of trying to decide satisfiability over arbitrary structures, we fix the structure (the integers, the real numbers, bit-vectors of fixed width) and decide satisfiability *over that one structure*. That is the key idea.
 :::
 
 ---
@@ -761,7 +761,7 @@ This is the FOL subtlety we stress with the Lyapunov-stability example: "for all
 Z3 supports all of these. The `(set-logic …)` directive tells it which fragment to assume.
 
 ::: notes
-SMT solvers combine SAT with one or more decidable theories via the DPLL(T) framework — we'll come back to this in L3. For our purposes today: LIA covers the counter ($x \le 10$, $x + 1$), BV covers Day 4's popcount, EUF covers any "abstract function" reasoning. The undecidability of NIA is why every solver chokes on $x \cdot y = z$ with arbitrary $x, y$.
+SMT solvers combine SAT with one or more decidable theories via the DPLL(T) framework — we'll come back to this in L3. For our purposes today: LIA covers the counter ($x \le 10$, $x + 1$), BV covers Day 4's popcount, EUF covers any "abstract function" reasoning. The undecidability of NIA is why every solver fails to decide $x \cdot y = z$ with arbitrary $x, y$.
 :::
 
 ---
@@ -878,7 +878,7 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
   <line x1="252" y1="160" x2="497" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
   <text x="375" y="151" text-anchor="middle" font-size="13" fill="#946E24">press / x′ := x</text>
   <path d="M520,204 Q375,286 236,206" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#946E24">press ∨ x = 10 / x′ := 0</text>
+  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#946E24">press ∨ x ≥ 10 / x′ := 0</text>
   <ellipse cx="190" cy="160" rx="62" ry="42" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
   <text x="190" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">off</text>
   <ellipse cx="560" cy="160" rx="62" ry="42" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
@@ -904,7 +904,7 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
   <line x1="20" y1="150" x2="60" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
   <text x="40" y="142" text-anchor="middle" font-size="12" fill="#5b6168">start</text>
   <path d="M720,126 L720,64 L114,64 L114,126" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#946E24">press ∨ x = 10</text>
+  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#946E24">press ∨ x ≥ 10</text>
   <path d="M94,176 C74,232 154,232 134,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
   <text x="114" y="244" text-anchor="middle" font-size="12" fill="#946E24">¬press</text>
   <line x1="166" y1="150" x2="276" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
@@ -1083,7 +1083,7 @@ Every propositional formula can be converted to CNF (Tseytin transformation, lin
 SAT solvers consume CNF.
 
 ::: notes
-CNF is the universal input format. The Tseytin transformation is the technical trick: instead of distributing ∧ over ∨ (which can blow up exponentially), introduce fresh propositional variables for sub-formulas and assert their equivalences. Linear in the size of the input. Every modern SAT solver has a CNF preprocessor built in; you can hand it almost anything.
+CNF is the universal input format. The Tseytin transformation is the technique: instead of distributing ∧ over ∨ (which can blow up exponentially), introduce fresh propositional variables for sub-formulas and assert their equivalences. Linear in the size of the input. Every modern SAT solver has a CNF preprocessor built in; you can hand it almost anything.
 :::
 
 ---
@@ -1094,7 +1094,7 @@ CNF is the universal input format. The Tseytin transformation is the technical t
 
 ```
 DPLL(φ):
-  if φ is empty:       return SAT
+  if no clauses left:       return SAT
   if φ has empty clause: return UNSAT
   apply unit propagation
   apply pure literal elimination
@@ -1149,7 +1149,7 @@ The whole DPLL loop on the smallest formula that exercises it: one decision, a u
 
 ---
 
-## DPLL's two free moves: unit propagation + pure literals
+## DPLL's two automatic rules: unit propagation + pure literals
 
 Before DPLL ever *guesses*, it applies two rules that force assignments for free:
 
@@ -1255,7 +1255,7 @@ This is the slide that says "industrial SAT works because of engineering, not th
 
 **SMT** = Satisfiability Modulo Theories.
 
-Take a SAT solver. Bolt onto it a **theory solver** that can decide formulas over a specific structure (integers, reals, bit-vectors). When the SAT layer guesses a propositional assignment, the theory solver checks whether that assignment is consistent over the theory.
+Take a SAT solver. Add a **theory solver** that can decide formulas over a specific structure (integers, reals, bit-vectors). When the SAT layer guesses a propositional assignment, the theory solver checks whether that assignment is consistent over the theory.
 
 **DPLL(T) framework** (Ganzinger, Hagen, Nieuwenhuis, Oliveras, Tinelli, 2004):
 
@@ -1431,12 +1431,12 @@ unsigned GCD(unsigned x, unsigned y) {   // requires y > 0
 **Goal:** find inputs that make the loop run *exactly twice*. We can't know the trip count by hand — so we ask Z3.
 
 ::: notes
-This is our Week-8 test-case-generation example, verbatim down to the GCD function. The framing: a `while(true)` loop whose iteration count depends on the inputs in a way that's painful to reason about by hand. Generating "an input that runs the loop exactly twice" (or ten times, or that hits a specific branch) is exactly what symbolic execution and tools like KLEE/CBMC do under the hood, and it's a different *use* of the same solver — synthesis of a witness rather than refutation. Tie it to the verification triple: here the "spec" is a path condition (loop runs twice), and the model Z3 returns is the test input. Next slide shows the encoding trick that makes the loop body into a flat formula.
+This is our Week-8 test-case-generation example, verbatim down to the GCD function. The framing: a `while(true)` loop whose iteration count depends on the inputs in a way that's painful to reason about by hand. Generating "an input that runs the loop exactly twice" (or ten times, or that hits a specific branch) is exactly what symbolic execution and tools like KLEE/CBMC do internally, and it's a different *use* of the same solver — synthesis of a witness rather than refutation. Tie it to the verification triple: here the "spec" is a path condition (loop runs twice), and the model Z3 returns is the test input. Next slide shows the encoding trick that makes the loop body into a flat formula.
 :::
 
 ---
 
-## The trick: single static assignment (SSA)
+## The key step: single static assignment (SSA)
 
 A variable is reassigned each iteration, but a formula can't reassign anything. **SSA** fixes this: give each write a **fresh subscripted name** ($x_0, x_1, \dots$), then conjoin one equation per statement. Unroll two iterations:
 
@@ -1541,7 +1541,7 @@ This is the single most important idea in the SMT half of the day: declarative, 
 
 ---
 
-## Sudoku, under the hood: the pure-SAT encoding
+## Sudoku at the Boolean level: the pure-SAT encoding
 
 <svg viewBox="0 0 268 268" style="display:block;margin:0.2em auto;max-width:30%;height:auto" font-family="Inter, system-ui, sans-serif">
 <rect x="0" y="0" width="268" height="268" fill="#ffffff"/>
@@ -1627,7 +1627,7 @@ This is the single most important idea in the SMT half of the day: declarative, 
 <text x="246" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
 </svg>
 
-The `Distinct` version is SMT *sugar*. In **pure SAT** there are no integers — only Booleans (this is the classic Rosen encoding, and what bit-blasting produces under the hood):
+The `Distinct` version is SMT *syntactic sugar*. In **pure SAT** there are no integers — only Booleans (this is the classic Rosen encoding, and what bit-blasting produces internally):
 
 - **One Boolean per (cell, value):** $p(i,j,n)$ = "row $i$, col $j$ holds $n$" — $9\cdot 9\cdot 9 = 729$ variables.
 - **Givens:** a unit clause $p(i,j,n)$ for each shaded clue.
@@ -1735,7 +1735,7 @@ The catch (our own caveat): **computing the exact $CT$ is as hard as model check
 - Bad case: a counter to $N$ has diameter $\sim N$; deep bugs hide past any practical $k$.
 
 ::: notes
-This is the Week-8 "completeness threshold" and "complexity of BMC" material, kept gentle. The honest story: BMC is fundamentally a refutation engine, and turning it into a proof requires knowing you've gone deep enough — the CT. We stress that finding the exact CT is itself as hard as the model-checking problem you were trying to avoid, so real tools over-approximate (via graph structure / diameter). Connect to the running example: our counter literally counts, so its diameter grows with the bound — which is *exactly* why Day 1's bounded check can never prove "x ≤ 10 forever" no matter how large we make k, and why we need Day 2 (fixpoint/BDD reachability) or Day 3 (induction). This is the precise mechanism behind the "reachable vs reachable-in-≤N" Euler picture from L2. The complexity punchline we give — SAT-based BMC is worst-case doubly exponential because k can reach the diameter (exponential in state vars) and each SAT call is exponential — is optional depth if time allows.
+This is the Week-8 "completeness threshold" and "complexity of BMC" material, kept gentle. The honest story: BMC is fundamentally a refutation engine, and turning it into a proof requires knowing you've gone deep enough — the CT. We stress that finding the exact CT is itself as hard as the model-checking problem you were trying to avoid, so real tools over-approximate (via graph structure / diameter). Connect to the running example: our counter literally counts, so its diameter grows with the bound — which is *exactly* why Day 1's bounded check can never prove "x ≤ 10 forever" no matter how large we make k, and why we need Day 2 (fixpoint/BDD reachability) or Day 3 (induction). This is the precise mechanism behind the "reachable vs reachable-in-≤N" Euler picture from L2. The complexity result we give — SAT-based BMC is worst-case doubly exponential because k can reach the diameter (exponential in state vars) and each SAT call is exponential — is optional depth if time allows.
 :::
 
 ---
