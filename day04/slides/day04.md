@@ -120,20 +120,20 @@ The pipeline. The key realization for students: CBMC is not magic, it is automat
   <line x1="520" y1="76" x2="548" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
   <line x1="700" y1="76" x2="728" y2="76" stroke="#5b6168" stroke-width="1.8" marker-end="url(#cbmc-ah)"/>
   <rect x="10" y="48" width="150" height="56" rx="10" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
-  <text x="85" y="81" text-anchor="middle" font-size="15" fill="#1c1c1c">C source</text>
+  <text x="54.1" y="81" font-size="15" fill="#1c1c1c">C source</text>
   <rect x="190" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="265" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">goto-program</text>
-  <text x="265" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">uniform control flow</text>
+  <text x="226.5" y="73" font-size="13.5" fill="#1c1c1c">goto-program</text>
+  <text x="214.5" y="91" font-size="10.5" fill="#5b6168">uniform control flow</text>
   <rect x="370" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="445" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">unwound ×k</text>
-  <text x="445" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">loops unrolled</text>
+  <text x="406.8" y="73" font-size="13.5" fill="#1c1c1c">unwound ×k</text>
+  <text x="411.2" y="91" font-size="10.5" fill="#5b6168">loops unrolled</text>
   <rect x="550" y="48" width="150" height="56" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="625" y="73" text-anchor="middle" font-size="13.5" fill="#1c1c1c">SSA + bit-blast</text>
-  <text x="625" y="91" text-anchor="middle" font-size="10.5" fill="#5b6168">bit-precise eqns</text>
+  <text x="574.4" y="73" font-size="13.5" fill="#1c1c1c">SSA + bit-blast</text>
+  <text x="584.6" y="91" font-size="10.5" fill="#5b6168">bit-precise eqns</text>
   <rect x="730" y="48" width="150" height="56" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="805" y="81" text-anchor="middle" font-size="13.5" fill="#1c1c1c">SAT / SMT solver</text>
-  <text x="805" y="128" text-anchor="middle" font-size="12.5" fill="#922b21">SAT ⇒ bug + trace</text>
-  <text x="805" y="148" text-anchor="middle" font-size="12.5" fill="#1e6b32">UNSAT ⇒ safe to depth k</text>
+  <text x="745.5" y="81" font-size="13.5" fill="#1c1c1c">SAT / SMT solver</text>
+  <text x="745.7" y="128" font-size="12.5" fill="#922b21">SAT ⇒ bug + trace</text>
+  <text x="726.1" y="148" font-size="12.5" fill="#1e6b32">UNSAT ⇒ safe to depth k</text>
 </svg>
 *Caption: each CBMC stage lowers the program one level closer to a Boolean/bit-vector formula a solver can decide.*
 
@@ -160,26 +160,26 @@ $$\underbrace{I(s_0)}_{\text{start state}} \ \wedge\ \underbrace{\bigwedge_{i=0}
 <svg viewBox="0 0 640 150" style="display:block;margin:0.3em auto;max-width:80%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="bmc-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="12" y1="58" x2="40" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="24" y="48" text-anchor="middle" font-size="12" fill="#5b6168">I</text>
+  <text x="22.2" y="48" font-size="12" fill="#5b6168">I</text>
   <line x1="130" y1="58" x2="176" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="153" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
+  <text x="148.9" y="48" font-size="12.5" fill="#946E24">T</text>
   <line x1="266" y1="58" x2="312" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="289" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
+  <text x="284.9" y="48" font-size="12.5" fill="#946E24">T</text>
   <line x1="458" y1="58" x2="504" y2="58" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc-ah)"/>
-  <text x="481" y="48" text-anchor="middle" font-size="12.5" fill="#946E24">T</text>
+  <text x="476.9" y="48" font-size="12.5" fill="#946E24">T</text>
   <rect x="42" y="36" width="88" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="86" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₀</text>
+  <text x="79.1" y="63" font-size="15" fill="#1c1c1c">s₀</text>
   <rect x="178" y="36" width="88" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="222" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₁</text>
+  <text x="215.1" y="63" font-size="15" fill="#1c1c1c">s₁</text>
   <rect x="314" y="36" width="88" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="358" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s₂</text>
-  <text x="432" y="64" text-anchor="middle" font-size="22" fill="#5b6168">⋯</text>
+  <text x="351.1" y="63" font-size="15" fill="#1c1c1c">s₂</text>
+  <text x="420.4" y="64" font-size="22" fill="#5b6168">⋯</text>
   <rect x="506" y="36" width="88" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
-  <text x="550" y="63" text-anchor="middle" font-size="15" fill="#1c1c1c">s_k</text>
-  <text x="86" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
-  <text x="222" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
-  <text x="358" y="100" text-anchor="middle" font-size="11.5" fill="#946E24">¬P?</text>
-  <text x="550" y="100" text-anchor="middle" font-size="11.5" fill="#922b21">¬P ✓ (bug)</text>
+  <text x="538" y="63" font-size="15" fill="#1c1c1c">s_k</text>
+  <text x="75.5" y="100" font-size="11.5" fill="#946E24">¬P?</text>
+  <text x="211.5" y="100" font-size="11.5" fill="#946E24">¬P?</text>
+  <text x="347.5" y="100" font-size="11.5" fill="#946E24">¬P?</text>
+  <text x="519.3" y="100" font-size="11.5" fill="#922b21">¬P ✓ (bug)</text>
 </svg>
 *Caption: bounded model checking unrolls the transition relation $k$ times and asks whether the property can fail at any step.*
 
@@ -266,7 +266,7 @@ Run it live. The function is the counter's fourth encoding, and the guards line 
 Weaken the assertion to `s.x < 10` and re-run:
 
 ```text
-[main.assertion.1] line 56 assertion s.x < 10: FAILURE
+[main.assertion.1] file counter_check.c line 57 assertion s.x < 10: FAILURE
 
 State ... counter.c function counter_step
   prev_x = 9
@@ -584,18 +584,18 @@ SAW is the bridge from spec to real code. You compile the C to LLVM bitcode, and
 <svg viewBox="0 0 720 224" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="saw-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <rect x="28" y="32" width="246" height="66" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="151" y="58" text-anchor="middle" font-size="14" fill="#1c1c1c">C implementation</text>
-  <text x="151" y="78" text-anchor="middle" font-size="10.5" fill="#5b6168">clang → LLVM bitcode → symbolic exec</text>
+  <text x="91.4" y="58" font-size="14" fill="#1c1c1c">C implementation</text>
+  <text x="45.7" y="78" font-size="10.5" fill="#5b6168">clang → LLVM bitcode → symbolic exec</text>
   <rect x="446" y="32" width="246" height="66" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="569" y="58" text-anchor="middle" font-size="14" fill="#1c1c1c">Cryptol spec</text>
-  <text x="569" y="78" text-anchor="middle" font-size="10.5" fill="#5b6168">executable bit-level spec</text>
+  <text x="528.7" y="58" font-size="14" fill="#1c1c1c">Cryptol spec</text>
+  <text x="507.3" y="78" font-size="10.5" fill="#5b6168">executable bit-level spec</text>
   <line x1="151" y1="98" x2="320" y2="136" stroke="#5b6168" stroke-width="1.8" marker-end="url(#saw-ah)"/>
   <line x1="569" y1="98" x2="400" y2="136" stroke="#5b6168" stroke-width="1.8" marker-end="url(#saw-ah)"/>
-  <text x="360" y="120" text-anchor="middle" font-size="10.5" fill="#5b6168">each → a formula of the input bits</text>
+  <text x="270.3" y="120" font-size="10.5" fill="#5b6168">each → a formula of the input bits</text>
   <rect x="282" y="136" width="156" height="46" rx="10" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
-  <text x="360" y="164" text-anchor="middle" font-size="14" fill="#1c1c1c">=?   SMT solver</text>
-  <text x="250" y="208" text-anchor="middle" font-size="12.5" fill="#1e6b32">✓ equal on all inputs</text>
-  <text x="478" y="208" text-anchor="middle" font-size="12.5" fill="#922b21">✗ counterexample</text>
+  <text x="302.2" y="164" font-size="14" fill="#1c1c1c">=?   SMT solver</text>
+  <text x="184.5" y="208" font-size="12.5" fill="#1e6b32">✓ equal on all inputs</text>
+  <text x="427.5" y="208" font-size="12.5" fill="#922b21">✗ counterexample</text>
 </svg>
 *Caption: SAW turns both the compiled C and the Cryptol spec into formulas over the same symbolic input, then asks the solver if they are equal for every input.*
 
@@ -759,19 +759,19 @@ Each ReLU neuron is **piecewise-linear** — two linear pieces with a kink at 0:
 
 <svg viewBox="0 0 740 210" style="display:block;margin:0.3em auto;max-width:84%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="relu-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
-  <text x="170" y="30" text-anchor="middle" font-size="13" fill="#1c1c1c">ReLU(z) = max(0, z)</text>
+  <text x="104.8" y="30" font-size="13" fill="#1c1c1c">ReLU(z) = max(0, z)</text>
   <line x1="55" y1="165" x2="295" y2="165" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
   <line x1="135" y1="180" x2="135" y2="52" stroke="#9aa3ab" stroke-width="1.5" marker-end="url(#relu-ah)"/>
   <polyline points="60,165 135,165 250,78" fill="none" stroke="#B49248" stroke-width="2.6"/>
-  <text x="300" y="170" text-anchor="middle" font-size="12" fill="#5b6168">z</text>
-  <text x="170" y="200" text-anchor="middle" font-size="11.5" fill="#5b6168">two linear pieces, one kink</text>
+  <text x="296.9" y="170" font-size="12" fill="#5b6168">z</text>
+  <text x="90" y="200" font-size="11.5" fill="#5b6168">two linear pieces, one kink</text>
   <rect x="392" y="74" width="70" height="70" rx="6" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="427" y="162" text-anchor="middle" font-size="11" fill="#5b6168">input region</text>
+  <text x="394.9" y="162" font-size="11" fill="#5b6168">input region</text>
   <line x1="470" y1="108" x2="528" y2="108" stroke="#5b6168" stroke-width="1.8" marker-end="url(#relu-ah)"/>
-  <text x="499" y="98" text-anchor="middle" font-size="10.5" fill="#946E24">k ReLUs</text>
+  <text x="477.5" y="98" font-size="10.5" fill="#946E24">k ReLUs</text>
   <polygon points="620,60 633,88 664,92 641,113 647,143 620,128 593,143 599,113 576,92 607,88" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
-  <text x="620" y="170" text-anchor="middle" font-size="11.5" fill="#922b21">≤ 2ᵏ linear pieces</text>
-  <text x="620" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">(non-convex)</text>
+  <text x="567.4" y="170" font-size="11.5" fill="#922b21">≤ 2ᵏ linear pieces</text>
+  <text x="587.9" y="186" font-size="11.5" fill="#922b21">(non-convex)</text>
 </svg>
 *Caption: each ReLU splits the input region into an "active" and "inactive" half; with $k$ neurons that is up to $2^k$ linear regions.*
 
@@ -800,7 +800,7 @@ Both certify robustness the same way: **UNSAT** ⇒ no in-region input reaches a
 **A second axis — completeness vs. cost:** *incomplete* methods (bound propagation) are fast but may answer "**unknown**"; *complete* methods add **branch-and-bound** to always decide, at higher cost. Winners run cheap-first, branch only where needed.
 
 ::: notes
-The map of the field, in two columns, plus the orthogonal completeness/scalability axis the AAAI NN-verification tutorial organizes around. Incomplete verifiers (interval-bound propagation, CROWN's linear relaxation) are cheap and sound but one-sided — they prove robustness when bounds are tight enough, else return "unknown." Complete verifiers guarantee a yes/no by branching (β-CROWN splits ReLUs into on/off cases) or by exact reachability (NNV splits the set at each kink); they always decide but cost more. The practical art, and what α,β-CROWN does to win VNN-COMP, is to run the cheap incomplete pass first and invoke branch-and-bound only on the neurons that remain ambiguous. Same completeness/scalability trade-off as everywhere else in the week (BMC vs k-induction; testing vs proof). The map of the field, in two columns. Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and our own group's approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The unifying point across them, and the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
+The map of the field, in two columns, plus the orthogonal completeness/scalability axis the AAAI NN-verification tutorial organizes around. Incomplete verifiers (interval-bound propagation, CROWN's linear relaxation) are cheap and sound but one-sided — they prove robustness when bounds are tight enough, else return "unknown." Complete verifiers guarantee a yes/no by branching (β-CROWN splits ReLUs into on/off cases) or by exact reachability (NNV splits the set at each kink); they always decide but cost more. The practical art, and what α,β-CROWN does to win VNN-COMP, is to run the cheap incomplete pass first and invoke branch-and-bound only on the neurons that remain ambiguous. Same completeness/scalability trade-off as everywhere else in the week (BMC vs k-induction; testing vs proof). Family (a), bound propagation with branch-and-bound, is the optimization lineage: replace each troublesome ReLU with a cheap linear over-approximation ("envelope"), compute guaranteed lower/upper bounds on the output, and if those bounds are too loose to decide robustness, branch — split a neuron into its on/off cases and recurse, tightening as you go. α,β-CROWN is the leading exemplar and the repeat VNN-COMP winner. Family (b), set-based reachability, is the model-checking lineage and our own group's approach: represent a whole set of inputs symbolically and push it through the network layer by layer (affine map then activation), then check the resulting output set against the unsafe region — literally reachability analysis where the transition relation is the network. The unifying point across them, and the whole week: both reduce robustness to an emptiness/UNSAT check — show no input in the ball can produce a misclassifying output.
 :::
 
 ---
@@ -836,7 +836,7 @@ The blow-up is real — so the *representation* of the set is everything. NNV us
   <polygon points="370,120 300,212 160,212 90,120 160,28 300,28" fill="#f1f1f1" stroke="#9aa3ab" stroke-width="1.8"/>
   <polygon points="330,120 286,184 174,184 130,120 174,56 286,56" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <polygon points="230,80 286,118 264,176 196,176 174,118" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="230" y="128" text-anchor="middle" font-size="12.5" fill="#1c1c1c">star set</text>
+  <text x="207.9" y="128" font-size="12.5" fill="#1c1c1c">star set</text>
   <rect x="40" y="244" width="16" height="16" rx="3" fill="#faf7f0" stroke="#B49248" stroke-width="1.6"/>
   <text x="64" y="257" font-size="12" fill="#1c1c1c">star set — tightest (least conservative)</text>
   <rect x="40" y="266" width="16" height="16" rx="3" fill="#f6eeda" stroke="#B49248" stroke-width="1.6"/>

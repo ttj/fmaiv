@@ -220,20 +220,20 @@ This is the deliverable. The workshop is short — four days — so we will cove
 <svg viewBox="0 0 920 300" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="vtri-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <rect x="24" y="46" width="206" height="62" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="127" y="72" text-anchor="middle" font-size="17" font-weight="600" fill="#1c1c1c">Model</text>
-  <text x="127" y="93" text-anchor="middle" font-size="12.5" fill="#946E24">what the system is</text>
+  <text x="103.9" y="72" font-size="17" font-weight="600" fill="#1c1c1c">Model</text>
+  <text x="67.6" y="93" font-size="12.5" fill="#946E24">what the system is</text>
   <rect x="24" y="168" width="206" height="62" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="127" y="194" text-anchor="middle" font-size="17" font-weight="600" fill="#6b531f">Specification</text>
-  <text x="127" y="215" text-anchor="middle" font-size="12.5" fill="#7a6334">what correct means</text>
+  <text x="72.1" y="194" font-size="17" font-weight="600" fill="#6b531f">Specification</text>
+  <text x="69.2" y="215" font-size="12.5" fill="#7a6334">what correct means</text>
   <rect x="384" y="104" width="168" height="84" rx="8" fill="#f5f3ef" stroke="#5b6168" stroke-width="2.4"/>
-  <text x="468" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#1c1c1c">Verifier</text>
-  <text x="468" y="162" text-anchor="middle" font-size="11.5" fill="#5b6168">solver · model checker · prover</text>
+  <text x="435.2" y="140" font-size="18" font-weight="700" fill="#1c1c1c">Verifier</text>
+  <text x="379.3" y="162" font-size="11.5" fill="#5b6168">solver · model checker · prover</text>
   <rect x="690" y="40" width="208" height="64" rx="8" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="794" y="66" text-anchor="middle" font-size="16" font-weight="600" fill="#1c6b30">&#10003; Verified</text>
-  <text x="794" y="87" text-anchor="middle" font-size="12.5" fill="#2f6b40">proof / certificate</text>
+  <text x="752.2" y="66" font-size="16" font-weight="600" fill="#1c6b30">&#10003; Verified</text>
+  <text x="741.4" y="87" font-size="12.5" fill="#2f6b40">proof / certificate</text>
   <rect x="690" y="176" width="208" height="64" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
-  <text x="794" y="202" text-anchor="middle" font-size="16" font-weight="600" fill="#922b21">&#10007; Counterexample</text>
-  <text x="794" y="223" text-anchor="middle" font-size="12.5" fill="#9c4036">a concrete bug trace</text>
+  <text x="728.2" y="202" font-size="16" font-weight="600" fill="#922b21">&#10007; Counterexample</text>
+  <text x="733.8" y="223" font-size="12.5" fill="#9c4036">a concrete bug trace</text>
   <line x1="230" y1="74" x2="378" y2="128" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
   <line x1="230" y1="200" x2="378" y2="166" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
   <line x1="552" y1="132" x2="684" y2="74" stroke="#5b6168" stroke-width="1.8" marker-end="url(#vtri-ah)"/>
@@ -872,19 +872,19 @@ The four-clause case analysis is the same case analysis we'll see in C (Day 4), 
     </marker>
   </defs>
   <line x1="56" y1="160" x2="124" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="90" y="150" text-anchor="middle" font-size="12" fill="#5b6168">init x = 0</text>
+  <text x="58.7" y="150" font-size="12" fill="#5b6168">init x = 0</text>
   <path d="M165,120 C152,76 228,76 215,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="190" y="66" text-anchor="middle" font-size="12.5" fill="#946E24">¬press / x′ := x</text>
+  <text x="138.2" y="66" font-size="12.5" fill="#946E24">¬press / x′ := x</text>
   <path d="M535,120 C522,74 598,74 585,120" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="560" y="64" text-anchor="middle" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10 / x′ := x+1</text>
+  <text x="469.3" y="64" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10 / x′ := x+1</text>
   <line x1="252" y1="160" x2="497" y2="160" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="375" y="151" text-anchor="middle" font-size="13" fill="#946E24">press / x′ := x</text>
+  <text x="325.1" y="151" font-size="13" fill="#946E24">press / x′ := x</text>
   <path d="M520,204 Q375,286 236,206" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#sym-ah)"/>
-  <text x="375" y="276" text-anchor="middle" font-size="12.5" fill="#946E24">press ∨ x ≥ 10 / x′ := 0</text>
+  <text x="295.1" y="276" font-size="12.5" fill="#946E24">press ∨ x ≥ 10 / x′ := 0</text>
   <ellipse cx="190" cy="160" rx="62" ry="42" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="190" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">off</text>
+  <text x="179.9" y="166" font-size="18" fill="#1c1c1c">off</text>
   <ellipse cx="560" cy="160" rx="62" ry="42" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="560" y="166" text-anchor="middle" font-size="18" fill="#1c1c1c">on</text>
+  <text x="550.6" y="166" font-size="18" fill="#1c1c1c">on</text>
 </svg>
 
 Two control modes; the count `x` stays a **variable**. Each edge is **guard / update** — exactly the symbolic transition relation $\varphi_T$ over $(s, s')$. The *next* slide "unrolls" this into explicit states by enumerating `x = 0, 1, …, 10`.
@@ -904,28 +904,28 @@ This is the abstract/symbolic view a model checker actually reasons about: the c
     </marker>
   </defs>
   <line x1="20" y1="150" x2="60" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="40" y="142" text-anchor="middle" font-size="12" fill="#5b6168">start</text>
+  <text x="28.4" y="142" font-size="12" fill="#5b6168">start</text>
   <path d="M720,126 L720,64 L114,64 L114,126" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="417" y="56" text-anchor="middle" font-size="13" fill="#946E24">press ∨ x ≥ 10</text>
+  <text x="368.6" y="56" font-size="13" fill="#946E24">press ∨ x ≥ 10</text>
   <path d="M94,176 C74,232 154,232 134,176" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="114" y="244" text-anchor="middle" font-size="12" fill="#946E24">¬press</text>
+  <text x="96.1" y="244" font-size="12" fill="#946E24">¬press</text>
   <line x1="166" y1="150" x2="276" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="221" y="142" text-anchor="middle" font-size="13" fill="#946E24">press</text>
+  <text x="205.5" y="142" font-size="13" fill="#946E24">press</text>
   <line x1="382" y1="150" x2="450" y2="150" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah)"/>
-  <text x="416" y="120" text-anchor="middle" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10</text>
+  <text x="365.7" y="120" font-size="12.5" fill="#946E24">¬press ∧ x &lt; 10</text>
   <line x1="554" y1="150" x2="668" y2="150" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ah)"/>
   <rect x="62" y="126" width="104" height="48" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="114" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">off, 0</text>
+  <text x="90.2" y="156" font-size="17" fill="#1c1c1c">off, 0</text>
   <rect x="278" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="330" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 0</text>
+  <text x="306.9" y="156" font-size="17" fill="#1c1c1c">on, 0</text>
   <rect x="450" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="502" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 1</text>
-  <text x="612" y="160" text-anchor="middle" font-size="26" fill="#5b6168">⋯</text>
+  <text x="478.9" y="156" font-size="17" fill="#1c1c1c">on, 1</text>
+  <text x="598.4" y="160" font-size="26" fill="#5b6168">⋯</text>
   <rect x="668" y="126" width="104" height="48" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="720" y="156" text-anchor="middle" font-size="17" fill="#1c1c1c">on, 10</text>
+  <text x="692.2" y="156" font-size="17" fill="#1c1c1c">on, 10</text>
 </svg>
 
-This **unrolls** the symbolic machine above: `x` becomes part of the state. The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Five drawn states stand in for the twelve reachable ones.
+This **unrolls** the symbolic machine above: `x` becomes part of the state. The initial state `off, 0` (gold); `on, 0 … on, 10` count up under `¬press`; `press` or `x = 10` returns to `off`. Four drawn states stand in for the twelve reachable ones.
 
 ::: notes
 The same transition relation, drawn as a state machine. This is exactly what nuXmv builds internally on Day 2 and what Lean reasons about by induction on Day 3. The chain structure (count up, then reset) is the running example for the inductive-invariant method on Day 3 (here `x ≤ 10` is already inductive thanks to the `x < 10` guard; the deeper "strengthen a too-weak invariant" lesson uses a separate two-counter example).
@@ -961,16 +961,16 @@ We could verify by hand because the *reachable* state space is finite and small.
 
 <svg viewBox="0 0 680 330" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
   <ellipse cx="310" cy="180" rx="300" ry="144" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.8"/>
-  <text x="310" y="20" text-anchor="middle" font-size="15" fill="#5b6168">all states S — infinite (mode × ℕ)</text>
+  <text x="182.9" y="20" font-size="15" fill="#5b6168">all states S — infinite (mode × ℕ)</text>
   <ellipse cx="252" cy="186" rx="218" ry="118" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="232" y="96" text-anchor="middle" font-size="15" fill="#946E24">reachable — 12</text>
+  <text x="179.3" y="96" font-size="15" fill="#946E24">reachable — 12</text>
   <ellipse cx="200" cy="200" rx="132" ry="72" fill="#efe1c0" stroke="#946E24" stroke-width="2"/>
-  <text x="200" y="190" text-anchor="middle" font-size="14" fill="#946E24">reachable in ≤ N steps</text>
-  <text x="200" y="212" text-anchor="middle" font-size="11.5" fill="#946E24">(what BMC explores)</text>
+  <text x="121.9" y="190" font-size="14" fill="#946E24">reachable in ≤ N steps</text>
+  <text x="143.5" y="212" font-size="11.5" fill="#946E24">(what BMC explores)</text>
   <circle cx="565" cy="150" r="9" fill="#c0392b"/>
-  <text x="565" y="131" text-anchor="middle" font-size="13.5" fill="#922b21">x = 11</text>
-  <text x="565" y="180" text-anchor="middle" font-size="11.5" fill="#922b21">bad &amp;</text>
-  <text x="565" y="196" text-anchor="middle" font-size="11.5" fill="#922b21">unreachable</text>
+  <text x="542.4" y="131" font-size="13.5" fill="#922b21">x = 11</text>
+  <text x="549.6" y="180" font-size="11.5" fill="#922b21">bad &amp;</text>
+  <text x="534.6" y="196" font-size="11.5" fill="#922b21">unreachable</text>
 </svg>
 
 - **All states** (infinite): every $(\text{mode}, x)$ pair you could write down ($x \in \mathbb{N}$).
@@ -1125,21 +1125,21 @@ Solve $\varphi = (p \vee q) \wedge (\neg p \vee q) \wedge (p \vee \neg q)$. Deci
     </marker>
   </defs>
   <line x1="360" y1="58" x2="175" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
-  <text x="240" y="78" text-anchor="middle" font-size="13" fill="#946E24">p = ⊥</text>
+  <text x="221.8" y="78" font-size="13" fill="#946E24">p = ⊥</text>
   <line x1="360" y1="58" x2="545" y2="102" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
-  <text x="480" y="78" text-anchor="middle" font-size="13" fill="#946E24">p = ⊤</text>
+  <text x="461.8" y="78" font-size="13" fill="#946E24">p = ⊤</text>
   <line x1="175" y1="146" x2="175" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
   <line x1="545" y1="146" x2="545" y2="190" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ah2)"/>
   <rect x="300" y="14" width="120" height="44" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
-  <text x="360" y="41" text-anchor="middle" font-size="15" fill="#1c1c1c">decide p</text>
+  <text x="328.5" y="41" font-size="15" fill="#1c1c1c">decide p</text>
   <rect x="85" y="102" width="180" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="175" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
+  <text x="127.9" y="129" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
   <rect x="103" y="190" width="144" height="44" rx="9" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
-  <text x="175" y="217" text-anchor="middle" font-size="14" fill="#922b21">✗ conflict</text>
+  <text x="142.7" y="217" font-size="14" fill="#922b21">✗ conflict</text>
   <rect x="455" y="102" width="180" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="545" y="129" text-anchor="middle" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
+  <text x="497.9" y="129" font-size="14" fill="#1c1c1c">unit ⇒ q = ⊤</text>
   <rect x="463" y="190" width="164" height="44" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="545" y="217" text-anchor="middle" font-size="13.5" fill="#1e6b32">✓ SAT: p = q = ⊤</text>
+  <text x="480.9" y="217" font-size="13.5" fill="#1e6b32">✓ SAT: p = q = ⊤</text>
 </svg>
 
 - $p = \bot$: clause $(p \vee q)$ forces $q = \top$ → now $(p \vee \neg q)$ has all literals false: **conflict**, backtrack.
@@ -1197,20 +1197,20 @@ Empty clause derived $\Rightarrow$ **UNSAT**. This is a checkable certificate: a
   <defs><marker id="res-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="92" y1="62" x2="188" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
   <line x1="240" y1="62" x2="222" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
-  <text x="128" y="96" text-anchor="middle" font-size="11.5" fill="#946E24">resolve p</text>
+  <text x="103.4" y="96" font-size="11.5" fill="#946E24">resolve p</text>
   <line x1="210" y1="158" x2="318" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
   <line x1="446" y1="62" x2="364" y2="202" stroke="#5b6168" stroke-width="1.6" marker-end="url(#res-ah)"/>
-  <text x="300" y="186" text-anchor="middle" font-size="11.5" fill="#946E24">resolve q</text>
+  <text x="275.4" y="186" font-size="11.5" fill="#946E24">resolve q</text>
   <rect x="52" y="24" width="78" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="91" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(p)</text>
+  <text x="83.2" y="48" font-size="14" fill="#1c1c1c">(p)</text>
   <rect x="180" y="24" width="120" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="240" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬p ∨ q)</text>
+  <text x="212.3" y="48" font-size="14" fill="#1c1c1c">(¬p ∨ q)</text>
   <rect x="400" y="24" width="92" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="446" y="48" text-anchor="middle" font-size="14" fill="#1c1c1c">(¬q)</text>
+  <text x="434" y="48" font-size="14" fill="#1c1c1c">(¬q)</text>
   <rect x="170" y="118" width="80" height="38" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="210" y="142" text-anchor="middle" font-size="14" fill="#1c1c1c">(q)</text>
+  <text x="202.2" y="142" font-size="14" fill="#1c1c1c">(q)</text>
   <rect x="296" y="204" width="92" height="40" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
-  <text x="342" y="230" text-anchor="middle" font-size="13.5" fill="#922b21">▢ empty</text>
+  <text x="316.1" y="230" font-size="13.5" fill="#922b21">▢ empty</text>
 </svg>
 
 *A resolution derivation: each node is a clause; the two parents resolve away one variable; reaching the empty clause $\square$ certifies UNSAT.*
@@ -1293,21 +1293,21 @@ Decide $\;a=b,\ b=c,\ d=e,\ b=s,\ d=t,\ f(a, g(d)) \ne f(b, g(e))$:
     </marker>
   </defs>
   <line x1="625" y1="88" x2="625" y2="130" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
-  <text x="700" y="114" text-anchor="middle" font-size="11.5" fill="#946E24">congruence: d = e</text>
+  <text x="649.1" y="114" font-size="11.5" fill="#946E24">congruence: d = e</text>
   <line x1="160" y1="88" x2="320" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
   <line x1="560" y1="178" x2="450" y2="228" stroke="#5b6168" stroke-width="1.6" marker-end="url(#euf-ah)"/>
-  <text x="300" y="200" text-anchor="middle" font-size="11.5" fill="#946E24">congruence: a = b, g(d) = g(e)</text>
+  <text x="213.9" y="200" font-size="11.5" fill="#946E24">congruence: a = b, g(d) = g(e)</text>
   <rect x="50" y="44" width="200" height="44" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="150" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ a, b, c, s }</text>
-  <text x="150" y="34" text-anchor="middle" font-size="11" fill="#5b6168">a=b, b=c, b=s</text>
+  <text x="96.3" y="71" font-size="15" fill="#1c1c1c">{ a, b, c, s }</text>
+  <text x="110.6" y="34" font-size="11" fill="#5b6168">a=b, b=c, b=s</text>
   <rect x="540" y="44" width="170" height="44" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="625" y="71" text-anchor="middle" font-size="15" fill="#1c1c1c">{ d, e, t }</text>
-  <text x="625" y="34" text-anchor="middle" font-size="11" fill="#5b6168">d=e, d=t</text>
+  <text x="585.2" y="71" font-size="15" fill="#1c1c1c">{ d, e, t }</text>
+  <text x="602" y="34" font-size="11" fill="#5b6168">d=e, d=t</text>
   <rect x="540" y="134" width="170" height="44" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="625" y="161" text-anchor="middle" font-size="15" fill="#1c1c1c">{ g(d), g(e) }</text>
+  <text x="579.1" y="161" font-size="15" fill="#1c1c1c">{ g(d), g(e) }</text>
   <rect x="225" y="228" width="310" height="44" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="380" y="255" text-anchor="middle" font-size="14.5" fill="#1c1c1c">{ f(a,g(d)), f(b,g(e)) }</text>
-  <text x="690" y="255" text-anchor="middle" font-size="14" fill="#922b21" font-weight="bold">⇒ UNSAT</text>
+  <text x="306.9" y="255" font-size="14.5" fill="#1c1c1c">{ f(a,g(d)), f(b,g(e)) }</text>
+  <text x="656.3" y="255" font-size="14" fill="#922b21" font-weight="bold">⇒ UNSAT</text>
 </svg>
 
 The asserted $f(a,g(d)) \ne f(b,g(e))$ lands *inside* the gold class — contradiction.
@@ -1345,16 +1345,16 @@ This is the loop we describe in the "Adding the Theory Solvers" slide: theory at
 <svg viewBox="0 0 720 210" style="display:block;margin:0.3em auto;max-width:84%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="dpllt-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="284" y1="84" x2="436" y2="84" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
-  <text x="360" y="74" text-anchor="middle" font-size="11.5" fill="#946E24">propose: p₁ = p₂ = p₃ = ⊤</text>
+  <text x="285.1" y="74" font-size="11.5" fill="#946E24">propose: p₁ = p₂ = p₃ = ⊤</text>
   <line x1="436" y1="132" x2="284" y2="132" stroke="#5b6168" stroke-width="1.8" marker-end="url(#dpllt-ah)"/>
-  <text x="360" y="150" text-anchor="middle" font-size="11.5" fill="#922b21">T-conflict: learn ¬p₁ ∨ ¬p₂ ∨ ¬p₃</text>
+  <text x="266.3" y="150" font-size="11.5" fill="#922b21">T-conflict: learn ¬p₁ ∨ ¬p₂ ∨ ¬p₃</text>
   <rect x="40" y="68" width="244" height="80" rx="10" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="162" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">SAT engine (Boolean DPLL)</text>
-  <text x="162" y="120" text-anchor="middle" font-size="12" fill="#5b6168">clauses { p₁, p₂, p₃ }</text>
+  <text x="66.9" y="96" font-size="14" fill="#1c1c1c">SAT engine (Boolean DPLL)</text>
+  <text x="97.8" y="120" font-size="12" fill="#5b6168">clauses { p₁, p₂, p₃ }</text>
   <rect x="436" y="68" width="244" height="80" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="558" y="96" text-anchor="middle" font-size="14" fill="#1c1c1c">theory solver</text>
-  <text x="558" y="118" text-anchor="middle" font-size="12" fill="#5b6168">linear real arithmetic (simplex)</text>
-  <text x="558" y="186" text-anchor="middle" font-size="11.5" fill="#922b21">x ≥ 0 ∧ y ≥ 0 ∧ x+y &lt; 0 : UNSAT over ℝ</text>
+  <text x="516.6" y="96" font-size="14" fill="#1c1c1c">theory solver</text>
+  <text x="466.6" y="118" font-size="12" fill="#5b6168">linear real arithmetic (simplex)</text>
+  <text x="434" y="186" font-size="11.5" fill="#922b21">x ≥ 0 ∧ y ≥ 0 ∧ x+y &lt; 0 : UNSAT over ℝ</text>
 </svg>
 
 The SAT engine and the theory solver pass messages until they agree:
@@ -1597,36 +1597,36 @@ This is the single most important idea in the SMT half of the day: declarative, 
 <line x1="8" y1="176" x2="260" y2="176" stroke="#1c1c1c" stroke-width="2.6"/>
 <line x1="260" y1="8" x2="260" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
 <line x1="8" y1="260" x2="260" y2="260" stroke="#1c1c1c" stroke-width="2.6"/>
-<text x="22" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
-<text x="50" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
-<text x="134" y="22" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
-<text x="22" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
-<text x="106" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
-<text x="134" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
-<text x="162" y="50" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
-<text x="50" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
-<text x="78" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
-<text x="218" y="78" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
-<text x="22" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
-<text x="134" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
-<text x="246" y="106" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
-<text x="22" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
-<text x="106" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
-<text x="162" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
-<text x="246" y="134" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
-<text x="22" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
-<text x="134" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
-<text x="246" y="162" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
-<text x="50" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
-<text x="190" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
-<text x="218" y="190" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
-<text x="106" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
-<text x="134" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
-<text x="162" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
-<text x="246" y="218" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
-<text x="134" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
-<text x="218" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
-<text x="246" y="246" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="17.3" y="22" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="45.3" y="22" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="129.3" y="22" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="17.3" y="50" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="101.3" y="50" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="129.3" y="50" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="157.3" y="50" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="45.3" y="78" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="73.3" y="78" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="213.3" y="78" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="17.3" y="106" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="129.3" y="106" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="241.3" y="106" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="17.3" y="134" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
+<text x="101.3" y="134" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="157.3" y="134" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">3</text>
+<text x="241.3" y="134" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="17.3" y="162" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="129.3" y="162" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
+<text x="241.3" y="162" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="45.3" y="190" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">6</text>
+<text x="185.3" y="190" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">2</text>
+<text x="213.3" y="190" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="101.3" y="218" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">4</text>
+<text x="129.3" y="218" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">1</text>
+<text x="157.3" y="218" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
+<text x="241.3" y="218" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">5</text>
+<text x="129.3" y="246" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">8</text>
+<text x="213.3" y="246" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">7</text>
+<text x="241.3" y="246" dominant-baseline="central" font-size="17" font-weight="700" fill="#1c1c1c">9</text>
 </svg>
 
 The `Distinct` version is SMT *syntactic sugar*. In **pure SAT** there are no integers — only Booleans (this is the classic Rosen encoding, and what bit-blasting produces internally):
@@ -1687,33 +1687,33 @@ This is the heart of the Week-8 "BMC as a SAT/SMT problem" slides, made explicit
 <svg viewBox="0 0 620 184" style="display:block;margin:0.3em auto;max-width:76%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="bmc1-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="8" y1="46" x2="32" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
-  <text x="20" y="37" text-anchor="middle" font-size="11.5" fill="#5b6168">I</text>
+  <text x="18.3" y="37" font-size="11.5" fill="#5b6168">I</text>
   <line x1="116" y1="46" x2="154" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
-  <text x="135" y="37" text-anchor="middle" font-size="12" fill="#946E24">T</text>
+  <text x="131" y="37" font-size="12" fill="#946E24">T</text>
   <line x1="238" y1="46" x2="276" y2="46" stroke="#5b6168" stroke-width="1.8" marker-end="url(#bmc1-ah)"/>
-  <text x="257" y="37" text-anchor="middle" font-size="12" fill="#946E24">T</text>
+  <text x="253" y="37" font-size="12" fill="#946E24">T</text>
   <line x1="360" y1="46" x2="438" y2="46" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#bmc1-ah)"/>
-  <text x="399" y="38" text-anchor="middle" font-size="16" fill="#5b6168">⋯</text>
+  <text x="390.6" y="38" font-size="16" fill="#5b6168">⋯</text>
   <rect x="34" y="26" width="82" height="40" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="75" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₀</text>
+  <text x="68.6" y="52" font-size="14" fill="#1c1c1c">s₀</text>
   <rect x="156" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="197" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₁</text>
+  <text x="190.6" y="52" font-size="14" fill="#1c1c1c">s₁</text>
   <rect x="278" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="319" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s₂</text>
+  <text x="312.6" y="52" font-size="14" fill="#1c1c1c">s₂</text>
   <rect x="440" y="26" width="82" height="40" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="481" y="52" text-anchor="middle" font-size="14" fill="#1c1c1c">s_k</text>
+  <text x="469.8" y="52" font-size="14" fill="#1c1c1c">s_k</text>
   <line x1="75" y1="66" x2="75" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="197" y1="66" x2="197" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="319" y1="66" x2="319" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
   <line x1="481" y1="66" x2="481" y2="98" stroke="#9aa3ab" stroke-width="1.4" stroke-dasharray="4 3"/>
-  <text x="75" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
-  <text x="197" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
-  <text x="319" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
-  <text x="481" y="112" text-anchor="middle" font-size="11" fill="#946E24">¬p?</text>
+  <text x="65.8" y="112" font-size="11" fill="#946E24">¬p?</text>
+  <text x="187.8" y="112" font-size="11" fill="#946E24">¬p?</text>
+  <text x="309.8" y="112" font-size="11" fill="#946E24">¬p?</text>
+  <text x="471.8" y="112" font-size="11" fill="#946E24">¬p?</text>
   <line x1="75" y1="120" x2="481" y2="120" stroke="#5b6168" stroke-width="1.4"/>
   <line x1="278" y1="120" x2="278" y2="142" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bmc1-ah)"/>
   <rect x="150" y="142" width="256" height="32" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
-  <text x="278" y="163" text-anchor="middle" font-size="12.5" fill="#922b21">⋁ ¬p(sᵢ)?  →  SAT = a real bad path</text>
+  <text x="162.4" y="163" font-size="12.5" fill="#922b21">⋁ ¬p(sᵢ)?  →  SAT = a real bad path</text>
 </svg>
 
 *Every step is a fresh copy of the state variables; $T$ chains them; the property $p$ is tested at each copy, and the $\bigvee$ asks "did it fail anywhere?"*

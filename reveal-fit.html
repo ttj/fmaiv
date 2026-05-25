@@ -14,12 +14,22 @@
     var cfg = (window.Reveal && Reveal.getConfig) ? Reveal.getConfig() : {};
     var H = cfg.height || 720, pad = 8;
     s.style.transform = '';                             // reset before measuring
+    s.style.zoom = '';
     s.style.transformOrigin = 'top center';
     var sh = s.scrollHeight, sw = s.scrollWidth, cw = s.clientWidth;
     var scaleH = sh > (H - pad) ? (H - pad) / sh : 1;   // taller than the slide
     var scaleW = sw > cw        ? cw / sw         : 1;   // wider than its box
     var scale = Math.min(scaleH, scaleW);
-    if (scale < 1) s.style.transform = 'scale(' + Math.max(0.3, scale) + ')';
+    if (scale < 1) {
+      scale = Math.max(0.3, scale);
+      // Chromium mis-places SVG <text> when an ancestor carries a CSS
+      // transform in RevealJS's print-pdf (decktape) path — labels drift off
+      // their shapes. Slides with inline SVG fit via `zoom` (layout scaling,
+      // no transform) which is immune; text-only slides keep `transform`
+      // (unchanged; centered via transform-origin).
+      if (s.querySelector('svg')) s.style.zoom = scale;
+      else s.style.transform = 'scale(' + scale + ')';
+    }
   }
   function fitAll() {
     document.querySelectorAll('.reveal .slides section').forEach(fitOne);

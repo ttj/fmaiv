@@ -300,26 +300,26 @@ These show the range of SMV modeling. The four original files (counter, traffic_
     </marker>
   </defs>
   <line x1="200" y1="129" x2="268" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
-  <text x="234" y="120" text-anchor="middle" font-size="12.5" fill="#946E24">timer = 4</text>
+  <text x="204.2" y="120" font-size="12.5" fill="#946E24">timer = 4</text>
   <line x1="440" y1="129" x2="508" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
-  <text x="474" y="120" text-anchor="middle" font-size="12.5" fill="#946E24">1 tick</text>
+  <text x="455.4" y="120" font-size="12.5" fill="#946E24">1 tick</text>
   <line x1="680" y1="129" x2="748" y2="129" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
-  <text x="714" y="120" text-anchor="middle" font-size="12.5" fill="#946E24">timer = 2</text>
+  <text x="684.1" y="120" font-size="12.5" fill="#946E24">timer = 2</text>
   <path d="M835,100 L835,50 L115,50 L115,100" fill="none" stroke="#5b6168" stroke-width="1.8" marker-end="url(#tl-ah)"/>
-  <text x="475" y="42" text-anchor="middle" font-size="12.5" fill="#946E24">1 tick (cycle repeats)</text>
+  <text x="410.8" y="42" font-size="12.5" fill="#946E24">1 tick (cycle repeats)</text>
   <rect x="30" y="100" width="170" height="58" rx="10" fill="#e7f6ec" stroke="#27843f" stroke-width="2"/>
-  <text x="115" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: green</text>
-  <text x="115" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: red</text>
+  <text x="72.1" y="124" font-size="14.5" fill="#1c1c1c">main: green</text>
+  <text x="82.1" y="145" font-size="14.5" fill="#1c1c1c">side: red</text>
   <rect x="270" y="100" width="170" height="58" rx="10" fill="#fbf3df" stroke="#B49248" stroke-width="2"/>
-  <text x="355" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: yellow</text>
-  <text x="355" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: red</text>
+  <text x="307.4" y="124" font-size="14.5" fill="#1c1c1c">main: yellow</text>
+  <text x="322.1" y="145" font-size="14.5" fill="#1c1c1c">side: red</text>
   <rect x="510" y="100" width="170" height="58" rx="10" fill="#e7f6ec" stroke="#27843f" stroke-width="2"/>
-  <text x="595" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: red</text>
-  <text x="595" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: green</text>
+  <text x="559.6" y="124" font-size="14.5" fill="#1c1c1c">main: red</text>
+  <text x="554.5" y="145" font-size="14.5" fill="#1c1c1c">side: green</text>
   <rect x="750" y="100" width="170" height="58" rx="10" fill="#fbf3df" stroke="#B49248" stroke-width="2"/>
-  <text x="835" y="124" text-anchor="middle" font-size="14.5" fill="#1c1c1c">main: red</text>
-  <text x="835" y="145" text-anchor="middle" font-size="14.5" fill="#1c1c1c">side: yellow</text>
-  <text x="115" y="182" text-anchor="middle" font-size="11.5" fill="#5b6168">▲ initial</text>
+  <text x="799.6" y="124" font-size="14.5" fill="#1c1c1c">main: red</text>
+  <text x="789.9" y="145" font-size="14.5" fill="#1c1c1c">side: yellow</text>
+  <text x="88.5" y="182" font-size="11.5" fill="#5b6168">▲ initial</text>
 </svg>
 
 Four phases cycle in order; the `timer` counts ticks within each phase. Exactly one direction is ever non-red, so the safety invariants — never two greens, never two yellows — are intended to hold; we confirm them with nuXmv.
@@ -465,21 +465,21 @@ Notation on the next slides: `(ρ, n) ⊨ φ` reads "trace `ρ` at position `n` 
   <circle cx="481" cy="30" r="7" fill="#B49248"/>
   <circle cx="587" cy="30" r="7" fill="#ffffff" stroke="#5b6168" stroke-width="1.6"/>
   <circle cx="693" cy="30" r="7" fill="#B49248"/>
-  <rect x="16"  y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="57"  y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">off</text>
-  <rect x="122" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="163" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
-  <rect x="228" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="269" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
-  <rect x="334" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="375" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
-  <rect x="440" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="481" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
-  <rect x="546" y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="587" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">off</text>
-  <rect x="652" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="693" y="68" text-anchor="middle" font-size="13.5" fill="#1c1c1c">on</text>
-  <text x="57"  y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₀</text>
-  <text x="163" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₁</text>
-  <text x="269" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₂</text>
-  <text x="375" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₃</text>
-  <text x="481" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₄</text>
-  <text x="587" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₅</text>
-  <text x="693" y="100" text-anchor="middle" font-size="12" fill="#5b6168">s₆ ⋯</text>
-  <text x="57"  y="124" text-anchor="middle" font-size="11.5" fill="#946E24">▲ you are here</text>
+  <rect x="16"  y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="49.4"  y="68" font-size="13.5" fill="#1c1c1c">off</text>
+  <rect x="122" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="156" y="68" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="228" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="262" y="68" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="334" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="368" y="68" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="440" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="474" y="68" font-size="13.5" fill="#1c1c1c">on</text>
+  <rect x="546" y="46" width="82" height="34" rx="8" fill="#faf7f0" stroke="#B49248" stroke-width="2"/><text x="579.4" y="68" font-size="13.5" fill="#1c1c1c">off</text>
+  <rect x="652" y="46" width="82" height="34" rx="8" fill="#f6eeda" stroke="#B49248" stroke-width="2"/><text x="686" y="68" font-size="13.5" fill="#1c1c1c">on</text>
+  <text x="51.5"  y="100" font-size="12" fill="#5b6168">s₀</text>
+  <text x="157.5" y="100" font-size="12" fill="#5b6168">s₁</text>
+  <text x="263.5" y="100" font-size="12" fill="#5b6168">s₂</text>
+  <text x="369.5" y="100" font-size="12" fill="#5b6168">s₃</text>
+  <text x="474.5" y="100" font-size="12" fill="#5b6168">s₄</text>
+  <text x="580.5" y="100" font-size="12" fill="#5b6168">s₅</text>
+  <text x="676.9" y="100" font-size="12" fill="#5b6168">s₆ ⋯</text>
+  <text x="15.1"  y="124" font-size="11.5" fill="#946E24">▲ you are here</text>
 </svg>
 
 Caption: the same run, drawn as a timeline — every LTL operator below is read off this picture.
@@ -601,8 +601,8 @@ That is why model checking decides $G\,p$, $F\,G\,p$, "infinitely often," etc., 
   <circle cx="440" cy="70" r="18" fill="#efe1c0" stroke="#946E24" stroke-width="2"/>
   <circle cx="440" cy="150" r="18" fill="#efe1c0" stroke="#946E24" stroke-width="2"/>
   <circle cx="300" cy="150" r="18" fill="#efe1c0" stroke="#946E24" stroke-width="2"/>
-  <text x="120" y="170" text-anchor="middle" font-size="12.5" fill="#5b6168">stem</text>
-  <text x="370" y="200" text-anchor="middle" font-size="12.5" fill="#946E24">cycle (repeats forever)</text>
+  <text x="106.2" y="170" font-size="12.5" fill="#5b6168">stem</text>
+  <text x="305.8" y="200" font-size="12.5" fill="#946E24">cycle (repeats forever)</text>
 </svg>
 
 Caption: every infinite run through finitely many states is a lasso — a stem into a repeating cycle — which is what makes infinite-time properties decidable.
@@ -698,7 +698,7 @@ Splitting a temporal operator across a connective changes the meaning.
 - `F p & F q` — `p` happens *sometime*, `q` happens *sometime* — possibly at **different** positions.
 - `F (p & q)` — `p` and `q` true at the **same** position.
 
-On the trace `x = 0,1,0,1,0,1,\dots`: `F(x=0) & F(x=1)` holds, but `F(x=0 & x=1)` is impossible. The first is **strictly weaker**.
+On the trace `x = 0,1,0,1,0,1,...`: `F(x=0) & F(x=1)` holds, but `F(x=0 & x=1)` is impossible. The first is **strictly weaker**.
 
 ::: notes
 This is our own worked counterexample (Week 9, repeated twice in the videos and the robot-goals example): Eventually(p)&Eventually(q) does NOT distribute into Eventually(p&q). The 0,1,0,1 trace is exactly the disproof we give. Useful because it generalizes: F distributes over ∨ but not ∧; G distributes over ∧ but not ∨. A frequent real bug — writing F a & F b when you meant the events to coincide.
@@ -755,31 +755,31 @@ Unfold the transition system from the initial state: each branch is a nondetermi
 
 <svg viewBox="0 0 620 248" style="display:block;margin:0.3em auto;max-width:74%;height:auto" font-family="Inter, system-ui, sans-serif">
   <line x1="296" y1="46" x2="196" y2="86" stroke="#9aa3ab" stroke-width="1.6"/>
-  <text x="232" y="60" text-anchor="middle" font-size="11" fill="#5b6168">¬p</text>
+  <text x="225.8" y="60" font-size="11" fill="#5b6168">¬p</text>
   <line x1="326" y1="46" x2="424" y2="86" stroke="#B49248" stroke-width="2.8"/>
-  <text x="392" y="60" text-anchor="middle" font-size="11" fill="#8a6d2f">p</text>
+  <text x="389.1" y="60" font-size="11" fill="#8a6d2f">p</text>
   <line x1="170" y1="114" x2="118" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
   <line x1="190" y1="116" x2="242" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
   <line x1="432" y1="116" x2="388" y2="156" stroke="#B49248" stroke-width="2.8"/>
   <line x1="450" y1="116" x2="512" y2="156" stroke="#9aa3ab" stroke-width="1.6"/>
   <line x1="380" y1="186" x2="380" y2="206" stroke="#B49248" stroke-width="2.8"/>
   <circle cx="310" cy="30" r="20" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
-  <text x="310" y="35" text-anchor="middle" font-size="11.5" fill="#1c1c1c">off,0</text>
+  <text x="297.1" y="35" font-size="11.5" fill="#1c1c1c">off,0</text>
   <circle cx="180" cy="100" r="18" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="180" y="105" text-anchor="middle" font-size="11" fill="#1c1c1c">off,0</text>
+  <text x="167.7" y="105" font-size="11" fill="#1c1c1c">off,0</text>
   <circle cx="440" cy="100" r="18" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
-  <text x="440" y="105" text-anchor="middle" font-size="11" fill="#1c1c1c">on,0</text>
+  <text x="428.1" y="105" font-size="11" fill="#1c1c1c">on,0</text>
   <circle cx="110" cy="170" r="15" fill="#f6eeda" stroke="#B49248" stroke-width="1.8"/>
   <circle cx="250" cy="170" r="15" fill="#f6eeda" stroke="#B49248" stroke-width="1.8"/>
   <circle cx="380" cy="170" r="16" fill="#faf7f0" stroke="#B49248" stroke-width="2.6"/>
-  <text x="380" y="175" text-anchor="middle" font-size="10.5" fill="#1c1c1c">on,1</text>
+  <text x="368.7" y="175" font-size="10.5" fill="#1c1c1c">on,1</text>
   <circle cx="520" cy="170" r="15" fill="#f6eeda" stroke="#B49248" stroke-width="1.8"/>
-  <text x="110" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
-  <text x="250" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
-  <text x="380" y="228" text-anchor="middle" font-size="15" fill="#8a6d2f">⋯</text>
-  <text x="520" y="226" text-anchor="middle" font-size="15" fill="#9aa3ab">⋯</text>
-  <text x="585" y="36" text-anchor="end" font-size="11" fill="#8a6d2f">gold = one path (LTL)</text>
-  <text x="585" y="52" text-anchor="end" font-size="11" fill="#5b6168">whole tree = CTL</text>
+  <text x="102.1" y="226" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="242.1" y="226" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="372.1" y="228" font-size="15" fill="#8a6d2f">⋯</text>
+  <text x="512.1" y="226" font-size="15" fill="#9aa3ab">⋯</text>
+  <text x="467.3" y="36" font-size="11" fill="#8a6d2f">gold = one path (LTL)</text>
+  <text x="490.2" y="52" font-size="11" fill="#5b6168">whole tree = CTL</text>
 </svg>
 
 Caption: the counter's computation tree — LTL talks about one highlighted path; CTL quantifies over the branches with A/E.
@@ -1157,10 +1157,10 @@ return UNREACHABLE                          # fixpoint: nothing new ⇒ invarian
   <rect x="98" y="86" width="404" height="170" rx="14" fill="#efe1c0" stroke="#B49248" stroke-width="2"/>
   <rect x="170" y="120" width="260" height="102" rx="12" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
   <rect x="242" y="150" width="116" height="42" rx="10" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="300" y="68" text-anchor="middle" font-size="13.5" fill="#8a6d2f">reach₃ = frontier (New)</text>
-  <text x="300" y="106" text-anchor="middle" font-size="13.5" fill="#946E24">reach₂</text>
-  <text x="300" y="139" text-anchor="middle" font-size="13" fill="#946E24">reach₁</text>
-  <text x="300" y="176" text-anchor="middle" font-size="12.5" fill="#1c1c1c">reach₀ = Init</text>
+  <text x="225.9" y="68" font-size="13.5" fill="#8a6d2f">reach₃ = frontier (New)</text>
+  <text x="281.2" y="106" font-size="13.5" fill="#946E24">reach₂</text>
+  <text x="281.9" y="139" font-size="13" fill="#946E24">reach₁</text>
+  <text x="261.6" y="176" font-size="12.5" fill="#1c1c1c">reach₀ = Init</text>
 </svg>
 
 Each ring is one BFS layer `reachᵢ`; the dashed gold band is the frontier `New` that `Post` pushes outward. It stops after the reachable graph's **diameter** (for the counter, 11 steps — then `New = ∅`).
@@ -1203,15 +1203,15 @@ The function $f = \text{ite}(a,b,c) = (a \wedge b) \vee (\neg a \wedge c)$ — "
   <line x1="142" y1="168" x2="336" y2="266" stroke="#5b6168" stroke-width="1.6" marker-end="url(#bdd-ah)"/>
   <line x1="120" y1="172" x2="108" y2="262" stroke="#5b6168" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#bdd-ah)"/>
   <circle cx="230" cy="46" r="24" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="230" y="52" text-anchor="middle" font-size="18" fill="#1c1c1c">a</text>
+  <text x="225.3" y="52" font-size="18" fill="#1c1c1c">a</text>
   <circle cx="330" cy="152" r="24" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="330" y="158" text-anchor="middle" font-size="18" fill="#1c1c1c">b</text>
+  <text x="325.3" y="158" font-size="18" fill="#1c1c1c">b</text>
   <circle cx="130" cy="152" r="24" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="130" y="158" text-anchor="middle" font-size="18" fill="#1c1c1c">c</text>
+  <text x="125.3" y="158" font-size="18" fill="#1c1c1c">c</text>
   <rect x="330" y="262" width="42" height="38" rx="5" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="351" y="287" text-anchor="middle" font-size="17" fill="#1e6b32">1</text>
+  <text x="346.3" y="287" font-size="17" fill="#1e6b32">1</text>
   <rect x="88" y="262" width="42" height="38" rx="5" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="2"/>
-  <text x="109" y="287" text-anchor="middle" font-size="17" fill="#5b6168">0</text>
+  <text x="104.3" y="287" font-size="17" fill="#5b6168">0</text>
 </svg>
 
 Solid edge = that variable is **1**; dashed = **0**. Follow your path of choices down to a terminal box (the output). The single shared `0` and `1` are what make it a **DAG**, not a tree — and why function equality becomes pointer-equality of BDDs.
@@ -1242,38 +1242,38 @@ Start from the Shannon-expansion **decision tree** for $f = x \vee y$, then appl
   <line x1="266" y1="148" x2="256" y2="206" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
   <line x1="284" y1="148" x2="315" y2="206" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
   <ellipse cx="210" cy="44" rx="22" ry="20" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="210" y="50" text-anchor="middle" font-size="16" fill="#1c1c1c">x</text>
+  <text x="205.8" y="50" font-size="16" fill="#1c1c1c">x</text>
   <ellipse cx="150" cy="130" rx="20" ry="18" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="150" y="135" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <text x="146.1" y="135" font-size="15" fill="#1c1c1c">y</text>
   <ellipse cx="275" cy="130" rx="20" ry="18" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="275" y="135" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <text x="271.1" y="135" font-size="15" fill="#1c1c1c">y</text>
   <rect x="98" y="208" width="26" height="30" rx="4" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="1.6"/>
-  <text x="111" y="229" text-anchor="middle" font-size="14" fill="#5b6168">0</text>
+  <text x="107.1" y="229" font-size="14" fill="#5b6168">0</text>
   <rect x="163" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
-  <text x="176" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <text x="172.1" y="229" font-size="14" fill="#1e6b32">1</text>
   <rect x="242" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
-  <text x="255" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
+  <text x="251.1" y="229" font-size="14" fill="#1e6b32">1</text>
   <rect x="307" y="208" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
-  <text x="320" y="229" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
-  <text x="210" y="266" text-anchor="middle" font-size="13" fill="#5b6168">decision tree</text>
+  <text x="316.1" y="229" font-size="14" fill="#1e6b32">1</text>
+  <text x="168.7" y="266" font-size="13" fill="#5b6168">decision tree</text>
   <!-- reduce arrow -->
   <line x1="392" y1="130" x2="498" y2="130" stroke="#5b6168" stroke-width="2" marker-end="url(#bddr-ah)"/>
-  <text x="445" y="118" text-anchor="middle" font-size="13" fill="#946E24">reduce</text>
-  <text x="445" y="150" text-anchor="middle" font-size="11" fill="#5b6168">Rules 1 &amp; 2</text>
+  <text x="426.1" y="118" font-size="13" fill="#946E24">reduce</text>
+  <text x="412.7" y="150" font-size="11" fill="#5b6168">Rules 1 &amp; 2</text>
   <!-- panel B: ROBDD -->
   <line x1="666" y1="60" x2="650" y2="116" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
   <line x1="697" y1="58" x2="745" y2="202" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
   <line x1="633" y1="151" x2="617" y2="204" stroke="#5b6168" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#bddr-ah)"/>
   <line x1="660" y1="149" x2="742" y2="204" stroke="#5b6168" stroke-width="1.5" marker-end="url(#bddr-ah)"/>
   <ellipse cx="680" cy="44" rx="22" ry="20" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="680" y="50" text-anchor="middle" font-size="16" fill="#1c1c1c">x</text>
+  <text x="675.8" y="50" font-size="16" fill="#1c1c1c">x</text>
   <ellipse cx="645" cy="133" rx="20" ry="18" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="645" y="138" text-anchor="middle" font-size="15" fill="#1c1c1c">y</text>
+  <text x="641.1" y="138" font-size="15" fill="#1c1c1c">y</text>
   <rect x="599" y="206" width="26" height="30" rx="4" fill="#f4f4f4" stroke="#9aa3ab" stroke-width="1.6"/>
-  <text x="612" y="227" text-anchor="middle" font-size="14" fill="#5b6168">0</text>
+  <text x="608.1" y="227" font-size="14" fill="#5b6168">0</text>
   <rect x="739" y="206" width="26" height="30" rx="4" fill="#eef7ee" stroke="#27843f" stroke-width="1.6"/>
-  <text x="752" y="227" text-anchor="middle" font-size="14" fill="#1e6b32">1</text>
-  <text x="680" y="266" text-anchor="middle" font-size="13" fill="#5b6168">ROBDD (canonical)</text>
+  <text x="748.1" y="227" font-size="14" fill="#1e6b32">1</text>
+  <text x="622" y="266" font-size="13" fill="#5b6168">ROBDD (canonical)</text>
 </svg>
 
 - **Rule 1 — merge** isomorphic subgraphs (identical nodes/leaves become one): the three `1`-leaves collapse to one.
