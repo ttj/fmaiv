@@ -4,7 +4,7 @@
 # Usage (from the repo root, or set FMAIV_ROOT):
 #   bash scripts/check_examples.sh
 # Requires: z3, NuSMV, lean/lake, cbmc, cryptol, saw, clang — all present in the
-# course Codespace image (ghcr.io/verivital/fmaiv-autograde) and the Day-4 Docker
+# course Codespace image (ghcr.io/ttj/fmaiv-autograde) and the Day-4 Docker
 # image. nuXmv is license-gated; Day 2 uses NuSMV (same SMV language/verdicts).
 set -u
 

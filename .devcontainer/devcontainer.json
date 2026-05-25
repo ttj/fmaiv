@@ -5,7 +5,7 @@
   //   z3 (CLI + Python), cbmc 6.9, cryptol + saw, NuSMV 2.6, Lean 4, smvis, pytest.
   // nuXmv is license-gated and NOT in this public image — see notebooks/README.md
   // for the add-on, or use the hosted smvis web app for nuXmv.
-  "image": "ghcr.io/verivital/fmaiv-autograde:latest",
+  "image": "ghcr.io/ttj/fmaiv-autograde:latest",
 
   // The image has no non-root user; run as root (Ubuntu 24.04 base).
   "containerUser": "root",
@@ -22,7 +22,7 @@
   // wheel ~200 MB, NOT the ~2.5 GB CUDA build — so the base image stays lean and
   // these install per-Codespace instead). Ubuntu 24.04 is PEP 668 "externally
   // managed", hence --break-system-packages.
-  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel nbconvert matplotlib && pip install --break-system-packages --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615",
+  "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel nbconvert matplotlib && pip install --break-system-packages --no-cache-dir torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615",
 
   "customizations": {
     "vscode": {

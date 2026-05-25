@@ -1,19 +1,19 @@
 # Dependencies for the Day-4 neural-network examples (robustness + MNIST).
 #
-# CPU-only — no GPU required. The examples are tiny MLPs that certify in about a
-# second on a CPU. To get the small CPU wheels of PyTorch (~200 MB) instead of
-# the large CUDA build (~2.5 GB), install torch/torchvision from the CPU index:
+# CPU-only -- no GPU. torch is PINNED: newer torch removed
+# torch.onnx.symbolic_helper._quantized_ops, which the pinned auto_LiRPA still
+# uses, so an unpinned (e.g. Colab's preinstalled) torch breaks BoundedModule.
+# Install the small CPU wheels (~200 MB) instead of the ~2.5 GB CUDA build:
 #
-#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#     pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu
 #     pip install -r requirements.txt
 #
-# torchvision is used only by the MNIST notebook (06_day4_nn_mnist) for the
-# dataset; robustness.py needs only torch. auto_LiRPA's maintained release
-# (0.7.x) is on GitHub, not PyPI (PyPI is stuck at an ancient 0.2/0.3), so we
-# install it from a pinned commit for reproducibility. On Google Colab, torch and
-# torchvision are already installed, so just run the git install line.
+# torchvision is used only by the MNIST notebook (06_day4_nn_mnist); robustness.py
+# needs only torch. auto_LiRPA's maintained release is on GitHub (PyPI is stuck at
+# an ancient 0.2/0.3), pinned to a commit for reproducibility. The notebooks
+# force-install these same pins so they work on Colab too (overriding Colab's torch).
 #
-torch
-torchvision
-matplotlib   # the Day-4 NN notebooks (05/06) plot with matplotlib; robustness.py itself does not
+torch==2.8.0
+torchvision==0.23.0
+matplotlib
 auto_LiRPA @ git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615

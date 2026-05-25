@@ -1,10 +1,9 @@
 name: examples
 
-# Verify every day's worked examples by actually running the tools on them
-# (z3, NuSMV, Lean/lake, CBMC, Cryptol, SAW) inside the course image, which has
-# all of them preinstalled. Mirrors `scripts/check_examples.sh`. We also execute
-# the online runner notebooks end-to-end so Colab/Codespace stays in lockstep
-# with the repo.
+# Verify every day's worked examples by running the tools on them (z3, NuSMV,
+# Lean/lake, CBMC, Cryptol, SAW) inside the course image, which has them all
+# preinstalled. Mirrors scripts/check_examples.sh. We also execute the online
+# runner notebooks end-to-end so Colab/Codespace stays in lockstep with the repo.
 
 on:
   push:
@@ -38,7 +37,7 @@ jobs:
       - name: Run all example verifications in the course image
         run: |
           docker run --rm -v "$PWD:/work" -w /work \
-            ghcr.io/verivital/fmaiv-autograde:latest \
+            ghcr.io/ttj/fmaiv-autograde:latest \
             bash scripts/check_examples.sh
 
   # Execute the Day 1-4 runner notebooks headlessly in the same course image.
@@ -51,17 +50,17 @@ jobs:
       - name: Execute Day 1-4 runner notebooks in the course image
         run: |
           docker run --rm -v "$PWD:/work" -w /work \
-            ghcr.io/verivital/fmaiv-autograde:latest \
+            ghcr.io/ttj/fmaiv-autograde:latest \
             bash scripts/run_notebooks.sh \
               notebooks/01_day1_logic_sat_smt.ipynb \
               notebooks/02_day2_model_checking.ipynb \
               notebooks/03_day3_theorem_proving.ipynb \
               notebooks/04_day4_program_verif.ipynb
 
-  # The Day-4 neural-network examples need PyTorch, which we deliberately keep
-  # OUT of the course image (it would add ~GBs to every pull). Test them here in
-  # a standalone CPU job instead, so the grading image stays lean. Runs both the
-  # script form and the two NN notebooks (robustness 2-D toy + MNIST).
+  # The Day-4 NN script needs PyTorch (kept OUT of the course image to keep it
+  # lean). torch is PINNED: newer torch removed torch.onnx.symbolic_helper.
+  # _quantized_ops, which the pinned auto_LiRPA still uses. (The NN *notebooks*
+  # 05/06 are exercised in the `colab` job below, in a clean Colab-like env.)
   nn:
     runs-on: ubuntu-latest
     steps:
@@ -69,26 +68,19 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install CPU PyTorch + torchvision + matplotlib + auto_LiRPA
+      - name: Install pinned CPU PyTorch + auto_LiRPA
         run: |
           python -m pip install --upgrade pip
-          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          pip install matplotlib
+          pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu
           pip install git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615
       - name: Certify the NN robustness example (script form)
         run: python day04/examples/nn/robustness.py
-      - name: Execute the NN notebooks (robustness 2-D toy + MNIST)
-        run: |
-          bash scripts/run_notebooks.sh \
-            notebooks/05_day4_nn_robustness.ipynb \
-            notebooks/06_day4_nn_mnist.ipynb
 
-  # Colab-style coverage. The `check`/`notebooks` jobs run in the course image
-  # where every tool is PREINSTALLED, so they never exercise the notebooks'
-  # install branches. This job runs each runner notebook in a CLEAN Ubuntu 22.04
-  # (root, nothing preinstalled -- like Google Colab), so the install paths
-  # (pip z3-solver, NuSMV/Lean/CBMC downloads, and the Cryptol/SAW tarball with
-  # FMAIV_INSTALL_CRYPTOL_SAW=1) are actually tested end-to-end.
+  # Colab-style coverage: run EVERY runner notebook in a clean Ubuntu 22.04 (root,
+  # nothing preinstalled -- like Google Colab), so the notebooks' own install
+  # branches run end-to-end. The preinstalled-image jobs above can't catch install
+  # bugs; this can. 05/06 here force-install the pinned torch + auto_LiRPA (+ MNIST),
+  # which is exactly the Colab path that broke with a newer torch.
   colab:
     runs-on: ubuntu-22.04
     strategy:
@@ -99,6 +91,8 @@ jobs:
           - 02_day2_model_checking
           - 03_day3_theorem_proving
           - 04_day4_program_verif
+          - 05_day4_nn_robustness
+          - 06_day4_nn_mnist
     steps:
       - uses: actions/checkout@v6
       - name: Run ${{ matrix.nb }} in a clean Ubuntu 22.04 (Colab-like) container
