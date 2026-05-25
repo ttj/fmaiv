@@ -346,19 +346,19 @@ $$0+\dots+k+(k{+}1)=\underbrace{\tfrac{k(k+1)}{2}}_{\text{by IH}}+(k{+}1)=\tfrac
   <line x1="324" y1="78" x2="350" y2="78" stroke="#5b6168" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ind-ah)"/>
   <line x1="374" y1="78" x2="398" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
   <line x1="482" y1="78" x2="558" y2="78" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ind-ah)"/>
-  <text x="520" y="124" text-anchor="middle" font-size="11.5" fill="#946E24">IH: P(k) ⟹ P(k+1)</text>
+  <text x="471.3" y="124" font-size="11.5" fill="#946E24">IH: P(k) ⟹ P(k+1)</text>
   <rect x="22" y="56" width="82" height="44" rx="9" fill="#faf7f0" stroke="#B49248" stroke-width="2"/>
-  <text x="63" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(0)</text>
-  <text x="63" y="124" text-anchor="middle" font-size="11.5" fill="#8a6d2f">base case</text>
+  <text x="50.3" y="83" font-size="14" fill="#1c1c1c">P(0)</text>
+  <text x="35.9" y="124" font-size="11.5" fill="#8a6d2f">base case</text>
   <rect x="132" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="173" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(1)</text>
+  <text x="160.3" y="83" font-size="14" fill="#1c1c1c">P(1)</text>
   <rect x="242" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="283" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(2)</text>
-  <text x="362" y="84" text-anchor="middle" font-size="18" fill="#5b6168">⋯</text>
+  <text x="270.3" y="83" font-size="14" fill="#1c1c1c">P(2)</text>
+  <text x="352.6" y="84" font-size="18" fill="#5b6168">⋯</text>
   <rect x="400" y="56" width="82" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="441" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k)</text>
+  <text x="428.5" y="83" font-size="14" fill="#1c1c1c">P(k)</text>
   <rect x="560" y="56" width="92" height="44" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="606" y="83" text-anchor="middle" font-size="14" fill="#1c1c1c">P(k+1)</text>
+  <text x="585.4" y="83" font-size="14" fill="#1c1c1c">P(k+1)</text>
 </svg>
 
 ::: notes
@@ -476,9 +476,9 @@ example (p q : Prop) (hpq : p → q) (hp : p) : q := by
 <svg viewBox="0 0 760 180" style="display:block;margin:0.3em auto;max-width:92%;height:auto" font-family="Inter, system-ui, sans-serif">
   <defs><marker id="ps-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
   <line x1="234" y1="92" x2="284" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
-  <text x="259" y="82" text-anchor="middle" font-size="11" fill="#946E24">apply hpq</text>
+  <text x="234.2" y="82" font-size="11" fill="#946E24">apply hpq</text>
   <line x1="506" y1="92" x2="556" y2="92" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ps-ah)"/>
-  <text x="531" y="82" text-anchor="middle" font-size="11" fill="#946E24">exact hp</text>
+  <text x="509.1" y="82" font-size="11" fill="#946E24">exact hp</text>
   <rect x="18" y="32" width="216" height="120" rx="9" fill="#f6f8fa" stroke="#9aa3ab" stroke-width="1.6"/>
   <text x="34" y="58" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hp  : p</text>
   <text x="34" y="80" font-size="12.5" fill="#1c1c1c" font-family="JetBrains Mono, monospace">hpq : p → q</text>
@@ -490,7 +490,7 @@ example (p q : Prop) (hpq : p → q) (hp : p) : q := by
   <line x1="302" y1="94" x2="494" y2="94" stroke="#cdd5db" stroke-width="1.2"/>
   <text x="306" y="120" font-size="13" fill="#946E24" font-family="JetBrains Mono, monospace">⊢ p</text>
   <rect x="562" y="32" width="184" height="120" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="1.8"/>
-  <text x="654" y="98" text-anchor="middle" font-size="14" fill="#1e6b32">no goals ✓</text>
+  <text x="616.6" y="98" font-size="14" fill="#1e6b32">no goals ✓</text>
 </svg>
 
 ::: notes
@@ -800,7 +800,7 @@ Same four guards as the SMV `next(...)` and the Z3 `step()`.
 The same `smv2lean` turns **any** Day-2 model into a Lean transition system: `NuXMV/{Gcd, Mutex, Elevator}` ship *with proofs*; `Peterson`, `Prodcons` are translated samplers — prove the true INVARSPECs, refute the deliberately-false ones.
 
 ::: notes
-The counter, fifth-ish encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by `scripts/smv2lean` — emphasizing that the *same* model flows through every tool; only the syntax changes. The translator is reusable: `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` drops a ready-to-prove Lean module into the project, which is exactly the Day-3 assignment's "translate-and-prove" track. Beyond the counter, the Day-3 project also ships a gentle set-theory intro (`DiscreteMath.lean`) as a Lean on-ramp and an IMP imperative-language formalization with Hoare-style reasoning (`ProgramVerif/`).
+The counter, third encoding. Note the structure mirrors SMV exactly: init is the initial predicate, next is the transition relation with the same four guards. The ∃ p' encodes the nondeterministic press input (the SMV "free variable" idiom). This file is mechanically generated from counter.smv by `scripts/smv2lean` — emphasizing that the *same* model flows through every tool; only the syntax changes. The translator is reusable: `scripts/smv2lean/to_lean.sh day02/examples/<model>.smv` drops a ready-to-prove Lean module into the project, which is exactly the Day-3 assignment's "translate-and-prove" track. Beyond the counter, the Day-3 project also ships a gentle set-theory intro (`DiscreteMath.lean`) as a Lean on-ramp and an IMP imperative-language formalization with Hoare-style reasoning (`ProgramVerif/`).
 :::
 
 ---
@@ -960,31 +960,31 @@ A deliberately honest slide. The `<;>` combinator collapses the *shared* work, b
     </marker>
   </defs>
   <line x1="395" y1="60" x2="150" y2="116" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="238" y="84" text-anchor="middle" font-size="12.5" fill="#946E24">mode = off</text>
+  <text x="205.1" y="84" font-size="12.5" fill="#946E24">mode = off</text>
   <line x1="448" y1="60" x2="578" y2="98" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="540" y="78" text-anchor="middle" font-size="12.5" fill="#946E24">mode = on</text>
+  <text x="507.6" y="78" font-size="12.5" fill="#946E24">mode = on</text>
   <line x1="568" y1="140" x2="430" y2="213" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="470" y="172" text-anchor="middle" font-size="12.5" fill="#946E24">press</text>
+  <text x="455.1" y="172" font-size="12.5" fill="#946E24">press</text>
   <line x1="612" y1="140" x2="690" y2="203" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="676" y="172" text-anchor="middle" font-size="12.5" fill="#946E24">¬press</text>
+  <text x="657.4" y="172" font-size="12.5" fill="#946E24">¬press</text>
   <line x1="688" y1="245" x2="612" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="618" y="284" text-anchor="middle" font-size="12.5" fill="#946E24">x &lt; 10</text>
+  <text x="597" y="284" font-size="12.5" fill="#946E24">x &lt; 10</text>
   <line x1="715" y1="245" x2="792" y2="310" stroke="#5b6168" stroke-width="1.6" marker-end="url(#pt-ah)"/>
-  <text x="772" y="284" text-anchor="middle" font-size="12.5" fill="#946E24">x ≥ 10</text>
+  <text x="751" y="284" font-size="12.5" fill="#946E24">x ≥ 10</text>
   <rect x="345" y="18" width="158" height="42" rx="9" fill="#f6f8fa" stroke="#5b6168" stroke-width="1.8"/>
-  <text x="424" y="44" text-anchor="middle" font-size="14" fill="#1c1c1c">counterInv s′ ?</text>
+  <text x="372.9" y="44" font-size="14" fill="#1c1c1c">counterInv s′ ?</text>
   <rect x="50" y="116" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="125" y="142" text-anchor="middle" font-size="12.5" fill="#1e6b32">x unchanged ✓</text>
+  <text x="80.5" y="142" font-size="12.5" fill="#1e6b32">x unchanged ✓</text>
   <rect x="528" y="98" width="120" height="42" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="588" y="124" text-anchor="middle" font-size="14" fill="#1c1c1c">mode = on</text>
+  <text x="551.7" y="124" font-size="14" fill="#1c1c1c">mode = on</text>
   <rect x="345" y="213" width="150" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="420" y="239" text-anchor="middle" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
+  <text x="390.5" y="239" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
   <rect x="648" y="203" width="104" height="42" rx="9" fill="#f6eeda" stroke="#B49248" stroke-width="2"/>
-  <text x="700" y="229" text-anchor="middle" font-size="14" fill="#1c1c1c">¬press</text>
+  <text x="679.1" y="229" font-size="14" fill="#1c1c1c">¬press</text>
   <rect x="512" y="310" width="178" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="601" y="336" text-anchor="middle" font-size="12" fill="#1e6b32">x := x+1 ≤ 10 ✓ omega</text>
+  <text x="528" y="336" font-size="12" fill="#1e6b32">x := x+1 ≤ 10 ✓ omega</text>
   <rect x="730" y="310" width="130" height="42" rx="9" fill="#eef7ee" stroke="#27843f" stroke-width="2"/>
-  <text x="795" y="336" text-anchor="middle" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
+  <text x="765.5" y="336" font-size="12.5" fill="#1e6b32">x := 0 ✓</text>
 </svg>
 
 Three nested case splits (mode → press → `x < 10`); each of the four leaves closes by `simp` + `omega`. `cases … <;> simp … <;> omega` collapses the whole tree into a couple of lines.
