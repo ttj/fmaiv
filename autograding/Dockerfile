@@ -3,7 +3,7 @@
 # Python+pytest, smvis (verivital), and NuSMV (Day 2 model checking).
 #
 # Every tool here is open source / freely redistributable, so this image is
-# meant to be PUBLIC at ghcr.io/verivital/fmaiv-autograde — that lets every
+# meant to be PUBLIC at ghcr.io/ttj/fmaiv-autograde — that lets every
 # student repo pull it with no secrets and no registry-access config. (nuXmv
 # is license-gated and lives only in the separate teaching Docker, not here.)
 #
@@ -11,7 +11,7 @@
 #
 # Local build:
 #     cd autograding
-#     docker build -t ghcr.io/verivital/fmaiv-autograde:latest .
+#     docker build -t ghcr.io/ttj/fmaiv-autograde:latest .
 
 FROM ubuntu:24.04
 
