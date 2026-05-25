@@ -1,6 +1,6 @@
 name: pages
 
-# Render the four day decks (Pandoc markdown) to RevealJS HTML and publish to
+# Render the course decks (Day 0 setup + Days 1-4, Pandoc markdown) to RevealJS HTML and publish to
 # GitHub Pages. After the first successful run, the slides are at:
 #   https://ttj.github.io/fmaiv/            (index)
 #   https://ttj.github.io/fmaiv/day01.html  (etc.)
@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          for d in day01 day02 day03 day04; do
+          for d in day00 day01 day02 day03 day04; do
             src="$d/slides/$d.md"
             [ -f "$src" ] || { echo "skip $d (no $src)"; continue; }
             echo "rendering $src"
@@ -65,7 +65,7 @@ jobs:
           npm install -g decktape
           CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium-browser || command -v chromium)"
           echo "using chrome: $CHROME"
-          for d in day01 day02 day03 day04; do
+          for d in day00 day01 day02 day03 day04; do
             [ -f "_site/$d.html" ] || continue
             decktape --chrome-path "$CHROME" \
               --chrome-arg=--no-sandbox --chrome-arg=--disable-dev-shm-usage \
@@ -121,6 +121,7 @@ jobs:
             <p>Each day builds one pillar of the modern verification toolkit and applies it to a shared set of running examples: <b>SAT/SMT solving</b>, <b>model checking</b>, <b>interactive theorem proving</b>, and <b>program &amp; high-assurance verification</b> — closing on the <b>AI frontier</b> (neural-network verification and AI-assisted proof). Every idea ships with runnable code, and everything below runs in the browser with no local install.</p>
             <h2>Slides</h2>
             <ul>
+              <li><span class="day">Day 0</span> — Setup &amp; running the tools &middot; <a href="day00.html">slides</a> &middot; <a href="day00.pdf">PDF</a></li>
               <li><span class="day">Day 1</span> — Foundations: logic, transition systems, SAT, SMT &middot; <a href="day01.html">slides</a> &middot; <a href="day01.pdf">PDF</a></li>
               <li><span class="day">Day 2</span> — Model checking with nuXmv &middot; <a href="day02.html">slides</a> &middot; <a href="day02.pdf">PDF</a></li>
               <li><span class="day">Day 3</span> — Theorem proving with Lean 4 (and AI) &middot; <a href="day03.html">slides</a> &middot; <a href="day03.pdf">PDF</a></li>

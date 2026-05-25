@@ -12,6 +12,11 @@ idempotent setup that **finds the repo (cloning it on Colab) and then runs the
 real `dayNN/examples/` files** — the same files CI checks — so the notebooks and
 the repo never drift.
 
+> **New to Codespaces or notebooks?** [`GETTING_STARTED.md`](../GETTING_STARTED.md)
+> is the gentler, click-by-click walkthrough, and the [Day 0 setup
+> slides](https://ttj.github.io/fmaiv/day00.html) cover the same ground in class.
+> This page is the quick command reference.
+
 ## Option 1 — GitHub Codespaces (full toolset, recommended)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ttj/fmaiv)
