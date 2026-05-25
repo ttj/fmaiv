@@ -7,12 +7,13 @@ Course materials and software setup for a short course on formal methods and AI-
 Published online (RevealJS — arrow keys to navigate, **S** speaker notes, **F** fullscreen, **Esc** for the slide grid):
 
 - **All decks:** <https://ttj.github.io/fmaiv/>
+- Day 0 — [Setup & running the tools](https://ttj.github.io/fmaiv/day00.html)
 - Day 1 — [Foundations: logic, transition systems, SAT, SMT](https://ttj.github.io/fmaiv/day01.html)
 - Day 2 — [Model checking with nuXmv](https://ttj.github.io/fmaiv/day02.html)
 - Day 3 — [Theorem proving with Lean 4 (and AI)](https://ttj.github.io/fmaiv/day03.html)
 - Day 4 — [Program & high-assurance verification + the frontier](https://ttj.github.io/fmaiv/day04.html)
 
-**PDF** (to follow along or print): [Day 1](https://ttj.github.io/fmaiv/day01.pdf) · [Day 2](https://ttj.github.io/fmaiv/day02.pdf) · [Day 3](https://ttj.github.io/fmaiv/day03.pdf) · [Day 4](https://ttj.github.io/fmaiv/day04.pdf)
+**PDF** (to follow along or print): [Day 0](https://ttj.github.io/fmaiv/day00.pdf) · [Day 1](https://ttj.github.io/fmaiv/day01.pdf) · [Day 2](https://ttj.github.io/fmaiv/day02.pdf) · [Day 3](https://ttj.github.io/fmaiv/day03.pdf) · [Day 4](https://ttj.github.io/fmaiv/day04.pdf)
 
 Markdown source is under `dayNN/slides/dayNN.md`.
 
@@ -27,7 +28,7 @@ Markdown source is under `dayNN/slides/dayNN.md`.
 
 ## Run the course online — no install (recommended)
 
-You do **not** need to install anything: every day runs in the browser, and every `dayNN/examples/` file is in the repo. Local installation is fully supported as a backup ([see below](#local-installation-backup)). The full online walkthrough — with the exact per-day run commands — is in [`notebooks/README.md`](notebooks/README.md).
+You do **not** need to install anything: every day runs in the browser, and every `dayNN/examples/` file is in the repo. Local installation is fully supported as a backup ([see below](#local-installation-backup)). **New to these tools?** Start with the step-by-step [`GETTING_STARTED.md`](GETTING_STARTED.md) (Codespaces + how to run every example, incl. the NuSMV console). The full online walkthrough — with the exact per-day run commands — is also in [`notebooks/README.md`](notebooks/README.md).
 
 - **GitHub Codespaces — full toolset, one click.** [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ttj/fmaiv) A cloud container with **everything preinstalled**: `z3` (CLI + Python), `cbmc`, `cryptol`, `saw`, `NuSMV`, `lean`, and `smvis` — plus `torch`/`torchvision` (CPU) + `auto_LiRPA` for the Day-4 neural-network notebooks, set up on first launch. Open any `notebooks/*.ipynb` and run it, or use the integrated terminal (e.g. `cbmc file.c --unwind 5`). Free within GitHub's monthly allowance (120 core-hours; 180 for verified students via GitHub Education).
 - **Google Colab — one notebook per day, zero setup** (just a Google login): Day 1 [Z3](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/01_day1_logic_sat_smt.ipynb), Day 2 [NuSMV](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/02_day2_model_checking.ipynb), Day 3 [Lean](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/03_day3_theorem_proving.ipynb), Day 4 [CBMC/Cryptol/SAW](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/04_day4_program_verif.ipynb), plus the Day-4 frontier [NN robustness](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/05_day4_nn_robustness.ipynb) and [MNIST](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/06_day4_nn_mnist.ipynb) notebooks. `z3`/`cbmc`/`NuSMV`/`auto_LiRPA` install in seconds; `cryptol`/`saw` are large — prefer Codespaces. Full table + per-day commands in [`notebooks/README.md`](notebooks/README.md).
