@@ -48,8 +48,11 @@ echo "===== Day 1: Z3 ====="
 expect "z3_smoke.py -> sat"             "result: sat"  python3 day01/examples/z3_smoke.py
 expect "z3_pigeonhole.py -> unsat"      "unsat"        python3 day01/examples/z3_pigeonhole.py
 expect "z3_counter_bounded.py -> UNSAT" "UNSAT"        python3 day01/examples/z3_counter_bounded.py
+expect "z3_test_gen.py -> sat (GCD)"    "GCD\(.*\) = " python3 day01/examples/z3_test_gen.py
 expect "z3_smt_basics.smt2 -> sat"      "^sat"         z3 day01/examples/z3_smt_basics.smt2
 expect "z3_smtlib_demo.smt2 -> sat"     "^sat"         z3 day01/examples/z3_smtlib_demo.smt2
+expect "z3_k4_3coloring.smt2 -> unsat"  "^unsat"       z3 day01/examples/z3_k4_3coloring.smt2
+expect "z3_c5_3coloring.smt2 -> sat"    "^sat"         z3 day01/examples/z3_c5_3coloring.smt2
 expect_ok "z3_entailment.py self-checks"               python3 day01/examples/z3_entailment.py
 expect_ok "z3_synthesis.py self-checks"                python3 day01/examples/z3_synthesis.py
 expect "puzzles/nqueens.py"             "[Qq.]"        python3 day01/examples/puzzles/nqueens.py
