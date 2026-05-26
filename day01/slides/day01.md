@@ -1453,6 +1453,8 @@ $$
 
 `check-sat` → **sat**, with model $x_0 = 2,\; y_0 = 4$ (then $m_0=2,\ x_1=4,\ y_1=2,\ m_1=0$). So `GCD(2, 4)` runs the loop exactly twice. ($a \bmod b$ = remainder; the subscripts are *versions*, not array indices.)
 
+**Code:** [`day01/examples/z3_test_gen.py`](https://github.com/ttj/fmaiv/blob/main/day01/examples/z3_test_gen.py) — runs this encoding (parameterized by `length` and `bits`), then asks Z3 for a *new* input each iteration via a blocking clause; toggle `opt_integer` to compare Int vs BitVec performance.
+
 ::: notes
 SSA is the encoding backbone of every program-level verification tool we'll meet — and it returns explicitly in Day 4 with CBMC, which SSA-converts and unrolls C automatically. Our note nails it: "conversion is to single static assignment (SSA) form prior to asserting." Spell out *why* it's needed: logic is timeless — `x = y; y = m` can't be two assignments to one `x`, so we mint x_0, x_1, ... and turn assignment (a command) into equality (a constraint). The two-iteration unrolling is structurally identical to the BMC unrolling we're about to do for the counter: same idea — replace state-over-time with subscripted copies and conjoin a transition per step. Worth saying out loud: this is the *same* solver, same SMT-LIB, just pointed at a path condition instead of a safety property. The model x0=2, y0=4 is our own answer.
 :::
