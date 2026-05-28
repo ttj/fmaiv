@@ -109,4 +109,63 @@ theorem odd_add_odd_even (a b : Nat) (ha : Odd a) (hb : Odd b) :
 
 end ModArith
 
+-- ────────────────────────────────────────────────────────────────────────
+-- Series — partial-sum closed forms
+-- ────────────────────────────────────────────────────────────────────────
+-- A note on the **harmonic series**:  Σ 1/k  in fact DIVERGES (Oresme, 1350)
+-- — group the terms as 1 + 1/2 + (1/3+1/4) + (1/5+…+1/8) + … ; each block
+-- is ≥ 1/2, so H(2ⁿ) ≥ 1 + n/2.  Stating "diverges" cleanly in Lean wants
+-- `Real` / `Rat` / `Filter.Tendsto` — i.e. Mathlib — which this project
+-- doesn't pull in.  The discrete, Mathlib-free angle on "convergence"
+-- is **partial-sum closed forms**: when a sum has a tidy closed form,
+-- the limit can be read off by inspection.  Two classics follow.
+
+-- Geometric series partial sum:  1 + 2 + 4 + ... + 2^n  =  2^(n+1) - 1.
+-- Stated as `geomSum2 n + 1 = 2^(n+1)` to avoid Nat subtraction.
+-- Convergence reading: dividing both sides by 2^n gives (geomSum2 n)/2^n
+-- = 2 - 1/2^n → 2 as n → ∞, so the related series Σ 1/2^k converges to 2.
+def geomSum2 : Nat → Nat
+  | 0     => 1
+  | n + 1 => geomSum2 n + 2 ^ (n + 1)
+
+theorem geomSum2_eq (n : Nat) : geomSum2 n + 1 = 2 ^ (n + 1) := by
+  induction n with
+  | zero =>
+    -- BASE.  geomSum2 0 + 1 = 1 + 1 = 2 = 2^1.
+    rfl
+  | succ k ih =>
+    -- STEP.  goal:  geomSum2 (k+1) + 1 = 2^(k+2)
+    --   ↦  (geomSum2 k + 2^(k+1)) + 1
+    --   ↦  (geomSum2 k + 1) + 2^(k+1)              (rearrange)
+    --   ↦  2^(k+1) + 2^(k+1)                       (IH)
+    --   ↦  2 * 2^(k+1) = 2^(k+2)                   (Nat.pow_succ)
+    show geomSum2 k + 2 ^ (k + 1) + 1 = 2 ^ (k + 2)
+    have hpow : 2 ^ (k + 2) = 2 ^ (k + 1) + 2 ^ (k + 1) := by
+      rw [Nat.pow_succ]   -- 2^(k+2) = 2^(k+1) * 2
+      omega                -- x * 2 = x + x
+    omega                  -- combines `ih` and `hpow` to close
+
+-- Sum of the first n odd numbers:  1 + 3 + 5 + ... + (2n - 1)  =  n^2.
+-- Classic visual induction: each odd number adds an L-shape that completes
+-- the next square.  Indexed with k from 0 so the (k+1)-st odd is `2*k + 1`
+-- (avoids Nat subtraction in the recursion).
+def oddSum : Nat → Nat
+  | 0     => 0
+  | n + 1 => oddSum n + (2 * n + 1)
+
+theorem oddSum_eq (n : Nat) : oddSum n = n * n := by
+  induction n with
+  | zero => rfl
+  | succ k ih =>
+    -- STEP.  goal:  oddSum (k+1) = (k+1) * (k+1)
+    --   ↦  oddSum k + (2k + 1)
+    --   ↦  k*k + (2k + 1)                          (IH)
+    --   ↦  (k+1) * (k+1)                           (since (k+1)² = k² + 2k + 1)
+    show oddSum k + (2 * k + 1) = (k + 1) * (k + 1)
+    rw [ih]
+    -- expand RHS: (k+1)(k+1) = k(k+1) + (k+1) = (k*k + k) + (k+1)
+    rw [Nat.succ_mul k (k + 1), Nat.mul_succ k k]
+    -- now goal:  k*k + (2k + 1) = k*k + k + (k+1)  — linear; `omega` closes.
+    omega
+
 end SlideExamples
