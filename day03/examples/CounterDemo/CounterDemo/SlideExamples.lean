@@ -39,4 +39,28 @@ theorem zero_add (n : Nat) : 0 + n = n := by
     rw [Nat.add_succ]
     rw [ih]
 
+-- "Induction, the way you already know it" — Gauss's sum-of-first-n formula.
+-- Stated in the doubled form `2 * sumTo n = n * (n + 1)` to stay over Nat
+-- without integer division; equivalent to `sumTo n = n*(n+1)/2` since the
+-- right side is always even. Mirrors the slide algebra: substitute the IH,
+-- then factor (k+1) out of the two terms on the left.
+def sumTo : Nat → Nat
+  | 0     => 0
+  | n + 1 => sumTo n + (n + 1)
+
+theorem gauss (n : Nat) : 2 * sumTo n = n * (n + 1) := by
+  induction n with
+  | zero =>
+    -- BASE.  goal: 2 * sumTo 0 = 0 * (0 + 1)  — both sides reduce to 0
+    rfl
+  | succ k ih =>
+    -- STEP.  ih   : 2 * sumTo k = k * (k + 1)
+    --        goal : 2 * sumTo (k+1) = (k+1) * (k+2)
+    show 2 * (sumTo k + (k + 1)) = (k + 1) * (k + 2)
+    rw [Nat.mul_add, ih]
+    -- now:  k * (k + 1) + 2 * (k + 1) = (k + 1) * (k + 2)
+    rw [← Nat.add_mul]
+    -- now:  (k + 2) * (k + 1) = (k + 1) * (k + 2)
+    exact Nat.mul_comm _ _
+
 end SlideExamples
