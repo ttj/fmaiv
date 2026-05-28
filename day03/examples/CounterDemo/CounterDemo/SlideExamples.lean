@@ -79,4 +79,34 @@ theorem odd_add_odd_even (a b : Nat) (ha : Odd a) (hb : Odd b) :
       -- witness: i + j + 1, since (2i+1) + (2j+1) = 2(i+j+1).
       exact ⟨i + j + 1, by omega⟩
 
+-- "The sum of two odds is even" — second proof, by modular arithmetic.
+-- Same theorem, different formulation of parity: `n` is even/odd iff
+-- `n % 2` equals 0 / 1. The proof is fully written out — no `omega` —
+-- using only two core lemmas:
+--   • `Nat.add_mod   : (a + b) % n = (a % n + b % n) % n`
+--   • `Nat.mod_self  : n % n = 0`
+namespace ModArith
+
+def Even (n : Nat) : Prop := n % 2 = 0
+def Odd  (n : Nat) : Prop := n % 2 = 1
+
+theorem odd_add_odd_even (a b : Nat) (ha : Odd a) (hb : Odd b) :
+    Even (a + b) := by
+  -- Goal (after unfolding `Even`):  (a + b) % 2 = 0.
+  show (a + b) % 2 = 0
+  -- A four-step calculation, each step justified by a single named lemma.
+  -- `calc` forces every intermediate equality to be stated explicitly — no
+  -- implicit `rfl`-reduction closes the goal early.
+  calc (a + b) % 2
+      -- (1) push `% 2` through the addition
+      = (a % 2 + b % 2) % 2 := Nat.add_mod a b 2
+      -- (2) substitute the two parity hypotheses
+    _ = (1 + 1) % 2         := by rw [ha, hb]
+      -- (3) `1 + 1` reduces to `2` definitionally
+    _ = 2 % 2               := rfl
+      -- (4) `Nat.mod_self` finishes:  any `n` satisfies `n % n = 0`
+    _ = 0                   := Nat.mod_self 2
+
+end ModArith
+
 end SlideExamples
