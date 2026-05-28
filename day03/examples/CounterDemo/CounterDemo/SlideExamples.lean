@@ -26,6 +26,10 @@ example : ∃ n : Nat, n + 1 = 4 :=
 theorem two_plus_two : 2 + 2 = 4 := by
   rfl
 
+example (x : Nat) (h : x < 10) : x + 1 ≤ 10 := by omega   -- ✓
+example (a b : Nat) (h : a + b = 10) (hb : b ≤ 3) : 7 ≤ a := by omega   -- ✓
+example (x : Nat) : x * x ≥ 0 := by omega   -- ✗ `x*x` is NON-linear — omega declines
+
 def double (n : Nat) : Nat := n + n
 
 theorem double_zero : double 0 = 0 := rfl
@@ -167,5 +171,35 @@ theorem oddSum_eq (n : Nat) : oddSum n = n * n := by
     rw [Nat.succ_mul k (k + 1), Nat.mul_succ k k]
     -- now goal:  k*k + (2k + 1) = k*k + k + (k+1)  — linear; `omega` closes.
     omega
+
+-- ────────────────────────────────────────────────────────────────────────
+-- Finite fields — note + Mathlib-free `Fin p` demonstration
+-- ────────────────────────────────────────────────────────────────────────
+-- The finite field **GF(p) = ℤ/pℤ** (for prime p) lives in **Mathlib** as
+-- `ZMod p`, with the full algebraic hierarchy:
+--
+--   import Mathlib.Data.ZMod.Basic            -- the type, CommRing instance
+--   import Mathlib.FieldTheory.Finite.Basic   -- Field instance when p is prime
+--   example : Fact (Nat.Prime 5) := ⟨by decide⟩
+--   example : (3 : ZMod 5) * 2 = 1 := by decide               -- 6 ≡ 1 (mod 5)
+--   example (x : ZMod 5) (hx : x ≠ 0) : x ^ 4 = 1 := ZMod.pow_card_sub_one_eq_one hx
+--
+-- For higher characteristic, `Mathlib.FieldTheory.Finite.GaloisField` gives
+-- `GaloisField p n`, the field of order p^n with full structure theorems
+-- (uniqueness up to isomorphism, splitting fields, Frobenius, etc.).
+--
+-- Mathlib-free angle for *this* file: Lean-core `Fin p` carries the same
+-- modular arithmetic, and concrete identities close by `decide` (no Mathlib
+-- needed). The field-axioms instance itself only exists in Mathlib.
+
+-- Closed-form identities in GF(5) ≅ Fin 5:
+example : (2 + 3 : Fin 5) = 0 := by decide          -- 5 mod 5 = 0
+example : (3 * 2 : Fin 5) = 1 := by decide          -- 6 mod 5 = 1 ⇒ 3 is the inverse of 2
+example : (4 * 4 : Fin 5) = 1 := by decide          -- 16 mod 5 = 1 ⇒ 4 is self-inverse (≡ −1)
+
+-- Fermat's little theorem at p = 5 — a^p ≡ a (mod p) — checked at two values.
+-- (The general theorem `x ^ p = x in ZMod p` is `ZMod.pow_card` in Mathlib.)
+example : (2 * 2 * 2 * 2 * 2 : Fin 5) = 2 := by decide
+example : (3 * 3 * 3 * 3 * 3 : Fin 5) = 3 := by decide
 
 end SlideExamples
