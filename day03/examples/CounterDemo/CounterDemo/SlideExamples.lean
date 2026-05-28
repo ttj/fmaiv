@@ -63,4 +63,20 @@ theorem gauss (n : Nat) : 2 * sumTo n = n * (n + 1) := by
     -- now:  (k + 2) * (k + 1) = (k + 1) * (k + 2)
     exact Nat.mul_comm _ _
 
+-- "The sum of two odd numbers is even" — a constructive parity proof.
+-- We define `Even` / `Odd` as existentials (Mathlib-free), then show the
+-- textbook witness:  a = 2i+1,  b = 2j+1  ⟹  a + b = 2·(i+j+1).
+def Even (n : Nat) : Prop := ∃ k, n = 2 * k
+def Odd  (n : Nat) : Prop := ∃ k, n = 2 * k + 1
+
+theorem odd_add_odd_even (a b : Nat) (ha : Odd a) (hb : Odd b) :
+    Even (a + b) := by
+  cases ha with
+  | intro i hi =>
+    cases hb with
+    | intro j hj =>
+      -- hi : a = 2*i + 1   hj : b = 2*j + 1
+      -- witness: i + j + 1, since (2i+1) + (2j+1) = 2(i+j+1).
+      exact ⟨i + j + 1, by omega⟩
+
 end SlideExamples
