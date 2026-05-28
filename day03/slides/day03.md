@@ -1072,6 +1072,78 @@ I close the inductive-invariants lecture on exactly this GCD example, so include
 
 ---
 
+## Live demo: Binomial expected value
+
+For $X \sim \mathrm{Binomial}(n, \theta)$ — n trials, each succeeding with probability θ — the expected number of successes is **$n\theta$**:
+
+$$\mathbb{E}[X]\;=\;\sum_{k=0}^{n}\, k\binom{n}{k}\theta^{k}(1-\theta)^{n-k}\;=\;n\theta$$
+
+The same statement in Lean (Mathlib):
+
+```lean
+theorem binomial_expectation (n : ℕ) (θ : ℝ) :
+    ∑ k ∈ Finset.range (n + 1),
+      (k : ℝ) * (n.choose k : ℝ) * θ^k * (1 - θ)^(n - k)
+    = n * θ
+```
+
+Proof in three moves: drop the $k=0$ term, absorb $k\binom{n}{k} = n\binom{n-1}{k-1}$ to factor $n\theta$ out, finish via the binomial theorem $(\theta + (1-\theta))^{n-1} = 1$. Full proof: [`MathlibDemos/Binomial.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/MathlibDemos/MathlibDemos/Binomial.lean).
+
+::: notes
+The probability example the brief asks for. Frame: same induction muscle as the counter, but the closed-form `n·θ` is what gets *used* in every applied lecture downstream (estimators, hypothesis tests, RL bandit analysis…). Walk the three moves on the slide first; then open `MathlibDemos/Binomial.lean` in VS Code and step through `key` and `hbinom` so the InfoView shows the IH-style state. Stress that this is the *first* slide where Mathlib is on screen — we'd been Mathlib-free until now; the binomial theorem and `Finset.sum` are what justify the dependency.
+:::
+
+---
+
+## The Pythagorean theorem, three views
+
+The classical $a^2 + b^2 = c^2$ has three natural Lean renderings — concrete, abstract, and coordinate — in [`MathlibDemos/Pythagorean.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/MathlibDemos/MathlibDemos/Pythagorean.lean):
+
+```lean
+-- 1. Primitive triples — closed by `decide`, no Mathlib needed.
+example : (3 : ℕ)^2 + 4^2 = 5^2 := by decide
+example : (5 : ℕ)^2 + 12^2 = 13^2 := by decide
+example : (8 : ℕ)^2 + 15^2 = 17^2 := by decide
+
+-- 2. Inner-product form: ‖u + v‖² = ‖u‖² + ‖v‖² when u ⊥ v.
+theorem pythagorean_inner {E} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    (u v : E) (h : ⟪u, v⟫_ℝ = 0) : ‖u + v‖^2 = ‖u‖^2 + ‖v‖^2
+
+-- 3. 2-D coordinates: ‖v‖² = v₀² + v₁² in EuclideanSpace ℝ (Fin 2).
+theorem pythagorean_2d (v : EuclideanSpace ℝ (Fin 2)) :
+    ‖v‖^2 = v 0 ^ 2 + v 1 ^ 2
+```
+
+::: notes
+Three formulations chosen to span the same idea from grade-school arithmetic to abstract algebra. (1) shows even `decide` polishes off concrete triples — pure computation, no theory. (2) is the *real* theorem: in any real inner-product space, orthogonality + the polarization identity gives the squared-norm relation; this is the form geometers and physicists use. (3) specialises (2) to the standard 2-D Euclidean plane, which is the form a calculus student recognises. Same theorem, three layers of abstraction; opening `Pythagorean.lean` shows them one after the other.
+:::
+
+---
+
+## $\sqrt{2}$ is irrational
+
+Classical Euclid: assume $\sqrt 2 = p/q$ in lowest terms. Then $p^2 = 2q^2$, so $2 \mid p$, so $p = 2k$, so $q^2 = 2k^2$, so $2 \mid q$. But $\gcd(p,q)=1$. ⊥
+
+Mathlib gives the *general* fact for any prime square root:
+
+```lean
+theorem sqrt_two_irrational : Irrational (Real.sqrt 2) :=
+  Nat.Prime.irrational_sqrt (by decide)
+```
+
+The arithmetic skeleton — formalised line-for-line with the proof above — is also available, with no real numbers involved ([`MathlibDemos/SqrtTwoIrrational.lean`](https://github.com/ttj/fmaiv/blob/main/day03/examples/MathlibDemos/MathlibDemos/SqrtTwoIrrational.lean)):
+
+```lean
+theorem no_coprime_sq_eq_two_mul_sq :
+    ¬ ∃ p q : ℕ, 0 < q ∧ Nat.Coprime p q ∧ p^2 = 2 * q^2
+```
+
+::: notes
+The canonical "first proof that needs no calculus" slide — and a great showcase for Mathlib's reach: the *general* theorem `Nat.Prime.irrational_sqrt` says the square root of *any* prime is irrational, instantiated for `p = 2` with `by decide`. Walk both versions: the one-liner that proves the actual irrationality of √2 over ℝ (so the whole `Real.sqrt` / `Irrational` machinery is doing the heavy lifting), and the arithmetic skeleton (`no_coprime_sq_eq_two_mul_sq`) that mirrors Euclid'"'"'s proof line-for-line and never mentions a real number. Both are in the file; both compile.
+:::
+
+---
+
 ## L2 recap
 
 - A handful of tactics (`intro`, `simp`, `omega`, `cases`, `constructor`) close most goals.
