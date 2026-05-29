@@ -100,14 +100,17 @@ expect "saw popcount.saw" "Proof succeeded" bash -c 'cd day04/examples && clang 
 echo "===== Day 4 (frontier): NN robustness (auto_LiRPA, optional) ====="
 # Skipped in the base grading image (no PyTorch). Runs in a Codespace (deps via
 # devcontainer onCreateCommand) and in the dedicated `nn` CI job on ubuntu.
+# adversarial_demo.py needs only torch, but we keep it in the same block.
 if python3 -c 'import auto_LiRPA' >/dev/null 2>&1; then
   expect "nn robustness.py"           "certified up to eps"        python3 day04/examples/nn/robustness.py
   expect "nn compare_reachability.py" "compareReachability:"       python3 day04/examples/nn/compare_reachability.py
   expect "nn verify_fc.py"            "verify_fc demo finished"    python3 day04/examples/nn/verify_fc.py
+  expect "nn adversarial_demo.py"     "adversarial_demo finished"  python3 day04/examples/nn/adversarial_demo.py
 elif [ "$LIST" = 0 ]; then
   printf '  [SKIP] nn robustness.py (auto_LiRPA not installed in this image)\n'
   printf '  [SKIP] nn compare_reachability.py (auto_LiRPA not installed in this image)\n'
   printf '  [SKIP] nn verify_fc.py (auto_LiRPA not installed in this image)\n'
+  printf '  [SKIP] nn adversarial_demo.py (skipped with the NN block)\n'
 fi
 
 echo

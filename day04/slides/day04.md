@@ -980,6 +980,45 @@ The honest "what's next," straight from my recent talks (Liverpool, Dagstuhl, RM
 
 ---
 
+## Transformer Explainer: see what we'd have to verify
+
+What is *inside* the model when we say "verify ChatGPT"? The **[Transformer Explainer](https://poloclub.github.io/transformer-explainer/)** (Cho et al., 2024; arXiv:2408.04619) is a browser-based, live interactive of GPT-2 — watch the embedding, attention heads, MLP blocks, and the softmax token sampler update as you type.
+
+- **Embedding + positional** — a bag of float vectors, layer-norm'd. *Robustness here is the easy part: bounded perturbations of a continuous vector.*
+- **Self-attention (multi-head)** — query/key/value matmul, then a **softmax** over key positions. *This is the hard layer for verification — softmax is curved, attention is bilinear in inputs, and bounds blow up fast.*
+- **MLP block** — two affine layers + GELU. *Sound bounds via CROWN-style relaxation; same family of techniques as Day-4 image-classifier verification.*
+- **Output softmax** — converts logits to next-token probabilities. *The decision is the argmax (or a sample); the "robustness" question is on the **distribution**, not the argmax — a brand-new specification problem.*
+
+The Explainer is a great **teaching prop**: every box you can click on is a layer some verifier needs to support. The honest answer to "what's missing for *Let's Verify ChatGPT*" is: **sound bounds for attention + softmax, at billions-of-parameters scale, against a non-ℓ∞ specification on a discrete-token output.** (Shi et al., *Robustness Verification for Transformers*, ICLR 2020, is the standing formal anchor — and it stops well short of full LLMs.)
+
+::: notes
+This is the "open the model and look inside" slide, paired with the *Let's verify ChatGPT* provocation on the previous slide. Transformer Explainer (Wang and Chau's PoloClub at Georgia Tech; ACL system demo + arXiv:2408.04619) is the cleanest live visualization of GPT-2 internals in a browser, and I use it as the speaking prop: I literally pull it up, type "the verification of neural networks", and watch attention heads light up. The point for a verification audience is that every box on that page is a layer some sound bound-propagation/reachability method needs to support — and for several of them the answer in 2025 is "no scalable sound method yet." Embedding + positional layers are fine: a continuous bag of vectors, ℓ∞ relaxations transfer. The MLP block is two affines + GELU and is *exactly* the family CROWN handles, modulo GELU's curvature (which costs tightness but is workable). The hard piece is the self-attention block: softmax over a learned key-position matrix is curved on *both* sides — the input dependency of the keys *and* the normalization — and existing transformer-robustness bounds (Shi et al. ICLR'20) tighten only a small attention window, far from full LLM scale. Finally the output softmax means the decision isn't argmax-of-logits any more — it's a sampled token from a distribution, so the "robustness" property is on the distribution itself ("low-probability token never becomes likely under a guardrail-bypass perturbation"). That spec doesn't yet have a clean formalism. Use this slide as a 1–2 minute interactive interlude before the literature slide.
+:::
+
+---
+
+## Adversarial perturbations → LLM jailbreaks: the same family
+
+The image attacks earlier (Eykholt's stickers, our PGD demo) and "LLM jailbreaks" are the *same algorithm family* in different metric spaces.
+
+| | **Image classifier (PGD)** | **LLM guardrail (GCG)** |
+|---|---|---|
+| Substrate | continuous pixels in $[0,1]^d$ | discrete token sequence |
+| Constraint | $\ell_\infty$ ball of radius $\varepsilon$ | suffix of $k$ tokens appended to a prompt |
+| Objective | minimize true-class margin | maximize probability of a forbidden completion |
+| Algorithm | gradient sign + project (Madry et al., ICLR 2018) | **GCG**: greedy coordinate descent on token logits (**Zou et al., 2023**; arXiv:2307.15043) |
+| State of the art | falsifier; verifier exists (α,β-CROWN, NNV) | falsifier; **no mature sound verifier** |
+
+**Demo:** [`day04/examples/nn/adversarial_demo.py`](https://github.com/ttj/fmaiv/blob/main/day04/examples/nn/adversarial_demo.py) — FGSM (Goodfellow et al., ICLR 2015) and PGD on a small ReLU MLP. Watch each attack flip the prediction as $\varepsilon$ grows; PGD is strictly stronger than FGSM at the same budget (the script asserts this as a sanity check).
+
+The takeaway for the audience: **generating an attack is easy; proving none exists is the open problem.** That asymmetry is exactly the soundness ↔ completeness gap from the whole week, and it is the reason this is still a research field.
+
+::: notes
+The bridge between the image-robustness story and the LLM-safety story the audience actually came to hear about. Mechanism: every adversarial-example generation method is a **constrained optimization** — minimize the network's confidence in the correct answer, subject to staying inside an allowed neighborhood of the clean input. For images that neighborhood is an ℓ∞ ball in pixel space and the optimizer is PGD (sign-of-gradient with projection; Madry et al. 2018, the canonical reference). For LLMs the neighborhood is a fixed-length token suffix attached to a prompt and the optimizer is GCG (Greedy Coordinate Gradient; Zou, Wang, Carlini, Nasr, Kolter, Fredrikson 2023, arXiv:2307.15043) — discrete because tokens are discrete, but the same gradient-driven search shape. The objective is symmetric: minimize the margin to the wrong class (images) ↔ maximize the probability of a forbidden completion (LLMs). The crucial asymmetry is what we have to *defend* with. For images, α,β-CROWN and NNV give a sound verifier (the slides three back); for LLMs there is no mature sound verifier, only adversarial-training defenses and dictionary filters — the open frontier. The adversarial_demo.py script is the in-deck POC: a small ReLU MLP from robustness.py, FGSM and PGD side-by-side, with a CI-checked invariant that PGD's attack success rate is at least FGSM's (otherwise our PGD has a bug). Use this as the slide where students leave understanding the difference between *attack* (easy, gradient + project) and *defense* (open problem on language).
+:::
+
+---
+
 ## Neural-network verification: the literature
 
 Fact-checked entry points — the spine of the field:
