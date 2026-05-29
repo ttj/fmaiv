@@ -33,6 +33,7 @@ random-restart PGD search then finds an adversarial example.
 | `robustness_starter.py` | same, with the one `compute_bounds` call blanked out (the TODO) |
 | `compare_reachability.py` | 3-in / 2-out ReLU MLP + an L∞ cube; reports IBP / CROWN / α-CROWN output-bounding-box areas vs sampling truth (the NNV [`compareReachability`](https://github.com/verivital/nnv/tree/master/code/nnv/examples/Tutorial/NN/compareReachability) MATLAB demo, in Python) |
 | `verify_fc.py` | MNIST FC classifier; prints CROWN's `[lo_j, hi_j]` per output neuron for a chosen test image — the **output set before argmax** — and decides robustness from one inequality on those intervals (Python analog of NNV's [`verify_fc.m`](https://github.com/verivital/nnv/blob/master/code/nnv/examples/Tutorial/NN/MNIST/verify_fc.m)) |
+| `adversarial_demo.py` | the *attack* side: FGSM (Goodfellow et al., ICLR 2015) + PGD (Madry et al., ICLR 2018) on the same 2-D MLP. Image-attack family extends to LLM jailbreaks — GCG (Zou et al., 2023; arXiv:2307.15043). `torch` only, no auto_LiRPA needed |
 | `requirements.txt` | `torch` + `torchvision` (CPU) + `auto_LiRPA` |
 
 The interactive notebooks are in [`notebooks/`](../../../notebooks/) (see the list above).
