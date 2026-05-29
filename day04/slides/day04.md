@@ -38,6 +38,23 @@ Recap the arc as a table. Each row is a stronger or different guarantee on the *
 
 ---
 
+## Fresh from yesterday: an AI-discovered theorem, kernel-checked in a week
+
+Day 3 closed on the **AI proposes, the kernel disposes** thesis — PFR, AlphaProof, DeepSeek-Prover. **News from this week (2026-05-28):**
+
+- **The result.** OpenAI's research stack discovered a **disproof of Paul Erdős' planar unit-distance conjecture** — a long-open extremal-geometry problem we flagged on Day 3 as *generated but not yet formalized*.
+- **Then.** Logical Intelligence's **Aleph Prover** drove a **Lean 4** formalization end-to-end in **roughly one week**, with professional mathematicians (Kevin Buzzard, Sergey Galkin, others) in the loop.
+- **Scale.** ~**33,000 lines** of Lean, ~**252 Mathlib modules**, conditional on **two** explicit class-field-theory inputs (Golod–Shafarevich + Shafarevich's relation-rank bound) — reduced from ~30 open dependencies at the start.
+- **Provenance.** Blog: <https://logicalintelligence.com/blog/aleph-prover-erdos-disproof-lean-4-formal-methods>; repo: <https://github.com/logical-intelligence/erdos-unit-distance> (Apache 2.0; Lean 4.29.1; CI runs `lake build` + external `leanchecker`).
+
+The Day-3 thesis, *uncomfortably literal*: an AI generated a candidate proof; a Lean **kernel-checked** artifact certified it within a week. For comparison, **PFR** (also flagged on Day 3) took ~3 weeks with 20+ contributors — the cycle time is shrinking. That cadence is the Day-4 frontier we'll close on in L3.
+
+::: notes
+The fresh-news opener for Day 4, requested by the audience after the Day-3 wrap. Day 3 framed AI+FM with the "AI proposes, the kernel disposes" thesis and the PFR data point (3 weeks to formalize, 20+ collaborators). The Erdős unit-distance datapoint, *literally from this week* (2026-05-28), is a tighter incarnation of the same pattern. The result itself: OpenAI's research stack discovered a counterexample/disproof to Erdős' planar unit-distance conjecture (a long-open extremal-geometry problem). Logical Intelligence's Aleph Prover then drove a Lean 4 formalization to completion in about a week, with Kevin Buzzard, Sergey Galkin, and other professional mathematicians validating along the way. The deliverable is a public Lean 4 repository — Apache 2.0, Lean 4.29.1, ~33k lines, 252 Mathlib modules imported — that kernel-checks the result conditional on two well-understood class-field-theory inputs (the Golod-Shafarevich inequality and Shafarevich's relation-rank bound), down from ~30 initial open assumptions. The cycle time is the headline: PFR took roughly three weeks with 20+ contributors; the Erdős disproof formalizes in about a week with an AI-driven loop plus human checking. Use this as the Day-4 motivation: the AI/FM convergence we'll close on in L3 is not aspirational, it is operating *now* at the speed of new mathematical results. Two anchors: the Logical Intelligence blog (their own report — explicit on the "AI generates / kernel verifies" division of labor) and the public GitHub repository (peer-checkable, MIT/Apache 2.0, builds in CI).
+:::
+
+---
+
 ## Today's roadmap
 
 | Block | Topic |
