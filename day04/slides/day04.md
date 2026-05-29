@@ -574,7 +574,7 @@ Proof succeeded! popcount_loop
 SAW extracts a symbolic model of each C function from LLVM bitcode and proves it **equivalent** to the Cryptol spec, over all inputs, via SMT.
 
 ::: notes
-SAW is the bridge from spec to real code. You compile the C to LLVM bitcode, and the .saw script tells SAW to symbolically execute each C function and prove it equals the Cryptol spec on all inputs. "Proof succeeded" means the C implementation and the spec are the same function — bit for bit, every input. This is end-to-end: a clean spec, an optimized implementation, and a machine-checked proof they agree. It is exactly the workflow behind AWS's verified crypto.
+SAW is the bridge from spec to real code. You compile the C to LLVM bitcode, and the .saw script tells SAW to symbolically execute each C function and prove it equals the Cryptol spec on all inputs. "Proof succeeded" means the C implementation and the spec are the same function — bit for bit, every input. This is end-to-end: a clean spec, an optimized implementation, and a machine-checked proof they agree. It is exactly the workflow behind AWS's verified crypto. *Backends in motion:* Galois shipped an Isabelle backend in [saw-script v1.5.1](https://github.com/GaloisInc/saw-script/releases/tag/v1.5.1) and a Lean backend is in progress at [GaloisInc/lean-saw-core](https://github.com/GaloisInc/lean-saw-core) — same pattern as [Lean-SMT](https://github.com/ufmg-smite/lean-smt), where tools grow each other's backends so that one solver's strengths cover another's gaps.
 :::
 
 ---
@@ -1071,7 +1071,7 @@ A 4-day intensive *samples*; here's the rest of the map, with courses that go de
 - **Program synthesis** — the dual of verification: **SyGuS, Rosette**. If generation is cheap, *synthesize-then-verify* is the natural pairing. (Berkeley 219C, OPLSS.)
 - **Verified-stack tradition (Coq/Rocq, Isabelle)** — **CompCert** (C compiler), **seL4** (microkernel): the largest machine-checked artifacts. (DeepSpec, MIT FRAP.)
 - **Probabilistic & hybrid model checking** — **PRISM**; nuXmv's infinite-state/IC3 and hybrid modes. (Oxford CAV.)
-- **Protocol verification** — **Tamarin, ProVerif** for crypto *protocols* (vs. SAW's implementation proofs). (SRI SSFT.)
+- **Protocol verification** — **Tamarin, ProVerif, CPSA** ([Cryptographic Protocol Shape Analyzer](https://github.com/mitre/cpsa), MITRE) for crypto *protocols* (vs. SAW's implementation proofs). (SRI SSFT.)
 - **Evaluating AI + FM** — the scoreboards: **miniF2F** (proofs), **VNN-COMP** (NN), **SV-COMP** (C). The highest-value skill for the agentic era.
 
 ::: notes

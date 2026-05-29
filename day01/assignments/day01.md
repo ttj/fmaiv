@@ -15,7 +15,7 @@ Pick **one** of the following.
 
 ### B.1. Two-counter system
 
-Modify the counter to have two counters `x` and `y`, both bounded by the same cap. The system can choose at each step which of them to increment. Encode this as a transition system in Z3 and ask the bounded version of:
+Modify the counter to have two counters `x` and `y`, both bounded by the same cap. **At each step, a non-deterministic choice picks one of `x`, `y`, or *neither* — the chosen counter is incremented (subject to the same `≤ cap` guard as the single counter), the other stays fixed.** No counter has its own button; the model picks. Encode this as a transition system in Z3 and ask the bounded version of:
 
 - `x + y ≤ 20` (should be `unsat` to falsify, i.e. the property holds for every bounded path)
 - `x = y = 10` is reachable (try a few bounds)
