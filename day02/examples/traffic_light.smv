@@ -1,22 +1,32 @@
 MODULE main          -- single top-level component; "main" is the entry point
 -- Traffic light controller for a main road / side road intersection.
 -- Main road gets a longer green phase; side road gets a shorter one.
--- Cycle: main_green -> main_yellow -> side_green -> side_yellow -> repeat
--- A shared `timer` counts ticks within each phase. The specs check the obvious
--- safety rules (never both green, etc.) plus liveness (each road keeps getting
--- green). Each spec is annotated with what it claims and pass/fail.
+-- Cycle: main_green -> main_yellow -> all_red -> side_green -> side_yellow
+--        -> all_red -> repeat.  The all-red "clearance" phase between the
+-- yellow and the next direction's green is a real safety convention (it
+-- protects against red-light runners and gives time for a vehicle stopped
+-- on the wrong side of the line to clear the intersection); we model it
+-- with a single all-red tick on each handover.  Because a state with both
+-- lights red is no longer enough to tell which side is next, we add a
+-- `next_dir` ghost variable: it holds the direction that gets green when
+-- the current all-red tick ends.  Each spec is annotated with what it
+-- claims and pass/fail.
 -- Operators: ! = not, & = and, | = or, -> = "implies".
 
 VAR
     main_light : {green, yellow, red};  -- enumerated: main road's light color
     side_light : {green, yellow, red};  -- enumerated: side road's light color
-    timer : 0..5;                       -- tick counter within the current phase
+    timer      : 0..5;                  -- tick counter within the current phase
+    next_dir   : {main, side};          -- who gets the next green when all-red ends
 
 ASSIGN
-    -- init(...) = value at time 0 (the start state): main green, side red.
+    -- init(...) = value at time 0 (the start state): main green, side red;
+    -- next_dir set to `side` so that when we eventually go all-red after main,
+    -- the rule "go to side green next" fires.
     init(main_light) := green;
     init(side_light) := red;
-    init(timer) := 0;
+    init(timer)      := 0;
+    init(next_dir)   := side;
 
     -- next(...) := case ... esac: guards checked top to bottom, FIRST true one
     -- wins; the trailing "TRUE : timer" is the catch-all default (no change).
@@ -29,24 +39,34 @@ ASSIGN
         side_light = green & timer < 2 : timer + 1;  -- still in side-green: count up
         side_light = green & timer = 2 : 0;          -- end of side-green: reset
         side_light = yellow : 0;                     -- side yellow: reset
+        -- all-red clearance: one tick, then hand off
+        main_light = red & side_light = red : 0;     -- all-red lasts 1 tick, reset
         TRUE : timer;                                -- otherwise unchanged
     esac;
 
-    -- main light advances green -> yellow -> red, and back to green only after
-    -- the side road has had its turn (side_light = yellow signals handover).
+    -- main light: green -> yellow -> red, returns to green only after a
+    -- side cycle plus an all-red tick with next_dir = main.
     next(main_light) := case
-        main_light = green & timer = 4 : yellow;             -- green time up -> yellow
-        main_light = yellow : red;                           -- yellow -> red
-        main_light = red & side_light = yellow : green;      -- side finishing -> main green again
-        TRUE : main_light;                                   -- otherwise unchanged
+        main_light = green  & timer = 4                          : yellow;
+        main_light = yellow                                      : red;
+        main_light = red & side_light = red & next_dir = main    : green;
+        TRUE                                                     : main_light;
     esac;
 
-    -- side light mirrors it: turns green once the main road hits yellow.
+    -- side light mirrors it.
     next(side_light) := case
-        side_light = red & main_light = yellow : green;      -- main finishing -> side green
-        side_light = green & timer = 2 : yellow;             -- side green time up -> yellow
-        side_light = yellow : red;                           -- yellow -> red
-        TRUE : side_light;                                   -- otherwise unchanged
+        side_light = green  & timer = 2                          : yellow;
+        side_light = yellow                                      : red;
+        main_light = red & side_light = red & next_dir = side    : green;
+        TRUE                                                     : side_light;
+    esac;
+
+    -- next_dir flips at every yellow so that when we land in all-red the
+    -- handover knows which way to go.
+    next(next_dir) := case
+        main_light = yellow : side;  -- main is finishing -> next green is side
+        side_light = yellow : main;  -- side is finishing -> next green is main
+        TRUE                : next_dir;
     esac;
 
 -- INVARSPEC = safety: must hold in EVERY reachable state.
@@ -67,14 +87,24 @@ CTLSPEC AG AF (side_light = green)
 -- timer stays in range (should pass: by the rules above it never exceeds 5)
 INVARSPEC timer <= 5
 
--- at least one direction is non-red (green or yellow) at all times (should pass)
-INVARSPEC main_light = green | side_light = green | main_light = yellow | side_light = yellow
-
 -- exactly one direction has a non-red light at any time (both should pass):
-INVARSPEC (main_light != red) -> (side_light = red)   -- if main is lit, side is red
-INVARSPEC (side_light != red) -> (main_light = red)   -- if side is lit, main is red
+-- "if main is lit, side is red" / "if side is lit, main is red".  These tolerate
+-- the all-red phase (where the antecedent is vacuously satisfied either way).
+INVARSPEC (main_light != red) -> (side_light = red)
+INVARSPEC (side_light != red) -> (main_light = red)
+
+-- The all-red clearance lasts AT MOST one tick before some direction goes green.
+-- (We checked: the next-state rules pick exactly one of main/side based on next_dir.)
+CTLSPEC AG ((main_light = red & side_light = red)
+             -> AX (main_light = green | side_light = green))
 
 -- LTL properties for Buchi analysis (LTL = one run over time; G=always, F=eventually)
 LTLSPEC G F(main_light = green)    -- passes: always eventually green (recurs forever)
 LTLSPEC F G(main_light = green)    -- fails: light keeps cycling, so it is NOT green-forever-eventually
 LTLSPEC G(!(main_light = green & side_light = green))  -- passes: mutual exclusion restated in LTL
+
+-- DELIBERATELY FALSE: the original "always at least one direction is lit"
+-- invariant no longer holds — the all-red phase is exactly the case where
+-- it fails.  We leave it in as a teaching artifact: the model checker
+-- returns "is false" and the counterexample is the all-red tick.
+INVARSPEC main_light = green | side_light = green | main_light = yellow | side_light = yellow

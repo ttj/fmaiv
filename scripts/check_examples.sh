@@ -61,7 +61,7 @@ expect "puzzles/magic_square.py"        "[0-9]"        python3 day01/examples/pu
 expect "puzzles/kenken.py"              "[0-9]"        python3 day01/examples/puzzles/kenken.py
 
 echo "===== Day 2: NuSMV (specs evaluate without error) ====="
-for m in counter mutex peterson prodcons elevator traffic_light gcd_01 spec_challenge bmc_depth; do
+for m in counter mutex peterson prodcons elevator traffic_light traffic_light_actuated gcd_01 spec_challenge bmc_depth; do
   expect "NuSMV $m.smv" "is (true|false)" NuSMV "day02/examples/$m.smv"
 done
 
