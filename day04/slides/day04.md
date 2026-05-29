@@ -962,6 +962,58 @@ This connects the frontier back to two earlier threads: data structures (BDDs/LD
 
 ---
 
+## Exact reachability in pictures: a 3-input / 2-output net
+
+A canonical NNV demo — a small **3-input / 2-output ReLU MLP** (~5 hidden layers), reachable output set computed *exactly* with star sets (Tran et al., FM 2019).
+
+![A 3-input → 5 hidden layers → 2-output ReLU MLP.](figures/nnv_network_3in_2out.png){width=78%}
+
+<div style="display:flex;gap:1em;justify-content:center;align-items:flex-start;margin:0.4em 0">
+  <figure style="margin:0;text-align:center;flex:1">
+    <img src="figures/nnv_reach_polytopes.png" alt="Exact output reachable set: dozens of colored polytopes covering the (y1, y2) plane." style="max-width:100%"/>
+    <figcaption style="font-size:0.78em;color:#5b6168"><em>Exact: every ReLU split produces a new polytope; the union is the true reachable set.</em></figcaption>
+  </figure>
+  <figure style="margin:0;text-align:center;flex:1">
+    <img src="figures/nnv_reach_polytopes_with_simulation.png" alt="Same polytopes overlaid with thousands of random forward-simulation samples — every sample sits inside a polytope." style="max-width:100%"/>
+    <figcaption style="font-size:0.78em;color:#5b6168"><em>Same polytopes + ~10k random forward simulations. Every sample lands inside; no holes, no over-approximation.</em></figcaption>
+  </figure>
+</div>
+
+- **Star sets keep the picture honest.** Each colored region is one piece of the *true* output set produced by an exact ReLU split. The simulations confirm soundness (every sample is contained) **and** tightness (no empty slack).
+- Our auto_LiRPA recreation in [`notebook 05`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/05_day4_nn_robustness.ipynb#scrollTo=compareReachability) / [`compare_reachability.py`](https://github.com/ttj/fmaiv/blob/main/day04/examples/nn/compare_reachability.py) shows the **bound-propagation** complement: a *rectangle* (IBP / CROWN / α-CROWN) that contains this whole polygon — sound, cheaper, looser.
+
+*(Source: T. Johnson's NNV lab — the exact 3-input / 2-output `compareReachability` benchmark; <https://github.com/verivital/nnv/tree/master/code/nnv/examples/Tutorial/NN/compareReachability>.)*
+
+::: notes
+The "look at the actual picture" slide students asked for, dropped in right after the star-set abstract diagram. The network is the standard NNV compareReachability demo: 3 input neurons, 5 ReLU hidden layers, 2 output neurons — small enough that *exact* reachability is tractable, large enough that the ReLU split blow-up is visible. The two MATLAB-rendered figures are the punchline. Left: the exact output reachable set drawn as ~30 colored polytopes — every one is the image of one piecewise-linear region of the input cube after passing through the ReLU splits. Right: the same polytope union overlaid with ~10k random forward-simulation samples; every sample sits inside, confirming both soundness (no real output is outside) and tightness (no empty over-approximation slack). The visual lesson is what abstract-interpretation slides cannot do: the *true* reachable set of a ReLU network is a complicated, non-convex, multi-component polytope union — and exact methods can compute it. The pedagogical move tying back to our hands-on stack: the auto_LiRPA bound-propagation recreation in notebook 05 / compare_reachability.py replaces this polytope union with a single axis-aligned RECTANGLE that contains it — sound, much cheaper, but visibly loose against this picture. So students see the spectrum from the live colab (loose, fast) to the NNV exact answer (tight, slow). Cite the NNV repo URL for the original MATLAB sources.
+:::
+
+---
+
+## MNIST robustness: set representations side by side
+
+Scaling the picture to a real classifier — **MNIST handwritten digits** (10 classes, 28×28 inputs):
+
+![A sample of MNIST training images, 10 rows × 15 columns.](figures/mnist_digit_grid.png){width=60%}
+
+For each test image $x_0$, **CROWN / ImageStar / α-CROWN** all answer the same question — *is every input in the ℓ∞ ε-ball classified the same way?* — by propagating a **set** through the convolutional layers and projecting to **ten output intervals** $[lo_j, hi_j]$ (one per class). Robustness holds iff:
+
+$$ lo_{\text{true}} \;>\; \max_{j \neq \text{true}} hi_j $$
+
+- **CROWN** (`auto_LiRPA`) — linear lower/upper bounds; ms-per-image on CPU. *Our colab demo*.
+- **ImageStar** (NNV; Tran et al., **CAV 2020**) — exact CNN reachability through Conv + AvgPool + BatchNorm + ReLU (uses **exact** ReLU splitting + the star-set representation).
+- **α-CROWN / β-CROWN** — bound propagation **+ branch-and-bound** → *complete* verifier; the VNN-COMP MNIST-FC champion.
+
+Live in our stack: [`notebook 06`](https://colab.research.google.com/github/ttj/fmaiv/blob/main/notebooks/06_day4_nn_mnist.ipynb) + [`verify_fc.py`](https://github.com/ttj/fmaiv/blob/main/day04/examples/nn/verify_fc.py) plot the **per-class CROWN intervals** for a single digit (the `verify_fc.m` analog from NNV) and compare CROWN vs IBP vs α-CROWN **certified accuracy** across 100 images.
+
+*(References: Tran et al., "Verification of Deep Convolutional Neural Networks Using ImageStars", CAV 2020; MNIST dataset: <http://yann.lecun.com/exdb/mnist/>.)*
+
+::: notes
+The companion slide, recreating the second illustrative figure from the source NNV deck (the WMF was too large to ship — the MNIST handwriting sample plus the citations are what carries the slide). The teaching arc: same property — class doesn't flip over the ε-ball — three representations of the propagated set, listed loosest-to-tightest. CROWN (auto_LiRPA, what our colab runs) is fast linear bound propagation: a per-neuron interval at each layer, then ten output intervals at the end. ImageStar (NNV; Tran et al., CAV 2020) is exact reachability through every CNN layer type — convolutions, batch norm, average and max pooling, ReLU — using the star-set representation from the previous slide; it gives a tighter answer than CROWN but costs more compute. α-CROWN / β-CROWN closes the gap on the bound-propagation side by adding branch-and-bound, recovering completeness; it's the VNN-COMP MNIST-FC champion that wins on speed *and* completeness. The crucial line for the audience is the inequality: robustness reduces to a single comparison between the TRUE class's lower bound and the largest RIVAL's upper bound — exactly what verify_fc.py prints and the new colab section plots. Reference: NNV's verify_fc.m at verivital/nnv/.../MNIST/verify_fc.m is the MATLAB original. Use the colab and the script as the hands-on companion.
+:::
+
+---
+
 ## NN verification in the wild
 
 Real networks we have verified — beyond toy MLPs:
