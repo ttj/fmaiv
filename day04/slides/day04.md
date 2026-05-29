@@ -700,6 +700,38 @@ Final block, a survey. Where formal methods meets AI (neural-network verificatio
 
 ---
 
+## A stop sign + stickers = "Speed Limit 45"
+
+A handful of **printable stickers** — not paint, not graffiti — on a real road sign make a deployed deep classifier read **Speed Limit 45** in **84.8 %** of drive-by video frames (Eykholt et al., *Robust Physical-World Attacks on Deep Learning Visual Classification*, CVPR 2018; <https://arxiv.org/abs/1707.08945>).
+
+<svg viewBox="0 0 740 230" style="display:block;margin:0.3em auto;max-width:78%;height:auto" font-family="Inter, system-ui, sans-serif">
+  <defs><marker id="ekm-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6168"/></marker></defs>
+  <polygon points="180,40 240,40 282,82 282,142 240,184 180,184 138,142 138,82" fill="#c0392b" stroke="#922b21" stroke-width="2"/>
+  <text x="210" y="123" font-size="42" font-weight="bold" fill="white" text-anchor="middle">STOP</text>
+  <rect x="158" y="60" width="38" height="16" fill="white" stroke="#1c1c1c" stroke-width="0.8"/>
+  <rect x="232" y="92" width="42" height="12" fill="white" stroke="#1c1c1c" stroke-width="0.8"/>
+  <rect x="172" y="142" width="46" height="14" fill="white" stroke="#1c1c1c" stroke-width="0.8"/>
+  <rect x="220" y="160" width="34" height="14" fill="white" stroke="#1c1c1c" stroke-width="0.8"/>
+  <text x="210" y="208" font-size="11.5" fill="#5b6168" text-anchor="middle">stop sign + 4 sticker patches</text>
+  <line x1="306" y1="112" x2="430" y2="112" stroke="#5b6168" stroke-width="1.8" marker-end="url(#ekm-ah)"/>
+  <text x="368" y="100" font-size="11.5" fill="#5b6168" text-anchor="middle">classifier</text>
+  <rect x="450" y="50" width="170" height="134" rx="10" fill="white" stroke="#1c1c1c" stroke-width="3"/>
+  <text x="535" y="80" font-size="14" font-weight="bold" fill="#1c1c1c" text-anchor="middle">SPEED</text>
+  <text x="535" y="99" font-size="14" font-weight="bold" fill="#1c1c1c" text-anchor="middle">LIMIT</text>
+  <text x="535" y="166" font-size="60" font-weight="bold" fill="#1c1c1c" text-anchor="middle">45</text>
+  <text x="535" y="208" font-size="11.5" fill="#922b21" text-anchor="middle">misclassified — 84.8 % of frames</text>
+</svg>
+
+- **Physical**, not pixel-only: stickers printed, applied to the *actual* sign, photographed on a moving vehicle at varying distances and angles.
+- The perturbation **survives a real camera + lighting pipeline** — no hand-crafted noise, no white-box gradient hidden in the JPEG.
+- Why this drives *formal* robustness: testing some images cannot rule out attackers like this; we want **a guarantee over a whole neighborhood of inputs around the true stop sign**.
+
+::: notes
+The opening icon of the modern adversarial-examples era, and the cleanest one-sentence pitch for why robustness needs a *verifier*, not just more test images. Eykholt et al.'s CVPR 2018 attack uses everyday printable stickers on a physical stop sign; across drive-by video at varying distances and angles, 84.8% of frames are misclassified as Speed Limit 45 by a standard production-style sign classifier (and similar attacks misclassify it as other signs). This breaks the "adversarial examples are an academic toy with hand-crafted pixel noise" framing: the perturbation is physical, manufacturable, survives the camera + lighting pipeline of a real perception stack, and was reproduced by independent groups (the Tencent Keen Security Lab Tesla-lane-detection attack is a follow-up in the same spirit). Two takeaways for the rest of L3. (1) Testing — even adversarial testing — can never *prove* robustness; for that we need a verifier that reasons about an entire neighborhood of inputs at once. (2) The neighborhood the verifier reasons about should be honest: ℓ∞ balls are the canonical clean form, but the real-world question is about whole *families* of physically realizable perturbations (stickers, weather, occlusion). That is the open challenge VNN-COMP captures in its newer benchmarks (Traffic-Signs-Recognition, cGAN, segmentation). The sketch above is hand-drawn in the deck's style; for the original photographs see fig. 1 of arXiv:1707.08945.
+:::
+
+---
+
 ## Verifying neural networks
 
 The problem: given a trained network `f` and an input region `R`,
@@ -867,6 +899,51 @@ The frontier reach: from a 300-neuron advisory net to a 140-million-parameter im
 
 ::: notes
 This is the "it's not just toys" slide, drawn directly from our NNV case studies. ACAS Xu — 45 small networks giving aircraft collision-avoidance advisories — is the field's standard benchmark, small but safety-critical and with crisp specs. At the other extreme, VGG16/19 are real ImageNet classifiers with ~140 million parameters and 1000 output classes, verified robust to a bounded perturbation of a specific image in about ten minutes on a single core using ImageStars (the image extension of star sets) — a genuinely large-scale result. CARLA is the driving simulator used for perception robustness. And the closed-loop CPS row is the part unique to this group: they verify the network together with the physical plant it controls (adaptive cruise control), so the property is about the whole controlled system's safety over time, not just one forward pass — that is the hybrid-systems heritage of star sets paying off. The takeaway: the reach now spans five orders of magnitude in network size.
+:::
+
+---
+
+## Where NN verification is being applied
+
+A widening application surface — far beyond MNIST/CIFAR toys (sources: VNN-COMP 2020–2025 benchmark archive; NNV case-study log; Liu et al., *Algorithms for Verifying Deep Neural Networks*, Found. & Trends in Optimization, 2021):
+
+| Domain | What is being verified | Representative benchmarks / references |
+|---|---|---|
+| **Image classification** | local ℓ∞ robustness of MLPs / CNNs / ResNets / ViTs | MNIST-FC, CIFAR-10/100, ImageNet (VGG-16/19 via ImageStar; Tran et al., CAV 2020), `tinyimagenet`, `vit` |
+| **Semantic / medical segmentation** | per-pixel class stability of U-Nets | Carvana UNet (VNN-COMP 2022+); brain-MRI / lung-CT segmentation (Tran et al., FM 2021) |
+| **Speaker / audio recognition** | invariance under bounded acoustic perturbations | Speaker-ID CNNs; VeriX explainability + verification on audio classifiers |
+| **Video classification** | per-frame and short-horizon temporal stability of 3D-CNNs | UCF-style action-recognition robustness studies (Pal, Musau et al.) |
+| **Fairness in tabular ML** | swaps in protected attributes never flip the label | FairSquare (Albarghouthi, OOPSLA 2017); DICE (Galhotra et al.); FairBoost |
+| **Aircraft collision avoidance** | safe-advisory regions of policy nets | **ACAS Xu** (every VNN-COMP, 2020 →) |
+| **Autonomous-driving perception** | sign-recognition + lane-detection invariance to noise | Traffic-Signs-Recognition (Erascu, Postovan; VNN-COMP'23); `cctsdb_yolo`, `metaroom` |
+| **Closed-loop CPS / RL** | system-level safety with the *network in the loop* | NNV 2.0 (Lopez et al., CAV 2023); SafeRL (AFRL); CartPole, LunarLander |
+| **Database / ML-for-systems** | bounded-error cardinality estimators, learned indexes | **nn4sys** (Lin et al., VNN-COMP 2022+) |
+| **LLM / VLM guardrails** | property checks on small open LMs and content filters | AWS Bedrock *Automated Reasoning*; Shi et al., *Robustness Verification for Transformers*, ICLR 2020 |
+
+Whenever the property fits the **"input region ⇒ output region"** shape from Day 1, the bound-propagation / reachability machinery transfers.
+
+::: notes
+The "is this only image robustness?" question, answered with the breadth from VNN-COMP and our own NNV case studies. The grouping is meant to be more comprehensive than the previous "NN verification in the wild" slide, which highlights four flagship case studies. Image classification (the bread and butter) now reaches ImageNet-scale via ImageStar (Tran et al., CAV 2020) and recent Vision Transformer benchmarks. Semantic and medical-imaging segmentation U-Nets are a recurring VNN-COMP benchmark (Carvana, 2022 onward); our group has verified networks for brain MRI tumor maps and lung CT segmentation. Speaker / audio is younger but the bounded-perturbation framing transfers cleanly. Video extends image classification temporally, often with 3D-CNNs (verivital archive). Fairness verification is a parallel line where the input "ball" is in protected attributes — FairSquare and DICE are the canonical references. ACAS Xu remains the field's hello-world. Traffic-signs recognition is the production-style classifier that Eykholt's stickers exposed — verified in VNN-COMP 2023 by Erascu and Postovan. Closed-loop CPS / RL is our group's signature (NNV 2.0, SafeRL benchmark) where the property is system-level safety with the network in the loop. Database / ML-for-systems is nn4sys, an unusual but growing benchmark family where the network is a learned cardinality estimator. LLMs / VLMs are the open frontier — AWS Bedrock's Automated Reasoning is one of the only production "guardrail" deployments, and Shi et al. 2020 remains the formal anchor for transformer robustness. The common thread: every row reduces to "input set → output set" — once you have the property in that shape, the bound-propagation or reachability machinery transfers (modulo what layer types your tool supports — which is the next slide).
+:::
+
+---
+
+## What works, what's hard, what's open
+
+Capability is not just "parameter count" — it is **layer × architecture × spec**. Distilled from the VNN-COMP 2020–2025 benchmark archive + our AAAI'26 lab (<https://vnn-comp.github.io/#aaai2026>):
+
+| | **Routinely verifiable today** | **Hard / partial** | **Open frontier** |
+|---|---|---|---|
+| **Layers** | Linear/Affine, Conv2D, ReLU, AvgPool, BatchNorm, ResNet skip-connections | MaxPool (per-neuron split), Sigmoid/Tanh (curved relaxations are loose), ConvTranspose, sigmoidal `nn4sys` heads | **Self-attention** / multi-head, LayerNorm, Softmax, LSTM/GRU recurrence, dynamic shapes |
+| **Architectures** | feed-forward MLPs, CNNs, small/medium ResNets, small ViTs, branched DAGs | Recurrent control (LSTM in the loop), U-Nets at full Carvana resolution | Large transformers, mixture-of-experts, LLMs, diffusion models |
+| **Sizes (one-shot robustness)** | ≲ 10 M params with bound-prop + B&B; up to ~140 M (ImageStar / VGG-16/19) for reachability | 100 M – 1 B image models with heavy conservatism | LLMs (1 – 70 B+), VLMs, full agent stacks |
+| **Specs / input regions** | ℓ∞ balls; safe-region reachability for control; halfspace output specs | ℓ2 / ℓ1 balls, rotations, brightness; discrete word-substitutions for NLP | semantic robustness across pixel-space **and** natural-language; "no jailbreak" |
+| **Verdict you can expect** | sound + complete via branch-and-bound (α,β-CROWN) or exact star reachability | sound + incomplete — verifier returns **unknown** on the hard pieces | no mature *sound* verifier exists for the full frontier yet |
+
+**Rule of thumb (2025):** "feed-forward / piecewise-linear / ℓ∞ / image scale" → solved; "recurrent / curved / discrete / language" → research.
+
+::: notes
+The honest capability map, distilled from the VNN-COMP'22 architecture table (15 benchmarks with explicit parameter counts and layer mixes), the 2024/2025 reports (arXiv:2412.19985 and arXiv:2512.19007 — the latter from our group), and our AAAI'26 VNN-COMP lab/tutorial. The fundamental observation is that *capability isn't size alone* — a 140M-param VGG-16 image classifier is verifiable in minutes (ImageStar; Tran et al., CAV 2020), while a 10M-param LSTM or attention block can be out of reach. The right axes are layer type × architecture × spec. Layers: the "linear-after-activation" family (Affine / Conv / ReLU / AvgPool / BatchNorm) is solved because each step has a clean convex over-approximation; MaxPool is partial (it forces a region split per neuron — the exponential blow-up again); Sigmoid/Tanh cost real tightness because their curvature is hard to relax cheaply; self-attention, LayerNorm, and Softmax are mostly open — only Shi et al. ICLR'20 give a formal transformer-robustness anchor, and LSTM/GRU remain niche. Architectures: routine includes MLPs, CNNs (up to VGG/ResNet scale), small ViTs; closed-loop control with LSTMs and large transformers are the frontier. Sizes: bound-propagation tools scale to ~10M params with branch-and-bound; ImageStar reachability pushes to ~140M for one-shot robustness; large transformers (1B+) remain open. Specs: ℓ∞ is canonical and solved; ℓ2/ℓ1, rotations, and brightness perturbations need geometric extensions; NLP (word-substitutions) and discrete neighborhoods are unevenly supported; "no jailbreak" has no clean formal definition yet — a research-task for the assignment. The two-line rule of thumb is what to leave students with — if the spec/network shape stays inside the green column, pick a VNN-COMP tool and go; if it crosses into the red column, expect research-level work.
 :::
 
 ---
