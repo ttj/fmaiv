@@ -85,6 +85,8 @@ expect "cbmc counter"   "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && 
 expect "cbmc array_max" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc array_max.c array_max_check.c --unwind 6 --unwinding-assertions'
 expect "cbmc binsearch" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc binsearch.c binsearch_check.c --unwind 10 --unwinding-assertions'
 expect "cbmc loop_invariant_demo" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc loop_invariant_demo.c --unwind 21 --unwinding-assertions'
+expect "cbmc gcd (property)" "VERIFICATION SUCCESSFUL" bash -c 'cd day04/examples && cbmc gcd.c gcd_check.c --unwind 11 --unwinding-assertions'
+expect "cbmc gcd (--cover branch test-gen)" "10 of 10 covered" bash -c 'cd day04/examples && cbmc gcd.c gcd_check.c --cover branch --unwind 11'
 
 echo "===== Day 4: Cryptol (:prove every property -> Q.E.D.) ====="
 cryprove(){ local f="$1"; shift; local p; for p in "$@"; do \

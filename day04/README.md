@@ -44,7 +44,7 @@ day04/
 │   ├── popcount.c             ← three C popcount implementations
 │   ├── popcount.saw           ← SAW script proving C ↔ Cryptol equivalence
 │   ├── loop_invariant_demo.c  ← bounded-loop CBMC taster (bridge to Day-3 induction) (+ _starter)
-│   ├── array_max / binsearch  ← more CBMC examples (`.c` + `_check.c` + `_starter.c`)
+│   ├── gcd / array_max / binsearch  ← more CBMC examples (`.c` + `_check.c` + `_starter.c`); gcd also showcases `--cover branch` unit-test generation
 │   ├── caesar / xor_cipher    ← more Cryptol examples (`.cry` + `_starter.cry`)
 │   └── nn/                     ← FRONTIER: neural-network robustness (auto_LiRPA): robustness.py + _starter, compare_reachability.py (3-in/2-out cube), verify_fc.py (MNIST output-set-before-argmax), requirements.txt, README.md  (Colab notebooks are in notebooks/)
 └── assignments/day04.md

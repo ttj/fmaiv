@@ -401,6 +401,67 @@ A major selling point: CBMC's default checks catch the classic memory-safety and
 
 ---
 
+## CBMC as a unit-test generator: `--cover`
+
+So far we used CBMC to *prove* `assert`s. The **same solver** can do the opposite — *find* an input for every coverage goal you name:
+
+```bash
+cbmc gcd.c gcd_check.c --cover branch    --unwind 11    # one input per branch
+cbmc gcd.c gcd_check.c --cover decision  --unwind 11    # one input per decision outcome
+cbmc gcd.c gcd_check.c --cover mcdc      --unwind 11    # MC/DC (DO-178C avionics-grade)
+cbmc gcd.c gcd_check.c --cover location  --unwind 11    # one input per source line
+```
+
+For **every** unreachable goal CBMC prints `FAILED` (dead code); for every reachable goal it prints **SATISFIED** along with the **concrete inputs** that hit it — exactly what a unit-test runner needs (CPROVER manual: <https://www.cprover.org/cprover-manual/>; tool source: <https://github.com/diffblue/cbmc>).
+
+| Coverage criterion | Captures |
+|---|---|
+| `location` | every source line is reached |
+| `branch` | every `if`/`while`/`for` decision goes both ways |
+| `decision` | every *compound* boolean expression evaluates true *and* false |
+| **`mcdc`** | every atomic condition is independently shown to affect the outcome — **the standard for DO-178C Level A avionics** |
+
+> **The shift:** "prove the assertion" and "generate one test per goal" are the same SAT/SMT query with different objective formulas. One tool, two modes.
+
+::: notes
+This is the unit-test-generation angle students asked about, and the cleanest way to make CBMC actionable beyond "prove or fail." Under the hood `--cover X` rewrites the program so that hitting each goal X corresponds to satisfying a fresh `assert(0)` — then asks the solver, for every goal, to find an input that triggers exactly that one. Unreachable goal → FAILED → it is dead code. Reachable goal → SATISFIED + a witness assignment to all `nondet_*` calls → exactly the test input you would write by hand. The four criteria escalate: `location` is line-coverage (cheapest), `branch` is the standard, `decision` upgrades to ensure compound conditions go both ways, and `mcdc` (Modified Condition / Decision Coverage) is the DO-178C Level A avionics-certification standard — independence proves each atomic condition can flip the outcome on its own. Pointers for the audience: the CPROVER manual at cprover.org/cprover-manual documents every flag, and the diffblue/cbmc GitHub repo (and the Diffblue commercial product Cover for JVM) builds the same machinery into IDEs. Hand-off slide for the next demo.
+:::
+
+---
+
+## Worked example: branch coverage for GCD
+
+The Euclidean GCD function from Day 2 (`gcd_01.smv`), now in C as [`gcd.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/gcd.c) + [`gcd_check.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/gcd_check.c):
+
+```c
+int gcd(int a, int b) {
+    while (b != 0) { int t = b; b = a % b; a = t; }
+    return a;
+}
+```
+
+**One harness, two CBMC runs.** *Property* mode proves the spec for every `(a, b)` in $[0, 20]^2$; *coverage* mode generates one unit-test input per branch:
+
+```text
+$ cbmc gcd.c gcd_check.c --unwind 11 --unwinding-assertions
+  → VERIFICATION SUCCESSFUL                                              # property mode
+
+$ cbmc gcd.c gcd_check.c --cover branch --unwind 11
+  [gcd.coverage.1]    line 28 function gcd entry point: SATISFIED        # 10 goals,
+  [gcd.coverage.2]    line 28 block 1 branch false:     SATISFIED        # one
+  [gcd.coverage.3]    line 28 block 1 branch true:      SATISFIED        # SATISFIED line
+  [main.coverage.1-7] line 26-43 ...                    SATISFIED        # per branch
+  ** 10 of 10 covered (100.0%)                                           # ← every branch hit
+```
+
+Each `SATISFIED` line carries the **concrete `(a, b)` pair** the solver found — that pair becomes one unit test. **Counter example** ([`counter_check.c`](https://github.com/ttj/fmaiv/blob/main/day04/examples/counter_check.c)) works the same way: `--cover branch` enumerates the press sequences that hit each of `counter_step`'s four guards.
+
+::: notes
+Run this live, both modes back-to-back, so students see the same artifact (`gcd.c` + `gcd_check.c` + `--unwind 11`) do two different jobs depending on the verb. Property mode proves the spec UNSAT (no input violates) and reports VERIFICATION SUCCESSFUL after exercising every value pair in [0..20]×[0..20]. Coverage mode rewrites internally so each coverage goal becomes its own SAT query, asks for one model per goal, and prints the witness — that witness is the `(a, b)` pair you would have hand-picked to hit that branch. We get 10/10 SATISFIED — 3 from gcd's loop guard + entry point + 7 from main's spec checks. Same trick works on counter: `cbmc counter.c counter_check.c --cover branch --unwind 26` enumerates the press sequences that exercise each of counter_step's four guards (MODE_OFF & !press, MODE_OFF & press, MODE_ON & !press & x<MAX, MODE_ON & (press|x>=MAX)) — a press-sequence-aware test generator without writing any test by hand. Practical use: pipe the JSON/XML output (`--xml-ui` / `--json-ui`) into a small script that emits one test function per SATISFIED goal in your test framework. This is exactly the workflow Diffblue's commercial Cover product wraps for JVM, and the open CBMC repo (github.com/diffblue/cbmc) has the same engine. CPROVER manual is the single-source-of-truth for every flag.
+:::
+
+---
+
 ## The complement to CBMC: deductive verification
 
 CBMC is **bounded** — it checks every run up to depth `N`. The other major style proves correctness for **all** inputs and **all** depths — the price is that *you* supply the invariants.
