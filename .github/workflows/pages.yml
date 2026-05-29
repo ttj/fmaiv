@@ -15,6 +15,7 @@ on:
       # NB: in GitHub path globs `?` means "zero or one of the preceding char",
       # so "day0?/slides" never matched day01..day04. Use "day*" instead.
       - "day*/slides/*.md"
+      - "day*/slides/figures/**"
       - "reveal-custom.css"
       - "reveal-neutral.css"
       - "reveal-fit.html"
@@ -42,7 +43,18 @@ jobs:
       - name: Render decks to RevealJS
         run: |
           set -euo pipefail
-          mkdir -p _site
+          mkdir -p _site _site/figures
+          # Mirror every day's slides/figures/ into _site/figures/ so the
+          # decks' relative `![alt](figures/...png)` and `<img src="figures/...">`
+          # references resolve once the slides are served from _site/. Each
+          # day's figures live in day*/slides/figures/; `cp -r .../.` preserves
+          # any subdirectories (e.g. day01/slides/figures/photos/).
+          for d in day00 day01 day02 day03 day04; do
+            if [ -d "$d/slides/figures" ]; then
+              cp -r "$d/slides/figures/." "_site/figures/"
+              echo "copied $d/slides/figures/ -> _site/figures/"
+            fi
+          done
           for d in day00 day01 day02 day03 day04; do
             src="$d/slides/$d.md"
             [ -f "$src" ] || { echo "skip $d (no $src)"; continue; }
