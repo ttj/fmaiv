@@ -9,10 +9,10 @@
  *   exercise every BRANCH in the implementation (one concrete unit test
  *   per branch goal):
  *       cbmc gcd.c gcd_check.c --cover branch --unwind 11
- *       expected output:
- *         coverage goals: 8
- *         ** N of N covered (N%)
- *         (one SATISFIED line per branch, with concrete a, b values)
+ *       expected output (CBMC 6.9.0):
+ *         ** 10 of 10 covered (100.0%)
+ *         (one SATISFIED line per branch in gcd + main, with concrete
+ *         a, b values -- the unit-test inputs)
  *
  * That second mode is the unit-test generation angle: CBMC walks every
  * branch of the loop and prints a concrete input pair driving the loop
