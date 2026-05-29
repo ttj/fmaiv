@@ -318,6 +318,14 @@ Violated property: counter_check.c line 57   s.x < 10
 - The last block names the **violated property** and its source line — the smoking gun.
 - Replaying just the `press` values in a debugger reproduces the bug deterministically.
 
+For a more readable view of the same trace — input column highlighted, `x` shown as a bar chart, transitions annotated — pipe `cbmc --trace` through [`scripts/cbmc-trace-replay.py`](https://github.com/ttj/fmaiv/blob/main/scripts/cbmc-trace-replay.py):
+
+```bash
+sed 's/s\.x <= 10/s.x < 10/' counter_check.c > /tmp/strict.c
+cbmc counter.c /tmp/strict.c --unwind 26 --unwinding-assertions --trace \
+    | python3 scripts/cbmc-trace-replay.py
+```
+
 ::: notes
 This is the "how to actually use the output" slide. Emphasize three reading habits. First, a CBMC trace is not prose — it is a chronological list of variable assignments, exactly what you would see single-stepping in gdb, so read top to bottom. Second, only a few lines are inputs (the nondet choices, here `press`); everything else is a consequence CBMC computed. To reproduce the bug you only need the inputs. Third, the final "Violated property" line is the one that matters — it tells you which assertion and which source line, so you jump straight there. The payoff over testing: a test tells you "it failed sometimes"; this tells you the precise, minimal, replayable input sequence that triggers it. Note CBMC reports the SHORTEST trace it can within the bound, so the counterexample is usually minimal and readable.
 :::
