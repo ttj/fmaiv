@@ -24,6 +24,13 @@
   // managed", hence --break-system-packages.
   "onCreateCommand": "pip install --break-system-packages --no-cache-dir jupyterlab notebook ipykernel nbconvert matplotlib && pip install --break-system-packages --no-cache-dir torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu && pip install --break-system-packages --no-cache-dir git+https://github.com/Verified-Intelligence/auto_LiRPA.git@ca767f1d8c0a6b125a292ba165adb2319bbaf615",
 
+  // Every time the container boots/resumes, fast-forward this branch to
+  // origin so a re-opened Codespace picks up new examples + slides without
+  // the student having to `git pull` manually. Non-fatal: if the student
+  // has local commits or a divergent branch, the script prints a
+  // diagnostic and continues so the Codespace still opens.
+  "postStartCommand": "bash .devcontainer/auto-pull.sh",
+
   "customizations": {
     "vscode": {
       // Open .ipynb directly in the browser VS Code editor.
@@ -38,5 +45,5 @@
     "8888": { "label": "JupyterLab", "onAutoForward": "openBrowser" }
   },
 
-  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis + torch/torchvision/auto_LiRPA (Day-4 NN). Open notebooks/*.ipynb (one per day), or use the terminal. For nuXmv: smvis web app or the private teaching image.'"
+  "postAttachCommand": "echo 'Ready: z3 cbmc cryptol saw NuSMV lean smvis + torch/torchvision/auto_LiRPA (Day-4 NN). Open notebooks/*.ipynb (one per day), or use the terminal. For nuXmv: smvis web app or the private teaching image. The container fast-forwards this branch to origin on every start -- run `bash .devcontainer/auto-pull.sh` any time to re-sync without restarting.'"
 }
