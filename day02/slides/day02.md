@@ -322,10 +322,33 @@ These show the range of SMV modeling. The four original files (counter, traffic_
   <text x="88.5" y="182" font-size="11.5" fill="#5b6168">▲ initial</text>
 </svg>
 
-Four phases cycle in order; the `timer` counts ticks within each phase. Exactly one direction is ever non-red, so the safety invariants — never two greens, never two yellows — are intended to hold; we confirm them with nuXmv.
+The cycle the file walks: **main green → main yellow → all-red → side green → side yellow → all-red →** main green. The `timer` counts ticks within each phase; a `next_dir` ghost variable carries the handover direction through the all-red phase (the figure simplifies the two 1-tick clearance ticks for clarity). Safety invariants — never two greens, never two yellows, mutually exclusive — hold throughout; we confirm with nuXmv.
 
 ::: notes
-The same SMV file (`traffic_light.smv`), drawn as the state machine it describes. The three `next(...)` case statements jointly walk this 4-cycle: green→yellow→red on the main side, interleaved with the side road. This is the picture students should sketch before writing any temporal property: once you can see the cycle, "never two greens" (`AG !(main=green & side=green)`) and "main always eventually green" (`AG AF main=green`) are obvious. Note both yellow phases are gold-tinted, both green phases green-tinted — color carries meaning here.
+The same SMV file (`traffic_light.smv`), drawn as the state machine it describes. The three light-variable `next(...)` case statements jointly walk this cycle: green→yellow→red on the main side, an all-red clearance tick, then the symmetric handoff to side. The all-red phase is a real safety convention (red-light-runner clearance + giving stopped drivers time to clear the intersection) — every modern pre-timed controller has it, and a student review flagged its absence in an earlier version of this file. The figure abbreviates the two 1-tick all-red phases to keep the diagram simple; the actual `next(...)` rules and the `next_dir` ghost variable handle it. Picture this once and "never two greens" (`AG !(main=green & side=green)`) and "main always eventually green" (`AG AF main=green`) are obvious. Note both yellow phases are gold-tinted, both green phases green-tinted — color carries meaning here.
+:::
+
+---
+
+## Actuated controller: [traffic_light_actuated.smv](https://github.com/ttj/fmaiv/blob/main/day02/examples/traffic_light_actuated.smv)
+
+Real intersections aren't pre-timed: the side road only gets green **when a car arrives**. Model the arrival as a non-deterministic free input `side_request : boolean` (`IVAR`); the controller stays in main green until a request appears after a minimum hold.
+
+The branching matters. The path "no request ever" stays in main_green forever; every path with a request reaches side_green. **`EF` and `AF` now genuinely differ** — the slide-worthy CTL/LTL distinction:
+
+| Spec | Verdict | Why |
+|---|---|---|
+| `EF (side_light = green)` | **holds** | some path takes a request and reaches side_green |
+| `AF (side_light = green)` | **fails** | the no-request path is a counterexample — stays main_green forever |
+| `AG AF (side_light = green)` | **fails** | same counterexample, from every reachable main-green state |
+| `EG (main_light = green)` | **holds** | exactly the no-request path |
+| `AG (side_request -> EF (side_light = green))` | **holds** | requests are servable |
+| `G F side_request -> G F (side_light = green)` (LTL) | **holds** | no starvation when requests keep coming |
+
+Same SMV vocabulary — the difference is the `IVAR` and a minimum-hold guard.
+
+::: notes
+This is the slide that earns CTL its keep. Pre-timed controllers like `traffic_light.smv` have a SINGLE behaviour, so `EF p` and `AF p` collapse — every state is on the only path. Once we add a non-deterministic input (`side_request`), the system has multiple paths and the difference between "some path reaches p" (`EF`) and "every path reaches p" (`AF`) becomes substantive. The headline EF-but-not-AF row is the one I dwell on: it's the canonical "AG EF p" recoverability pattern, but easier to motivate here than on the counter. The starvation-freedom LTL line is bonus — it's the same idea ("if requests keep coming, side keeps getting served") in the LTL idiom. *Origin note:* the actuated variant was suggested by a course participant who'd done graduate work on traffic systems and pointed out the original pre-timed example was too simple to motivate CTL convincingly — credit where due.
 :::
 
 ---

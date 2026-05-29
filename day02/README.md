@@ -35,7 +35,8 @@ day02/
 ├── slides/day02.md
 ├── examples/
 │   ├── counter.smv              ← running example (adapted from verivital/smvis as a sampler)
-│   ├── traffic_light.smv        ← cyclic four-phase controller
+│   ├── traffic_light.smv        ← pre-timed cyclic controller (with all-red clearance phase)
+│   ├── traffic_light_actuated.smv ← vehicle-actuated variant: side green only on nondet `side_request`; makes `EF` ≠ `AF` substantive
 │   ├── mutex.smv                ← two-process mutual exclusion
 │   ├── gcd_01.smv               ← Euclid's algorithm as a transition system
 │   ├── elevator / peterson / prodcons   ← more models (each `.smv` + a `_starter.smv`)

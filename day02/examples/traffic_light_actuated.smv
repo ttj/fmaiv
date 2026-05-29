@@ -1,0 +1,107 @@
+MODULE main          -- single top-level component; "main" is the entry point
+-- Actuated traffic light: the main road stays green by default; the side
+-- road only gets a green phase when a vehicle arrives -- encoded as the
+-- non-deterministic free input `side_request`.  This is a teaching
+-- abstraction of a real vehicle-actuated controller (loop / camera sensor
+-- on the side road; the main road runs free until something is detected).
+--
+-- Compared to the pre-timed `traffic_light.smv`, the controller's behaviour
+-- now genuinely BRANCHES: the path where no request ever arrives stays in
+-- main_green forever, while every path that takes a request reaches side
+-- green.  That branching is what makes CTL operators (EF vs AF, AG EF vs
+-- AG AF) MEANINGFUL on this model -- with the pre-timed version they
+-- collapse together.
+--
+-- Cycle once triggered:
+--   main_green --(req & timer>=2)--> main_yellow --> all_red(next=side)
+--     --> side_green --> side_yellow --> all_red(next=main) --> main_green
+-- A `next_dir` ghost variable carries the handover direction through the
+-- all-red phase (same trick as the pre-timed file).
+--
+-- Operators: ! = not, & = and, | = or, -> = "implies".
+
+VAR
+    main_light   : {green, yellow, red};
+    side_light   : {green, yellow, red};
+    timer        : 0..3;
+    next_dir     : {main, side};
+    -- `side_request` is a state variable with NO init/next assignment, so its
+    -- value is unconstrained at every step (a nondeterministic Boolean input
+    -- visible to the specs).  We use VAR rather than IVAR because NuSMV CTL
+    -- and LTL properties may only reference state variables.
+    side_request : boolean;
+
+ASSIGN
+    init(main_light) := green;
+    init(side_light) := red;
+    init(timer)      := 0;
+    init(next_dir)   := side;
+
+    -- timer counts ticks within whatever phase we're in.  In main_green it
+    -- climbs to a minimum main-green time (2 ticks) and then HOLDS until a
+    -- side_request appears.  In side_green it counts a fixed 2-tick service.
+    next(timer) := case
+        main_light = green & timer < 2                 : timer + 1;  -- warm-up
+        main_light = green & timer = 2 & side_request  : 0;          -- yield
+        main_light = green & timer = 2 & !side_request : 2;          -- hold
+        main_light = yellow                            : 0;
+        side_light = green & timer < 2                 : timer + 1;  -- side service
+        side_light = green & timer = 2                 : 0;          -- end side
+        side_light = yellow                            : 0;
+        main_light = red & side_light = red            : 0;          -- all-red: 1 tick
+        TRUE                                           : timer;
+    esac;
+
+    -- main_light: stays green until a side_request after the minimum hold time.
+    next(main_light) := case
+        main_light = green & timer = 2 & side_request          : yellow;
+        main_light = yellow                                    : red;
+        main_light = red & side_light = red & next_dir = main  : green;
+        TRUE                                                   : main_light;
+    esac;
+
+    -- side_light: fixed-duration service once granted.
+    next(side_light) := case
+        side_light = green  & timer = 2                        : yellow;
+        side_light = yellow                                    : red;
+        main_light = red & side_light = red & next_dir = side  : green;
+        TRUE                                                   : side_light;
+    esac;
+
+    next(next_dir) := case
+        main_light = yellow : side;  -- main finishing -> next green is side
+        side_light = yellow : main;  -- side finishing -> next green is main
+        TRUE                : next_dir;
+    esac;
+
+-- SAFETY (HOLDS) -- the usual mutex / range invariants.
+INVARSPEC !(main_light = green & side_light = green)
+INVARSPEC !(main_light = yellow & side_light = yellow)
+INVARSPEC (main_light != red) -> (side_light = red)
+INVARSPEC (side_light != red) -> (main_light = red)
+INVARSPEC timer <= 3
+
+-- CTL: side green is reachable on SOME path (HOLDS).
+CTLSPEC EF (side_light = green)
+
+-- CTL: main is always somewhere reachable (HOLDS) -- the cycle returns home.
+CTLSPEC AG EF (main_light = green)
+
+-- CTL: some path keeps main_light = green forever (HOLDS) -- the "no request ever" path.
+CTLSPEC EG (main_light = green)
+
+-- CTL: whenever a side_request fires, some path serves it (HOLDS).
+CTLSPEC AG (side_request -> EF (side_light = green))
+
+-- CTL: side green is reachable on EVERY path (DELIBERATELY FALSE) --
+-- the no-request path never gets there.  This is the slide's headline
+-- distinction:  EF holds, AF doesn't.
+CTLSPEC AF (side_light = green)
+
+-- CTL: side green is always-eventually reached on every path (DELIBERATELY FALSE)
+-- for the same reason.  With the pre-timed model this passes; here it fails.
+CTLSPEC AG AF (side_light = green)
+
+-- LTL: no-starvation in the LTL idiom -- if requests come infinitely often,
+-- side green also happens infinitely often (HOLDS).
+LTLSPEC G F side_request -> G F (side_light = green)
