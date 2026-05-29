@@ -86,10 +86,13 @@ caesar> :prove roundtrip          # Q.E.D.
 |---|---|---|---|
 | Array maximum | result ≥ every element, and equals some element | `array_max.c` + `array_max_check.c` | `array_max_starter.c` |
 | Binary search (sorted input) | found ⇒ `a[r] == key`; not found ⇒ key absent | `binsearch.c` + `binsearch_check.c` | `binsearch_starter.c` |
+| Euclidean GCD | `gcd(a, b)` divides both `a` and `b` (for `a, b ∈ [0..20]`); also showcases `--cover branch` **unit-test generation** | `gcd.c` + `gcd_check.c` | `gcd_starter.c` |
 
 ```bash
 cbmc array_max.c  array_max_check.c  --unwind 6  --unwinding-assertions   # SUCCESSFUL
 cbmc binsearch.c  binsearch_check.c  --unwind 10 --unwinding-assertions   # SUCCESSFUL
+cbmc gcd.c        gcd_check.c        --unwind 11 --unwinding-assertions   # SUCCESSFUL
+cbmc gcd.c        gcd_check.c        --cover branch --unwind 11           # 10 of 10 covered (100.0%)
 ```
 
 The `*_starter.{cry,c}` files are stubs: Cryptol returns a **Counterexample**
