@@ -9,17 +9,19 @@ on:
   push:
     branches: [main]
     paths:
-      - "day0*/examples/**"
+      - "day*/examples/**"
       - "notebooks/**"
       - "scripts/check_examples.sh"
+      - "scripts/lint-examples.sh"
       - "scripts/run_notebooks.sh"
       - "scripts/smv2lean/**"
       - ".github/workflows/examples.yml"
   pull_request:
     paths:
-      - "day0*/examples/**"
+      - "day*/examples/**"
       - "notebooks/**"
       - "scripts/check_examples.sh"
+      - "scripts/lint-examples.sh"
       - "scripts/run_notebooks.sh"
       - "scripts/smv2lean/**"
       - ".github/workflows/examples.yml"
@@ -30,6 +32,19 @@ permissions:
   packages: read
 
 jobs:
+  # Fast guard: every example file under day*/examples/ must be referenced
+  # from either scripts/check_examples.sh or one of the runner notebooks.
+  # Catches "added an example, forgot to wire it" -- the failure mode that
+  # silently leaves a file out of the grader and out of the Codespace
+  # learning path even when the repo merges cleanly.  Runs in seconds on
+  # a stock ubuntu-latest -- no Docker image required.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint examples (every file must be exercised)
+        run: bash scripts/lint-examples.sh
+
   check:
     runs-on: ubuntu-latest
     steps:
